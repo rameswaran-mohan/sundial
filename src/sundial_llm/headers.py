@@ -34,3 +34,22 @@ def decision_headers(decision: Decision) -> dict[str, str]:
     if decision.approximate:
         headers["X-Sundial-Approximate"] = "true"
     return headers
+
+REDIRECTED_FROM = "X-Sundial-Redirected-From"
+
+
+def block_message(decision: Decision, public_model: str) -> str:
+    """The error text a client sees when a request is refused."""
+    record = decision.record
+    if record is None:
+        return f"Model '{public_model}' is blocked by Sundial."
+    retire_on = record.retire_on.isoformat() if record.retire_on else None
+    if decision.state is not None and decision.state.value == "retired":
+        status = f"was retired on {retire_on}" if retire_on else "is retired"
+    else:
+        state = decision.state.value if decision.state else record.state.value
+        status = f"is {state}" + (f" and retires on {retire_on}" if retire_on else "")
+    successor = decision.target or ", ".join(record.replacements)
+    advice = f" Use {successor} instead." if successor else ""
+    rule = f" (Sundial rule '{decision.rule}')" if decision.rule else ""
+    return f"Model '{public_model}' {status}{rule}.{advice}"

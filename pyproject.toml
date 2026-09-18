@@ -22,7 +22,13 @@ litellm = ["litellm>=1.60"]
 sundial = "sundial_llm.cli:main"
 
 [dependency-groups]
-dev = ["pytest>=8", "anyio>=4", "ruff>=0.6"]
+dev = [
+    "pytest>=8",
+    "anyio>=4",
+    "ruff>=0.6",
+    "litellm>=1.60",
+    "fastapi>=0.110",
+]
 
 [build-system]
 requires = ["hatchling"]
