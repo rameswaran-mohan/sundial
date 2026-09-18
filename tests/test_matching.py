@@ -105,3 +105,11 @@ def test_vertex_gemini_models_match_the_gemini_page_approximately() -> None:
 )
 def test_unknown_models_and_providers_do_not_match(model: str) -> None:
     assert find_record(RECORDS, parse_upstream(model), TODAY) is None
+
+
+def test_record_built_from_conflicting_source_rows_is_only_an_approximate_match() -> None:
+    ambiguous = rec("openai", "gpt-twice", retire_on=date(2026, 9, 21), ambiguous=True)
+
+    match = find_record({ambiguous.key: ambiguous}, parse_upstream("gpt-twice"), TODAY)
+
+    assert match is not None and match.approximate is True

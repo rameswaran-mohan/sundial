@@ -103,3 +103,11 @@ def test_patch_renders_as_a_mapping_litellm_maintainers_can_apply() -> None:
 
     assert patch.as_mapping() == {"gpt-4-0613": {"deprecation_date": "2026-10-23"}}
     assert patch.changes[0].source_url == "https://docs.test/openai"
+
+
+def test_ambiguous_source_rows_are_never_proposed_upstream() -> None:
+    uncertain = rec("openai", "gpt-twice", retire_on=date(2026, 9, 21), ambiguous=True)
+
+    patch = build_patch({"gpt-twice": {"litellm_provider": "openai"}}, {uncertain.key: uncertain}, TODAY)
+
+    assert patch.changes == ()

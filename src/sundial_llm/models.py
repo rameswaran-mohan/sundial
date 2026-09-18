@@ -41,6 +41,8 @@ class LifecycleRecord(BaseModel):
     retire_on: date | None = None
     retire_on_is_floor: bool = False
     replacements: tuple[str, ...] = ()
+    # The source page contradicts itself about this model, so the dates are a best guess.
+    ambiguous: bool = False
 
     @property
     def key(self) -> RecordKey:

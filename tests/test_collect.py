@@ -109,3 +109,62 @@ def test_http_fetch_gives_up_after_the_last_attempt() -> None:
         pytest.raises(httpx.HTTPStatusError),
     ):
         http_fetch("https://docs.test/page.md", client=client, sleep=lambda _: None)
+
+
+def test_fallback_url_is_used_when_the_primary_fails() -> None:
+    source = Source(
+        "s",
+        "https://primary.test",
+        lambda text: ParseResult((rec(LifecycleState.ACTIVE),)),
+        "https://backup.test",
+    )
+    asked: list[str] = []
+
+    def fetch(url: str) -> str:
+        asked.append(url)
+        if "primary" in url:
+            raise httpx.ConnectError("primary down")
+        return "ok"
+
+    result = collect((source,), fetch)
+
+    assert asked == ["https://primary.test", "https://backup.test"]
+    assert result.failures == {}
+    assert ("openai", "gpt-x", "") in result.records
+    assert any("fallback" in warning and "primary down" in warning for warning in result.warnings)
+
+
+def test_failure_names_both_urls_when_the_fallback_fails_too() -> None:
+    source = Source(
+        "s",
+        "https://primary.test",
+        lambda text: ParseResult((rec(LifecycleState.ACTIVE),)),
+        "https://backup.test",
+    )
+
+    def fetch(url: str) -> str:
+        raise httpx.ConnectError(f"down: {url}")
+
+    result = collect((source,), fetch)
+
+    assert "primary.test" in result.failures["s"] and "backup.test" in result.failures["s"]
+
+
+def test_azure_reads_the_published_page_first_and_github_second() -> None:
+    azure_source = next(source for source in ALL_SOURCES if source.name == "azure")
+
+    assert azure_source.url.startswith("https://learn.microsoft.com/")
+    assert azure_source.fallback_url is not None and "raw.githubusercontent.com" in azure_source.fallback_url
+
+
+def test_http_fetch_asks_for_markdown() -> None:
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, text="# ok")
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        http_fetch("https://docs.test/page", client=client)
+
+    assert seen[0].headers["accept"].startswith("text/markdown")

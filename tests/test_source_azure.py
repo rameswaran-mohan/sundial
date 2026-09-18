@@ -77,3 +77,21 @@ def test_duplicate_rows_keep_the_earliest_retirement_and_warn(result, records) -
 def test_page_with_no_lifecycle_tables_raises() -> None:
     with pytest.raises(SourceFormatError):
         azure.parse("# Model retirement schedule\n\nNothing here.\n")
+
+
+def test_conflicting_duplicate_rows_mark_the_record_ambiguous(records) -> None:
+    assert records[("gpt-realtime-mini", "2025-10-06")].ambiguous is True
+    assert records[("gpt-4o", "2024-05-13")].ambiguous is False
+
+
+def test_caret_footnotes_from_the_published_page_are_stripped() -> None:
+    page = (
+        "### Cohere\n\n"
+        "| Model | Version | Lifecycle | Retirement date | Replacement |\n"
+        "| --- | --- | --- | --- | --- |\n"
+        "| cmd-a | 1 | Preview | 2026-10-16 | cmd-b^1^, cmd-c^1^ |\n"
+    )
+
+    record = azure.parse(page).records[0]
+
+    assert record.replacements == ("cmd-b", "cmd-c")

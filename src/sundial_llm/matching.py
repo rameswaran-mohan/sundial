@@ -67,12 +67,12 @@ def _azure(records: Mapping[RecordKey, LifecycleRecord], name: str, today: date)
     if versioned:
         exact = records.get(("azure", versioned.group("model"), versioned.group("version")))
         if exact is not None:
-            return Match(exact, approximate=False)
+            return Match(exact, approximate=exact.ambiguous)
     versions = [r for key, r in records.items() if key[0] == "azure" and key[1] == name]
     if not versions:
         return None
     if len(versions) == 1:
-        return Match(versions[0], approximate=False)
+        return Match(versions[0], approximate=versions[0].ambiguous)
     live = [r for r in versions if r.effective_state(today) is not LifecycleState.RETIRED]
     pool = live or versions
     chosen = min(pool, key=lambda r: (r.retire_on is None, r.retire_on or date.max))
@@ -89,4 +89,4 @@ def find_record(
     if name == "azure":
         return _azure(records, upstream.base_model or upstream.model, today)
     record = records.get((name, upstream.base_model or upstream.model, ""))
-    return Match(record, approximate) if record is not None else None
+    return Match(record, approximate or record.ambiguous) if record is not None else None

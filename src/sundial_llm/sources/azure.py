@@ -7,7 +7,10 @@ from sundial_llm.mdtable import iter_tables
 from sundial_llm.models import LifecycleRecord, LifecycleState, ParseResult, RecordKey
 from sundial_llm.sources._common import clean, finish
 
-SOURCE_URL = (
+# The published page is what customers see. It serves markdown when asked for it.
+SOURCE_URL = "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule"
+# The docs repository can run ahead of publication, so it is only the fallback.
+FALLBACK_URL = (
     "https://raw.githubusercontent.com/MicrosoftDocs/azure-ai-docs/main/"
     "articles/foundry/openai/includes/concepts-model-retirement-schedule-content.md"
 )
@@ -64,6 +67,9 @@ def parse(text: str) -> ParseResult:
                     f"azure: {model_id} version {record.version} is listed more than once; "
                     "keeping the earliest retirement date"
                 )
+                conflicting = existing.retire_on != record.retire_on
                 record = _earlier(existing, record)
+                if conflicting or existing.ambiguous:
+                    record = record.model_copy(update={"ambiguous": True})
             by_key[record.key] = record
     return finish("azure", list(by_key.values()), warnings)
