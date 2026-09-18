@@ -22,7 +22,12 @@ POLICY = load_policy(
     {
         "rules": [
             {"name": "block-retired", "when": {"state": "retired"}, "action": "block", "mode": "apply"},
-            {"name": "redirect-week", "when": {"days_until_retirement_lte": 7}, "action": "redirect", "mode": "apply"},
+            {
+                "name": "redirect-week",
+                "when": {"days_until_retirement_lte": 7},
+                "action": "redirect",
+                "mode": "apply",
+            },
             {"name": "warn-90", "when": {"days_until_retirement_lte": 90}, "action": "warn"},
         ],
         "successors": {"leaving": "next"},
@@ -32,11 +37,23 @@ POLICY = load_policy(
 
 def rec(model_id: str, retire_on: date) -> LifecycleRecord:
     return LifecycleRecord(
-        platform="openai", model_id=model_id, state=LifecycleState.DEPRECATED, retire_on=retire_on, source_url="u", evidence="e"
+        platform="openai",
+        model_id=model_id,
+        state=LifecycleState.DEPRECATED,
+        retire_on=retire_on,
+        source_url="u",
+        evidence="e",
     )
 
 
-RECORDS = {r.key: r for r in (rec("gpt-dead", date(2026, 1, 1)), rec("gpt-leaving", date(2026, 9, 22)), rec("gpt-fading", date(2026, 10, 19)))}
+RECORDS = {
+    r.key: r
+    for r in (
+        rec("gpt-dead", date(2026, 1, 1)),
+        rec("gpt-leaving", date(2026, 9, 22)),
+        rec("gpt-fading", date(2026, 10, 19)),
+    )
+}
 
 
 class FakeRouter:
@@ -53,7 +70,10 @@ ROUTER = FakeRouter(
         "leaving": [{"litellm_params": {"model": "openai/gpt-leaving"}}],
         "fading": [{"litellm_params": {"model": "openai/gpt-fading"}, "model_info": {}}],
         "mixed": [
-            {"litellm_params": {"model": "azure/prod"}, "model_info": {"base_model": "azure/gpt-4o-2024-05-13"}},
+            {
+                "litellm_params": {"model": "azure/prod"},
+                "model_info": {"base_model": "azure/gpt-4o-2024-05-13"},
+            },
             {"litellm_params": {"model": "openai/gpt-4o"}},
         ],
     }
@@ -76,8 +96,12 @@ def test_resolver_reads_the_upstream_model_and_base_model_of_every_deployment() 
 
 
 def test_resolver_falls_back_to_the_public_name_for_unknown_groups_and_missing_routers() -> None:
-    assert tuple(LitellmRouterResolver(lambda: ROUTER).resolve("openai/gpt-dead")) == (UpstreamModel("openai", "gpt-dead"),)
-    assert tuple(LitellmRouterResolver(lambda: None).resolve("gpt-dead")) == (UpstreamModel("openai", "gpt-dead"),)
+    assert tuple(LitellmRouterResolver(lambda: ROUTER).resolve("openai/gpt-dead")) == (
+        UpstreamModel("openai", "gpt-dead"),
+    )
+    assert tuple(LitellmRouterResolver(lambda: None).resolve("gpt-dead")) == (
+        UpstreamModel("openai", "gpt-dead"),
+    )
 
 
 def test_hook_is_a_litellm_custom_logger_and_the_module_exposes_an_instance(hook: SundialHook) -> None:

@@ -100,6 +100,8 @@ def test_vertex_gemini_models_match_the_gemini_page_approximately() -> None:
     assert match.approximate is True
 
 
-@pytest.mark.parametrize("model", ["gpt-unknown", "together_ai/meta-llama/Llama-3", "azure/mystery-deployment"])
+@pytest.mark.parametrize(
+    "model", ["gpt-unknown", "together_ai/meta-llama/Llama-3", "azure/mystery-deployment"]
+)
 def test_unknown_models_and_providers_do_not_match(model: str) -> None:
     assert find_record(RECORDS, parse_upstream(model), TODAY) is None

@@ -41,7 +41,9 @@ ON CONFLICT (platform, model_id, version)
 DO UPDATE SET data = excluded.data, last_seen = excluded.last_seen
 """
 
-_UPSERT_META = "INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value"
+_UPSERT_META = (
+    "INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value"
+)
 
 
 @dataclass(frozen=True)
@@ -74,7 +76,8 @@ class Store:
     def seen(self, key: RecordKey) -> tuple[datetime, datetime] | None:
         with closing(self._connect()) as conn:
             row = conn.execute(
-                "SELECT first_seen, last_seen FROM records WHERE platform = ? AND model_id = ? AND version = ?",
+                "SELECT first_seen, last_seen FROM records "
+                "WHERE platform = ? AND model_id = ? AND version = ?",
                 key,
             ).fetchone()
         return (datetime.fromisoformat(row[0]), datetime.fromisoformat(row[1])) if row else None

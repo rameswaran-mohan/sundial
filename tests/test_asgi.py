@@ -17,7 +17,12 @@ POLICY = load_policy(
     {
         "rules": [
             {"name": "block-retired", "when": {"state": "retired"}, "action": "block", "mode": "apply"},
-            {"name": "redirect-week", "when": {"days_until_retirement_lte": 7}, "action": "redirect", "mode": "apply"},
+            {
+                "name": "redirect-week",
+                "when": {"days_until_retirement_lte": 7},
+                "action": "redirect",
+                "mode": "apply",
+            },
             {"name": "warn-90", "when": {"days_until_retirement_lte": 90}, "action": "warn"},
         ],
         "successors": {"gpt-leaving": "gpt-next"},
@@ -55,8 +60,16 @@ class EchoApp:
             if not message.get("more_body"):
                 break
         declared = dict(scope["headers"]).get(b"content-length", b"").decode()
-        payload = json.dumps({"body": body.decode(), "declared_length": declared, "actual_length": len(body)}).encode()
-        await send({"type": "http.response.start", "status": 200, "headers": [(b"content-type", b"application/json")]})
+        payload = json.dumps(
+            {"body": body.decode(), "declared_length": declared, "actual_length": len(body)}
+        ).encode()
+        await send(
+            {
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [(b"content-type", b"application/json")],
+            }
+        )
         await send({"type": "http.response.body", "body": payload})
 
 
@@ -89,12 +102,17 @@ async def test_retired_model_is_refused_with_410_and_never_reaches_the_gateway(c
     assert app.calls == 0
     error = response.json()["error"]
     assert error["code"] == "model_retired"
-    assert "gpt-dead" in error["message"] and "2026-01-01" in error["message"] and "gpt-next" in error["message"]
+    assert (
+        "gpt-dead" in error["message"] and "2026-01-01" in error["message"] and "gpt-next" in error["message"]
+    )
     assert response.headers["x-sundial-state"] == "retired"
 
 
 async def test_redirect_rewrites_the_model_and_keeps_content_length_honest(client, app) -> None:
-    response = await client.post("/v1/chat/completions", json={"model": "gpt-leaving", "messages": [{"role": "user", "content": "héllo"}]})
+    response = await client.post(
+        "/v1/chat/completions",
+        json={"model": "gpt-leaving", "messages": [{"role": "user", "content": "héllo"}]},
+    )
 
     seen = response.json()
     forwarded = json.loads(seen["body"])
@@ -112,7 +130,9 @@ async def test_unknown_model_gets_no_headers(client) -> None:
     assert not any(name.startswith("x-sundial") for name in response.headers)
 
 
-@pytest.mark.parametrize("path", ["/v1/embeddings", "/v1/responses", "/v1/messages", "/openai/deployments/x/chat/completions"])
+@pytest.mark.parametrize(
+    "path", ["/v1/embeddings", "/v1/responses", "/v1/messages", "/openai/deployments/x/chat/completions"]
+)
 async def test_every_inference_route_is_guarded(client, path: str) -> None:
     response = await client.post(path, json={"model": "gpt-dead"})
 
@@ -128,7 +148,9 @@ async def test_requests_that_are_not_inference_calls_are_not_inspected(client, a
 
 
 async def test_body_that_is_not_json_is_forwarded_byte_for_byte(client) -> None:
-    response = await client.post("/v1/chat/completions", content=b"not json at all", headers={"content-type": "text/plain"})
+    response = await client.post(
+        "/v1/chat/completions", content=b"not json at all", headers={"content-type": "text/plain"}
+    )
 
     assert response.status_code == 200
     assert response.json()["body"] == "not json at all"

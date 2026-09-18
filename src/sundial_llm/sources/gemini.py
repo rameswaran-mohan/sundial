@@ -30,7 +30,7 @@ def parse(text: str) -> ParseResult:
         replacement_col = _column(header, "recommended replacement")
         vendor = table.headings[-1] if table.headings else None
         preview = False
-        for row, raw in zip(table.rows, table.raw_rows):
+        for row, raw in zip(table.rows, table.raw_rows, strict=True):
             if row and row[0].lower().startswith("preview models"):
                 preview = True
                 continue

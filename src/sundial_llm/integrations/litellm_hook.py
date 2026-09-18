@@ -56,7 +56,8 @@ class LitellmRouterResolver:
         resolved = tuple(
             parse_upstream(params["model"], (deployment.get("model_info") or {}).get("base_model"))
             for deployment in deployments or ()
-            if isinstance((params := deployment.get("litellm_params")), dict) and isinstance(params.get("model"), str)
+            if isinstance((params := deployment.get("litellm_params")), dict)
+            and isinstance(params.get("model"), str)
         )
         # Wildcard routes and unknown groups: the client sent the provider model string itself.
         return resolved or (parse_upstream(public_model),)
@@ -69,7 +70,14 @@ def _refusal(message: str) -> Exception:
         return ModelBlocked(message)
     return HTTPException(
         status_code=410,
-        detail={"error": {"message": message, "type": "invalid_request_error", "param": "model", "code": "model_retired"}},
+        detail={
+            "error": {
+                "message": message,
+                "type": "invalid_request_error",
+                "param": "model",
+                "code": "model_retired",
+            }
+        },
     )
 
 
@@ -98,7 +106,9 @@ class SundialHook(CustomLogger):
             logger.exception("sundial: lifecycle check failed for %s", model)
             return ALLOW, {}
 
-    async def async_pre_call_hook(self, user_api_key_dict: Any, cache: Any, data: dict, call_type: Any) -> Any:
+    async def async_pre_call_hook(
+        self, user_api_key_dict: Any, cache: Any, data: dict, call_type: Any
+    ) -> Any:
         model = data.get("model")
         if not isinstance(model, str) or not model:
             return data

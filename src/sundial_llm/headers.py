@@ -35,6 +35,7 @@ def decision_headers(decision: Decision) -> dict[str, str]:
         headers["X-Sundial-Approximate"] = "true"
     return headers
 
+
 REDIRECTED_FROM = "X-Sundial-Redirected-From"
 
 

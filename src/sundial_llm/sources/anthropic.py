@@ -25,7 +25,7 @@ def parse(text: str) -> ParseResult:
     for table in iter_tables(text):
         header = tuple(cell.lower() for cell in table.header)
         if header and header[0] == "api model name" and len(header) >= 4:
-            for row, raw in zip(table.rows, table.raw_rows):
+            for row, raw in zip(table.rows, table.raw_rows, strict=True):
                 model_id = clean(row[0]).strip("`")
                 state = _STATES.get(clean(row[1]).lower())
                 if len(row) < 4 or state is None or not MODEL_ID.match(model_id):
@@ -47,7 +47,7 @@ def parse(text: str) -> ParseResult:
                 )
         elif header == _HISTORY_HEADER:
             announced = parse_date(table.headings[-1]).value if table.headings else None
-            for row, raw in zip(table.rows, table.raw_rows):
+            for row, raw in zip(table.rows, table.raw_rows, strict=True):
                 retire_on = parse_date(row[0]).value
                 for model_id in backticked(row[1]):
                     _add(

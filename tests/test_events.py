@@ -4,8 +4,12 @@ from sundial_llm.events import EventType, diff
 from sundial_llm.models import LifecycleRecord, LifecycleState
 
 
-def rec(model_id: str = "m", state: LifecycleState = LifecycleState.ACTIVE, **extra: object) -> LifecycleRecord:
-    return LifecycleRecord(platform="openai", model_id=model_id, state=state, source_url="u", evidence="e", **extra)
+def rec(
+    model_id: str = "m", state: LifecycleState = LifecycleState.ACTIVE, **extra: object
+) -> LifecycleRecord:
+    return LifecycleRecord(
+        platform="openai", model_id=model_id, state=state, source_url="u", evidence="e", **extra
+    )
 
 
 def index(*records: LifecycleRecord) -> dict:

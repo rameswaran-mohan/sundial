@@ -34,7 +34,10 @@ def test_floor_date_in_the_past_does_not_mean_retired() -> None:
 
 def test_days_until_retirement_is_none_for_floors_and_missing_dates() -> None:
     assert record().days_until_retirement(date(2026, 1, 1)) is None
-    assert record(retire_on=date(2026, 1, 11), retire_on_is_floor=True).days_until_retirement(date(2026, 1, 1)) is None
+    assert (
+        record(retire_on=date(2026, 1, 11), retire_on_is_floor=True).days_until_retirement(date(2026, 1, 1))
+        is None
+    )
     assert record(retire_on=date(2026, 1, 11)).days_until_retirement(date(2026, 1, 1)) == 10
 
 

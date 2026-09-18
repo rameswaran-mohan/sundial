@@ -39,7 +39,7 @@ def parse(text: str) -> ParseResult:
         if tuple(cell.lower() for cell in table.header) != _HEADER:
             continue
         vendor = table.headings[-1] if table.headings else None
-        for row, raw in zip(table.rows, table.raw_rows):
+        for row, raw in zip(table.rows, table.raw_rows, strict=True):
             if len(row) != len(_HEADER):
                 continue
             model_id = clean(row[0]).split(" (")[0].strip()

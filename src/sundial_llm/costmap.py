@@ -1,0 +1,60 @@
+"""Compare litellm's model cost map with provider-published retirement dates.
+
+Only exact matches with firm dates are proposed. The output is a small patch mapping, so the
+maintainers' file is never reformatted.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+from datetime import date
+from typing import Any
+
+from sundial_llm.matching import UpstreamModel, find_record
+from sundial_llm.models import LifecycleRecord, RecordKey
+
+
+@dataclass(frozen=True)
+class Change:
+    key: str
+    old: str | None
+    new: str
+    source_url: str
+
+
+@dataclass(frozen=True)
+class CostMapPatch:
+    changes: tuple[Change, ...]
+
+    def as_mapping(self) -> dict[str, dict[str, str]]:
+        return {change.key: {"deprecation_date": change.new} for change in self.changes}
+
+
+def _upstream(key: str, provider: str) -> UpstreamModel:
+    name = key[len(provider) + 1 :] if key.startswith(f"{provider}/") else key
+    # Azure keys carry the version in the name, which is what base_model matching expects.
+    return UpstreamModel(provider, name, name if provider.startswith("azure") else None)
+
+
+def build_patch(
+    cost_map: Mapping[str, Any], records: Mapping[RecordKey, LifecycleRecord], today: date
+) -> CostMapPatch:
+    changes: list[Change] = []
+    for key, entry in cost_map.items():
+        if key == "sample_spec" or not isinstance(entry, Mapping):
+            continue
+        provider = entry.get("litellm_provider")
+        if not isinstance(provider, str):
+            continue
+        match = find_record(records, _upstream(key, provider), today)
+        if match is None or match.approximate:
+            continue
+        record = match.record
+        if record.retire_on is None or record.retire_on_is_floor:
+            continue
+        new = record.retire_on.isoformat()
+        old = entry.get("deprecation_date")
+        if old != new:
+            changes.append(Change(key, old if isinstance(old, str) else None, new, record.source_url))
+    return CostMapPatch(tuple(changes))

@@ -40,7 +40,9 @@ def _default_guard() -> Decider:
 
 
 class SundialMiddleware:
-    def __init__(self, app: ASGIApp, guard: Decider | None = None, *, max_body_bytes: int = 8 * 1024 * 1024) -> None:
+    def __init__(
+        self, app: ASGIApp, guard: Decider | None = None, *, max_body_bytes: int = 8 * 1024 * 1024
+    ) -> None:
         self.app = app
         self._guard = guard
         self._max_body_bytes = max_body_bytes
@@ -89,7 +91,12 @@ class SundialMiddleware:
             if decision.enforced and decision.action is Action.BLOCK:
                 await _refuse(send, block_message(decision, model), extra)
                 return
-            if decision.enforced and decision.action is Action.REDIRECT and decision.target and payload is not None:
+            if (
+                decision.enforced
+                and decision.action is Action.REDIRECT
+                and decision.target
+                and payload is not None
+            ):
                 payload["model"] = decision.target
                 body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
                 scope = _with_content_length(scope, len(body))
@@ -110,7 +117,10 @@ class SundialMiddleware:
 
 
 def _encode(headers: dict[str, str]) -> list[tuple[bytes, bytes]]:
-    return [(name.lower().encode("latin-1"), value.encode("latin-1", "replace")) for name, value in headers.items()]
+    return [
+        (name.lower().encode("latin-1"), value.encode("latin-1", "replace"))
+        for name, value in headers.items()
+    ]
 
 
 def _with_content_length(scope: Scope, length: int) -> Scope:
@@ -121,7 +131,14 @@ def _with_content_length(scope: Scope, length: int) -> Scope:
 
 async def _refuse(send: Send, message: str, extra: dict[str, str]) -> None:
     body = json.dumps(
-        {"error": {"message": message, "type": "invalid_request_error", "param": "model", "code": "model_retired"}}
+        {
+            "error": {
+                "message": message,
+                "type": "invalid_request_error",
+                "param": "model",
+                "code": "model_retired",
+            }
+        }
     ).encode("utf-8")
     headers = [
         (b"content-type", b"application/json"),

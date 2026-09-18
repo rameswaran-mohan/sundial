@@ -63,8 +63,16 @@ def test_page_that_parses_to_nothing_is_reported_as_a_failure(fixture_fetch) -> 
 
 
 def test_same_key_from_two_sources_is_merged() -> None:
-    launches = Source("a", "https://a.test", lambda _: ParseResult((rec(LifecycleState.ACTIVE, released_on=date(2025, 1, 1)),)))
-    retirements = Source("b", "https://b.test", lambda _: ParseResult((rec(LifecycleState.DEPRECATED, retire_on=date(2026, 1, 1)),)))
+    launches = Source(
+        "a",
+        "https://a.test",
+        lambda _: ParseResult((rec(LifecycleState.ACTIVE, released_on=date(2025, 1, 1)),)),
+    )
+    retirements = Source(
+        "b",
+        "https://b.test",
+        lambda _: ParseResult((rec(LifecycleState.DEPRECATED, retire_on=date(2026, 1, 1)),)),
+    )
 
     result = collect((launches, retirements), lambda url: "")
 
@@ -96,5 +104,8 @@ def test_http_fetch_retries_server_errors_and_identifies_itself() -> None:
 
 
 def test_http_fetch_gives_up_after_the_last_attempt() -> None:
-    with httpx.Client(transport=httpx.MockTransport(lambda _: httpx.Response(500))) as client, pytest.raises(httpx.HTTPStatusError):
+    with (
+        httpx.Client(transport=httpx.MockTransport(lambda _: httpx.Response(500))) as client,
+        pytest.raises(httpx.HTTPStatusError),
+    ):
         http_fetch("https://docs.test/page.md", client=client, sleep=lambda _: None)

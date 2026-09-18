@@ -37,7 +37,9 @@ def store(tmp_path) -> Store:
 
 
 def scanner(store: Store, fetch, hours: float = 24, clock=lambda: NOW) -> AutoScanner:
-    return AutoScanner(store, Config(auto_scan_hours=hours), fetch, clock=clock, spawn=inline, post=lambda u, b: None)
+    return AutoScanner(
+        store, Config(auto_scan_hours=hours), fetch, clock=clock, spawn=inline, post=lambda u, b: None
+    )
 
 
 def test_store_that_was_never_scanned_is_scanned(store: Store, fixture_fetch) -> None:
@@ -81,7 +83,9 @@ def test_scan_that_blows_up_is_swallowed(store: Store) -> None:
 
 def test_only_one_scan_runs_at_a_time(store: Store, fixture_fetch) -> None:
     pending: list = []
-    subject = AutoScanner(store, Config(), fixture_fetch, clock=lambda: NOW, spawn=pending.append, post=lambda u, b: None)
+    subject = AutoScanner(
+        store, Config(), fixture_fetch, clock=lambda: NOW, spawn=pending.append, post=lambda u, b: None
+    )
 
     assert subject.maybe_start() is True
     assert subject.maybe_start() is False

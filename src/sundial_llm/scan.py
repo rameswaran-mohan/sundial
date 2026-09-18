@@ -27,12 +27,7 @@ def run_scan(store: Store, sources: Iterable[Source], fetch: Fetch, now: datetim
     baselined = store.baselined_sources()
 
     # A source seen for the first time is a baseline for its own records: it must not flood events.
-    announced = {
-        key
-        for name, keys in result.keys_by_source.items()
-        if name in baselined
-        for key in keys
-    }
+    announced = {key for name, keys in result.keys_by_source.items() if name in baselined for key in keys}
     comparable = {key: record for key, record in result.records.items() if key in announced or key in old}
     events = diff(old, comparable)
 

@@ -139,7 +139,9 @@ def test_notifications_post_slack_shaped_json_and_include_proposals() -> None:
         }
     )
 
-    errors = notify_events([event(EventType.MODEL_ADDED, rec())], config, lambda url, body: posted.append((url, body)))
+    errors = notify_events(
+        [event(EventType.MODEL_ADDED, rec())], config, lambda url, body: posted.append((url, body))
+    )
 
     assert errors == []
     assert [url for url, _ in posted] == ["https://hooks.test/slack", "https://hooks.test/generic"]
@@ -161,5 +163,8 @@ def test_failing_webhook_is_reported_not_raised() -> None:
 def test_no_targets_means_nothing_is_posted() -> None:
     posted: list[object] = []
 
-    assert notify_events([event(EventType.MODEL_ADDED, rec())], Config(), lambda url, body: posted.append(url)) == []
+    assert (
+        notify_events([event(EventType.MODEL_ADDED, rec())], Config(), lambda url, body: posted.append(url))
+        == []
+    )
     assert posted == []

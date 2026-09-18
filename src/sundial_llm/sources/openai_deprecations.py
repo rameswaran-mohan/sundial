@@ -19,7 +19,7 @@ def parse(text: str) -> ParseResult:
         if len(header) < 3 or not header[0].startswith("shutdown date") or header[1] == "system":
             continue
         announced = parse_date(table.headings[-1]).value if table.headings else None
-        for row, raw in zip(table.rows, table.raw_rows):
+        for row, raw in zip(table.rows, table.raw_rows, strict=True):
             if len(row) < 3:
                 continue
             model_ids = backticked(row[1])

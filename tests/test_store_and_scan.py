@@ -22,7 +22,13 @@ FIXTURE_BY_SOURCE = {
 
 
 def rec(model_id: str = "m", **extra: object) -> LifecycleRecord:
-    base = {"platform": "openai", "model_id": model_id, "state": LifecycleState.ACTIVE, "source_url": "u", "evidence": "e"}
+    base = {
+        "platform": "openai",
+        "model_id": model_id,
+        "state": LifecycleState.ACTIVE,
+        "source_url": "u",
+        "evidence": "e",
+    }
     return LifecycleRecord(**{**base, **extra})
 
 
@@ -98,7 +104,9 @@ def test_second_scan_reports_and_persists_a_moved_retirement_date(store: Store, 
     run_scan(store, ALL_SOURCES, fixture_fetch, T1)
 
     def moved(url: str) -> str:
-        return fixture_fetch(url).replace("| Oct 1, 2026   | `gpt-5.4-cyber`", "| Nov 1, 2026   | `gpt-5.4-cyber`")
+        return fixture_fetch(url).replace(
+            "| Oct 1, 2026   | `gpt-5.4-cyber`", "| Nov 1, 2026   | `gpt-5.4-cyber`"
+        )
 
     outcome = run_scan(store, ALL_SOURCES, moved, T2)
 

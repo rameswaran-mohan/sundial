@@ -11,7 +11,13 @@ TODAY = date(2026, 9, 19)
 
 
 def match(approximate: bool = False, **extra: object) -> Match:
-    base = {"platform": "openai", "model_id": "gpt-old", "state": LifecycleState.DEPRECATED, "source_url": "u", "evidence": "e"}
+    base = {
+        "platform": "openai",
+        "model_id": "gpt-old",
+        "state": LifecycleState.DEPRECATED,
+        "source_url": "u",
+        "evidence": "e",
+    }
     return Match(LifecycleRecord(**{**base, **extra}), approximate)
 
 
@@ -19,7 +25,12 @@ POLICY = load_policy(
     {
         "rules": [
             {"name": "block-retired", "when": {"state": "retired"}, "action": "block", "mode": "apply"},
-            {"name": "redirect-week", "when": {"days_until_retirement_lte": 7}, "action": "redirect", "mode": "apply"},
+            {
+                "name": "redirect-week",
+                "when": {"days_until_retirement_lte": 7},
+                "action": "redirect",
+                "mode": "apply",
+            },
             {"name": "warn-90", "when": {"days_until_retirement_lte": 90}, "action": "warn"},
         ],
         "successors": {"public-old": "public-new"},
@@ -55,7 +66,9 @@ def test_warn_rule_reports_days_left() -> None:
 
 
 def test_floor_dates_never_trigger_day_based_rules() -> None:
-    decision = POLICY.decide(match(state=LifecycleState.ACTIVE, retire_on=date(2026, 9, 25), retire_on_is_floor=True), TODAY, "m")
+    decision = POLICY.decide(
+        match(state=LifecycleState.ACTIVE, retire_on=date(2026, 9, 25), retire_on_is_floor=True), TODAY, "m"
+    )
 
     assert decision.action is Action.ALLOW
 
@@ -89,10 +102,18 @@ def test_propose_is_the_default_mode_and_is_never_enforced() -> None:
 
 
 def test_platform_and_glob_filters_narrow_a_rule() -> None:
-    policy = load_policy({"rules": [{"name": "g", "when": {"platform": "gemini", "model_glob": "gemini-2.*"}, "action": "warn"}]})
+    policy = load_policy(
+        {
+            "rules": [
+                {"name": "g", "when": {"platform": "gemini", "model_glob": "gemini-2.*"}, "action": "warn"}
+            ]
+        }
+    )
 
     assert policy.decide(match(), TODAY, "m").action is Action.ALLOW
-    assert policy.decide(match(platform="gemini", model_id="gemini-2.0-flash"), TODAY, "m").action is Action.WARN
+    assert (
+        policy.decide(match(platform="gemini", model_id="gemini-2.0-flash"), TODAY, "m").action is Action.WARN
+    )
 
 
 def test_default_policy_only_warns() -> None:
@@ -110,7 +131,11 @@ def test_unknown_action_in_config_is_rejected() -> None:
 
 def test_headers_follow_the_deprecation_and_sunset_rfcs() -> None:
     decision = POLICY.decide(
-        match(retire_on=date(2026, 10, 19), deprecated_on=date(2026, 4, 1), replacements=("gpt-new", "gpt-newer")),
+        match(
+            retire_on=date(2026, 10, 19),
+            deprecated_on=date(2026, 4, 1),
+            replacements=("gpt-new", "gpt-newer"),
+        ),
         TODAY,
         "m",
     )
@@ -126,7 +151,9 @@ def test_headers_follow_the_deprecation_and_sunset_rfcs() -> None:
 
 
 def test_redirect_headers_name_the_public_target_and_flag_approximation() -> None:
-    headers = decision_headers(POLICY.decide(match(approximate=True, retire_on=date(2026, 9, 22)), TODAY, "public-old"))
+    headers = decision_headers(
+        POLICY.decide(match(approximate=True, retire_on=date(2026, 9, 22)), TODAY, "public-old")
+    )
 
     assert headers["X-Sundial-Successor"] == "public-new"
     assert headers["X-Sundial-Approximate"] == "true"

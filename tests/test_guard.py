@@ -42,7 +42,9 @@ class GroupResolver:
 
 
 def guard(records: dict, resolver=None, **kwargs) -> LifecycleGuard:
-    return LifecycleGuard(lambda: records, resolver or IdentityResolver(), BLOCK_RETIRED, clock=Clock(), **kwargs)
+    return LifecycleGuard(
+        lambda: records, resolver or IdentityResolver(), BLOCK_RETIRED, clock=Clock(), **kwargs
+    )
 
 
 def test_unknown_model_is_allowed() -> None:
