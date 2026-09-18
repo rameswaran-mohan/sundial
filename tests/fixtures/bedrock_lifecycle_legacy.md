@@ -1,0 +1,91 @@
+# Model lifecycle (Legacy)
+## Active versions
+## Legacy and end-of-life (EOL) models
+- **AI21 Labs**
+  - **Model name:** Jamba 1.5 Large
+  - **Model ID:** ai21.jamba-1-5-large-v1:0
+  - **Regions:** us-east-1
+  - **Legacy date:** May 26, 2026
+  - **EOL date:** November 26, 2026
+  - **Public extended access start date:** August 26, 2026
+- **AI21 Labs**
+  - **Model name:** Jamba 1.5 Mini
+  - **Model ID:** ai21.jamba-1-5-mini-v1:0
+  - **Regions:** us-east-1
+  - **Legacy date:** May 26, 2026
+  - **EOL date:** November 26, 2026
+  - **Public extended access start date:** August 26, 2026
+- **Amazon**
+  - **Model name:** Nova Canvas
+  - **Model ID:** amazon.nova-canvas-v1:0
+  - **Regions:** ap-northeast-1, eu-west-1, us-east-1
+  - **Legacy date:** March 30, 2026
+  - **EOL date:** September 30, 2026
+  - **Public extended access start date:** —
+- **Amazon**
+  - **Model name:** Nova Reel
+  - **Model ID:** amazon.nova-reel-v1:0
+  - **Regions:** ap-northeast-1, eu-west-1, us-east-1
+  - **Legacy date:** March 30, 2026
+  - **EOL date:** September 30, 2026
+  - **Public extended access start date:** —
+- **Amazon**
+  - **Model name:** Nova Reel
+  - **Model ID:** amazon.nova-reel-v1:1
+  - **Regions:** us-east-1
+  - **Legacy date:** March 30, 2026
+  - **EOL date:** September 30, 2026
+  - **Public extended access start date:** —
+- **Amazon**
+  - **Model name:** Nova Premier
+  - **Model ID:** amazon.nova-premier-v1:0
+  - **Regions:** us-east-1, us-east-2, us-west-2
+  - **Legacy date:** March 13, 2026
+  - **EOL date:** September 14, 2026
+  - **Public extended access start date:** —
+- **Amazon**
+  - **Model name:** Nova Sonic
+  - **Model ID:** amazon.nova-sonic-v1:0
+  - **Regions:** ap-northeast-1, eu-north-1, us-east-1
+  - **Legacy date:** March 13, 2026
+  - **EOL date:** September 14, 2026
+  - **Public extended access start date:** —
+- **Anthropic**
+  - **Model name:** Claude Opus 4.1
+  - **Model ID:** anthropic.claude-opus-4-1-20250805-v1:0
+  - **Regions:** us-east-1, us-east-2, us-west-2
+  - **Legacy date:** July 8, 2026
+  - **EOL date:** January 8, 2027
+  - **Public extended access start date:** October 8, 2026
+- **Anthropic**
+  - **Model name:** Claude Sonnet 4
+  - **Model ID:** anthropic.claude-sonnet-4-20250514-v1:0
+  - **Regions:** ap-northeast-1, eu-central-1, eu-north-1, eu-south-1, eu-south-2, eu-west-1, eu-west-3, us-east-1, us-east-2, us-west-1, us-west-2, ap-east-2, ap-northeast-2, ap-northeast-3, ap-south-1, ap-south-2, ap-southeast-1, ap-southeast-2, ap-southeast-3, ap-southeast-4, ap-southeast-5, ap-southeast-7, il-central-1
+  - **Legacy date:** April 14, 2026
+  - **EOL date:** October 14, 2026
+  - **Public extended access start date:** July 14, 2026
+- **Anthropic**
+  - **Model name:** Claude 3 Haiku
+  - **Model ID:** anthropic.claude-3-haiku-20240307-v1:0
+  - **Regions:** ap-northeast-1, ap-southeast-2, eu-central-1, eu-west-1, eu-west-2, eu-west-3, us-east-1, us-east-2, us-west-2 / **Legacy date:** March 10, 2026 / **EOL date:** September 10, 2026 / **Public extended access start date:** June 10, 2026
+  - **Regions:** us-gov-east-1, us-gov-west-1 / **Legacy date:** March 10, 2026 / **EOL date:** September 10, 2026 / **Public extended access start date:** June 10, 2026
+- **Command R**
+  - **Model name:** cohere.command-r-v1:0
+  - **Model ID:** us-east-1, us-west-2
+  - **Regions:** February 19, 2026
+  - **Legacy date:** August 19, 2026
+  - **EOL date:** May 19, 2026
+- **Cohere**
+  - **Model name:** Command R\+
+  - **Model ID:** cohere.command-r-plus-v1:0
+  - **Regions:** us-east-1, us-west-2
+  - **Legacy date:** February 19, 2026
+  - **EOL date:** August 19, 2026
+  - **Public extended access start date:** May 19, 2026
+- **TwelveLabs**
+  - **Model name:** Marengo Embed v2.7
+  - **Model ID:** twelvelabs.marengo-embed-2-7-v1:0
+  - **Regions:** ap-northeast-2, eu-west-1, us-east-1
+  - **Legacy date:** May 29, 2026
+  - **EOL date:** November 30, 2026
+  - **Public extended access start date:** August 29, 2026
