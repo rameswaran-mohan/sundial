@@ -1,0 +1,114 @@
+"""SQLite registry of lifecycle records and the events produced by scans."""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+from collections.abc import Iterable, Mapping, Sequence
+from contextlib import closing
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
+from sundial_llm.events import Event
+from sundial_llm.models import LifecycleRecord, RecordKey
+
+_SCHEMA = """
+CREATE TABLE IF NOT EXISTS records (
+    platform TEXT NOT NULL,
+    model_id TEXT NOT NULL,
+    version TEXT NOT NULL,
+    data TEXT NOT NULL,
+    first_seen TEXT NOT NULL,
+    last_seen TEXT NOT NULL,
+    PRIMARY KEY (platform, model_id, version)
+);
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    at TEXT NOT NULL,
+    data TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+"""
+
+_UPSERT_RECORD = """
+INSERT INTO records (platform, model_id, version, data, first_seen, last_seen)
+VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT (platform, model_id, version)
+DO UPDATE SET data = excluded.data, last_seen = excluded.last_seen
+"""
+
+_UPSERT_META = "INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value"
+
+
+@dataclass(frozen=True)
+class StoredEvent:
+    at: datetime
+    event: Event
+
+
+class Store:
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with closing(self._connect()) as conn, conn:
+            conn.executescript(_SCHEMA)
+
+    def _connect(self) -> sqlite3.Connection:
+        return sqlite3.connect(self.path)
+
+    def _meta(self, key: str) -> str | None:
+        with closing(self._connect()) as conn:
+            row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+        return row[0] if row else None
+
+    def load_records(self) -> dict[RecordKey, LifecycleRecord]:
+        with closing(self._connect()) as conn:
+            rows = conn.execute("SELECT data FROM records").fetchall()
+        records = (LifecycleRecord.model_validate_json(row[0]) for row in rows)
+        return {record.key: record for record in records}
+
+    def seen(self, key: RecordKey) -> tuple[datetime, datetime] | None:
+        with closing(self._connect()) as conn:
+            row = conn.execute(
+                "SELECT first_seen, last_seen FROM records WHERE platform = ? AND model_id = ? AND version = ?",
+                key,
+            ).fetchone()
+        return (datetime.fromisoformat(row[0]), datetime.fromisoformat(row[1])) if row else None
+
+    def last_scan_at(self) -> datetime | None:
+        value = self._meta("last_scan_at")
+        return datetime.fromisoformat(value) if value else None
+
+    def baselined_sources(self) -> frozenset[str]:
+        value = self._meta("baselined_sources")
+        return frozenset(json.loads(value)) if value else frozenset()
+
+    def save_scan(
+        self,
+        records: Mapping[RecordKey, LifecycleRecord],
+        events: Sequence[Event],
+        at: datetime,
+        sources_ok: Iterable[str] = (),
+    ) -> None:
+        stamp = at.isoformat()
+        baselined = sorted(self.baselined_sources() | frozenset(sources_ok))
+        with closing(self._connect()) as conn, conn:
+            conn.executemany(
+                _UPSERT_RECORD,
+                [(*key, record.model_dump_json(), stamp, stamp) for key, record in records.items()],
+            )
+            conn.executemany(
+                "INSERT INTO events (at, data) VALUES (?, ?)",
+                [(stamp, event.model_dump_json()) for event in events],
+            )
+            conn.execute(_UPSERT_META, ("last_scan_at", stamp))
+            conn.execute(_UPSERT_META, ("baselined_sources", json.dumps(baselined)))
+
+    def events(self, limit: int = 50) -> list[StoredEvent]:
+        with closing(self._connect()) as conn:
+            rows = conn.execute("SELECT at, data FROM events ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        return [StoredEvent(datetime.fromisoformat(at), Event.model_validate_json(data)) for at, data in rows]

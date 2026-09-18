@@ -21,6 +21,9 @@ _MONTHS = {
     "dec": 12, "december": 12,
 }  # fmt: skip
 
+# Provider pages sometimes write dates with non-breaking or typographic hyphens.
+_DASHES = str.maketrans({char: "-" for char in "‐‑‒–—―−"})
+
 _ISO = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
 _LONG = re.compile(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b")
 _FLOOR = re.compile(r"\b(?:not|no) (?:sooner|earlier) than\b|\bnot before\b", re.IGNORECASE)
@@ -54,5 +57,6 @@ def _find(text: str) -> date | None:
 
 
 def parse_date(text: str) -> ParsedDate:
+    text = text.translate(_DASHES)
     value = _find(text)
     return ParsedDate(value=value, is_floor=value is not None and bool(_FLOOR.search(text)))

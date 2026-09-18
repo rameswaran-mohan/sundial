@@ -14,6 +14,7 @@ from sundial_llm.dates import parse_date
         ("May 8th, 2026", date(2026, 5, 8)),
         ("  September 15, 2026 ", date(2026, 9, 15)),
         ("Sept 3, 2026", date(2026, 9, 3)),
+        ("2026‑03‑26", date(2026, 3, 26)),
     ],
 )
 def test_parses_every_date_shape_the_providers_use(text: str, expected: date) -> None:

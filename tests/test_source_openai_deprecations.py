@@ -50,6 +50,10 @@ def test_past_deprecations_are_recorded_with_their_announcement_date(records) ->
     assert rec.retire_on == date(2026, 2, 17)
 
 
+def test_dates_written_with_non_breaking_hyphens_are_read(records) -> None:
+    assert records[("gpt-4-0314", "")].retire_on == date(2026, 3, 26)
+
+
 def test_endpoint_and_system_deprecations_are_not_models(records) -> None:
     assert not any(model_id.startswith(("/", "v1")) for model_id, _ in records)
 
