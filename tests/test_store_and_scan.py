@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
@@ -9,8 +9,13 @@ from sundial_llm.scan import run_import, run_scan
 from sundial_llm.sources import ALL_SOURCES
 from sundial_llm.store import Store
 
+T0 = datetime(2026, 3, 1, 8, 0, tzinfo=timezone.utc)
 T1 = datetime(2026, 9, 19, 8, 0, tzinfo=timezone.utc)
 T2 = datetime(2026, 9, 20, 8, 0, tzinfo=timezone.utc)
+T3 = datetime(2026, 9, 21, 8, 0, tzinfo=timezone.utc)
+T4 = datetime(2026, 9, 22, 8, 0, tzinfo=timezone.utc)
+# One hour before T2, written in an offset whose ISO text sorts after T2's.
+BEFORE_T2_IN_PLUS_5 = datetime(2026, 9, 20, 12, 0, tzinfo=timezone(timedelta(hours=5)))
 
 FIXTURE_BY_SOURCE = {
     "openai-deprecations": "openai_deprecations.md",
@@ -33,8 +38,10 @@ def rec(model_id: str = "m", **extra: object) -> LifecycleRecord:
     return LifecycleRecord(**{**base, **extra})
 
 
-def stored(model_id: str, **extra: object) -> StoredRecord:
-    return StoredRecord(**rec(model_id, **extra).model_dump(), first_seen=T1, last_seen=T1)
+def stored(
+    model_id: str, first_seen: datetime = T1, last_seen: datetime = T1, **extra: object
+) -> StoredRecord:
+    return StoredRecord(**rec(model_id, **extra).model_dump(), first_seen=first_seen, last_seen=last_seen)
 
 
 @pytest.fixture
@@ -217,3 +224,55 @@ def test_import_keeps_records_the_document_does_not_mention(store: Store) -> Non
     assert set(store.load_records()) == {rec("old").key, rec("new").key}
     assert outcome.total_records == 2
     assert outcome.baseline is False
+
+
+def test_import_into_an_empty_store_keeps_the_document_timestamps(store: Store) -> None:
+    document = RegistryDocument(
+        generated_at=T1, sources={}, records=(stored("m", first_seen=T0, last_seen=T1),)
+    )
+
+    run_import(store, document, T2)
+
+    assert store.seen(rec("m").key) == (T0, T1)
+
+
+@pytest.mark.parametrize(
+    ("store_saw_it_at", "document_last_seen", "expected"),
+    [
+        (T3, T2, (T3, T3)),
+        (T1, T2, (T1, T2)),
+        (T2, BEFORE_T2_IN_PLUS_5, (T2, T2)),
+    ],
+    ids=["store-is-newer", "document-is-newer", "newer-as-text-but-older-in-time"],
+)
+def test_import_into_a_store_that_knows_the_key_keeps_first_seen_and_the_later_last_seen(
+    store: Store, store_saw_it_at: datetime, document_last_seen: datetime, expected: tuple[datetime, datetime]
+) -> None:
+    store.save_scan({rec("m").key: rec("m")}, (), store_saw_it_at)
+    document = RegistryDocument(
+        generated_at=T2, sources={}, records=(stored("m", first_seen=T0, last_seen=document_last_seen),)
+    )
+
+    run_import(store, document, T4)
+
+    assert store.seen(rec("m").key) == expected
+
+
+def test_scan_after_import_advances_last_seen_only_for_what_it_found(
+    store: Store, scanned: RegistryDocument, fixture_fetch
+) -> None:
+    aged = RegistryDocument(
+        generated_at=T1,
+        sources={},
+        records=(
+            *(r.model_copy(update={"first_seen": T0}) for r in scanned.records),
+            stored("gone-from-every-page", first_seen=T0, last_seen=T1),
+        ),
+    )
+    run_import(store, aged, T2)
+
+    run_scan(store, ALL_SOURCES, fixture_fetch, T3)
+
+    assert store.seen(("openai", "gpt-5.4-cyber", "")) == (T0, T3)
+    assert store.seen(rec("gone-from-every-page").key) == (T0, T1)
+    assert {first for first, _ in store.seen_all().values()} == {T0}

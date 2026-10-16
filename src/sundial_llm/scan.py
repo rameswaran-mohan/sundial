@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
 
 from sundial_llm.events import Event, diff
+from sundial_llm.models import RecordKey
 from sundial_llm.registry import RegistryDocument
 from sundial_llm.sources import CollectResult, Fetch, Source, collect
 from sundial_llm.store import Store
@@ -27,12 +28,22 @@ def run_scan(store: Store, sources: Iterable[Source], fetch: Fetch, now: datetim
 
 
 def run_import(store: Store, document: RegistryDocument, now: datetime) -> ScanOutcome:
-    """Load a published registry document as if it were one source named `registry`."""
+    """Load a published registry document as if it were one source named `registry`.
+
+    Each record keeps the first_seen and last_seen the document carries, not the import time.
+    """
     records = {stored.key: stored.lifecycle_record() for stored in document.records}
-    return _record(store, CollectResult(records, keys_by_source={"registry": frozenset(records)}), now)
+    seen = {stored.key: (stored.first_seen, stored.last_seen) for stored in document.records}
+    result = CollectResult(records, keys_by_source={"registry": frozenset(records)})
+    return _record(store, result, now, seen=seen)
 
 
-def _record(store: Store, result: CollectResult, now: datetime) -> ScanOutcome:
+def _record(
+    store: Store,
+    result: CollectResult,
+    now: datetime,
+    seen: Mapping[RecordKey, tuple[datetime, datetime]] | None = None,
+) -> ScanOutcome:
     old = store.load_records()
     baselined = store.baselined_sources()
 
@@ -41,7 +52,9 @@ def _record(store: Store, result: CollectResult, now: datetime) -> ScanOutcome:
     comparable = {key: record for key, record in result.records.items() if key in announced or key in old}
     events = diff(old, comparable)
 
-    store.save_scan(result.records, events, now, sources_ok=result.keys_by_source, failures=result.failures)
+    store.save_scan(
+        result.records, events, now, sources_ok=result.keys_by_source, failures=result.failures, seen=seen
+    )
     return ScanOutcome(
         total_records=len({**old, **result.records}),
         events=events,

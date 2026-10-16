@@ -34,11 +34,18 @@ CREATE TABLE IF NOT EXISTS meta (
 );
 """
 
+# first_seen is never changed once a key exists. last_seen only moves forward, compared as instants
+# (julianday) rather than as text, so timestamps written with different offsets still order correctly.
 _UPSERT_RECORD = """
 INSERT INTO records (platform, model_id, version, data, first_seen, last_seen)
 VALUES (?, ?, ?, ?, ?, ?)
 ON CONFLICT (platform, model_id, version)
-DO UPDATE SET data = excluded.data, last_seen = excluded.last_seen
+DO UPDATE SET
+    data = excluded.data,
+    last_seen = CASE
+        WHEN julianday(excluded.last_seen) > julianday(records.last_seen) THEN excluded.last_seen
+        ELSE records.last_seen
+    END
 """
 
 _UPSERT_META = (
@@ -112,15 +119,22 @@ class Store:
         at: datetime,
         sources_ok: Iterable[str] = (),
         failures: Mapping[str, str] | None = None,
+        seen: Mapping[RecordKey, tuple[datetime, datetime]] | None = None,
     ) -> None:
+        """Persist one scan. `seen` supplies (first_seen, last_seen) for keys whose history is
+        already known, such as records imported from a registry document; other keys are stamped `at`."""
         stamp = at.isoformat()
         ok = frozenset(sources_ok)
         baselined = sorted(self.baselined_sources() | ok)
         outcomes = {**dict.fromkeys(ok, "ok"), **(failures or {})}
+        known = {key: (first.isoformat(), last.isoformat()) for key, (first, last) in (seen or {}).items()}
         with closing(self._connect()) as conn, conn:
             conn.executemany(
                 _UPSERT_RECORD,
-                [(*key, record.model_dump_json(), stamp, stamp) for key, record in records.items()],
+                [
+                    (*key, record.model_dump_json(), *known.get(key, (stamp, stamp)))
+                    for key, record in records.items()
+                ],
             )
             conn.executemany(
                 "INSERT INTO events (at, data) VALUES (?, ?)",
