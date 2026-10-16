@@ -58,6 +58,22 @@ def test_config_file_is_found_through_the_environment(tmp_path: Path) -> None:
     assert config.new_models[0].model_glob == "claude-sonnet-*"
 
 
+def test_published_registry_is_read_from_github_by_default() -> None:
+    config = load_config(None, env={})
+
+    assert (
+        config.registry_url
+        == "https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json"
+    )
+
+
+def test_null_registry_url_turns_the_published_registry_off(tmp_path: Path) -> None:
+    path = tmp_path / "sundial.yaml"
+    path.write_text("registry_url: null\n", encoding="utf-8")
+
+    assert load_config(path, env={}).registry_url is None
+
+
 def test_explicitly_empty_rules_mean_no_rules() -> None:
     assert Config.model_validate({"rules": []}).policy.rules == ()
 

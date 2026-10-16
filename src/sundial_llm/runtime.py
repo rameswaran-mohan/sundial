@@ -10,7 +10,8 @@ from datetime import datetime, timedelta, timezone
 from sundial_llm.config import Config
 from sundial_llm.guard import LifecycleGuard, Records, Resolver
 from sundial_llm.notify import Post, http_post, notify_events
-from sundial_llm.scan import run_scan
+from sundial_llm.registry import RegistryDocument, parse_document
+from sundial_llm.scan import ScanOutcome, run_import, run_scan
 from sundial_llm.sources import ALL_SOURCES, Fetch, http_fetch
 from sundial_llm.store import Store
 
@@ -28,7 +29,8 @@ def _thread_spawn(job: Callable[[], None]) -> None:
 
 
 class AutoScanner:
-    """Starts a scan when the registry is older than `auto_scan_hours`. At most one scan at a time."""
+    """Refreshes the store when it is older than `auto_scan_hours`, from the published registry when
+    possible and by scanning the providers otherwise. At most one refresh at a time."""
 
     def __init__(
         self,
@@ -48,6 +50,7 @@ class AutoScanner:
         self._post = post
         self._lock = threading.Lock()
         self._running = False
+        self.last_mode: str | None = None  # "registry" or "scan": where the last refresh came from
 
     def maybe_start(self) -> bool:
         hours = self._config.auto_scan_hours
@@ -65,7 +68,7 @@ class AutoScanner:
 
     def _scan(self) -> None:
         try:
-            outcome = run_scan(self._store, ALL_SOURCES, self._fetch, self._clock())
+            outcome = self._refresh()
             for name, reason in outcome.failures.items():
                 logger.warning("sundial: source %s failed: %s", name, reason)
             for error in notify_events(outcome.events, self._config, self._post):
@@ -75,6 +78,40 @@ class AutoScanner:
         finally:
             with self._lock:
                 self._running = False
+
+    def _refresh(self) -> ScanOutcome:
+        """Import the published registry when it is usable, otherwise scan the provider pages."""
+        now = self._clock()
+        document = self._published_document()
+        if document is not None:
+            self.last_mode = "registry"
+            return run_import(self._store, document, now)
+        self.last_mode = "scan"
+        return run_scan(self._store, ALL_SOURCES, self._fetch, now)
+
+    def _published_document(self) -> RegistryDocument | None:
+        """The registry document if one is configured, readable and newer than the local data."""
+        url = self._config.registry_url
+        if url is None:
+            return None
+        last = self._store.last_scan_at()
+        try:
+            document = parse_document(self._fetch(url))
+            newer = last is None or document.generated_at > last
+        except Exception as error:  # noqa: BLE001 - any registry problem means scanning the sources instead
+            logger.warning("sundial: registry %s unavailable (%s); scanning sources directly", url, error)
+            return None
+        if not newer:
+            # Importing it could roll back a change a direct scan already saw, and events would flap.
+            logger.warning(
+                "sundial: registry %s is not newer than the local data (generated %s, last refresh %s); "
+                "scanning sources directly",
+                url,
+                document.generated_at,
+                last,
+            )
+            return None
+        return document
 
 
 def build_guard(

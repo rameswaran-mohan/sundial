@@ -51,6 +51,10 @@ class Config(BaseModel):
     successors: dict[str, str] = {}
     notify: NotifyConfig = NotifyConfig()
     new_models: tuple[NewModelRule, ...] = ()
+    # The registry published nightly from the official pages; None means always scan them directly.
+    registry_url: str | None = (
+        "https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json"
+    )
 
     @field_validator("db", mode="before")
     @classmethod
