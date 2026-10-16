@@ -7,7 +7,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from sundial_llm.events import Event, diff
-from sundial_llm.sources import Fetch, Source, collect
+from sundial_llm.registry import RegistryDocument
+from sundial_llm.sources import CollectResult, Fetch, Source, collect
 from sundial_llm.store import Store
 
 
@@ -22,8 +23,17 @@ class ScanOutcome:
 
 
 def run_scan(store: Store, sources: Iterable[Source], fetch: Fetch, now: datetime) -> ScanOutcome:
+    return _record(store, collect(sources, fetch), now)
+
+
+def run_import(store: Store, document: RegistryDocument, now: datetime) -> ScanOutcome:
+    """Load a published registry document as if it were one source named `registry`."""
+    records = {stored.key: stored.lifecycle_record() for stored in document.records}
+    return _record(store, CollectResult(records, keys_by_source={"registry": frozenset(records)}), now)
+
+
+def _record(store: Store, result: CollectResult, now: datetime) -> ScanOutcome:
     old = store.load_records()
-    result = collect(sources, fetch)
     baselined = store.baselined_sources()
 
     # A source seen for the first time is a baseline for its own records: it must not flood events.
@@ -31,7 +41,7 @@ def run_scan(store: Store, sources: Iterable[Source], fetch: Fetch, now: datetim
     comparable = {key: record for key, record in result.records.items() if key in announced or key in old}
     events = diff(old, comparable)
 
-    store.save_scan(result.records, events, now, sources_ok=result.keys_by_source)
+    store.save_scan(result.records, events, now, sources_ok=result.keys_by_source, failures=result.failures)
     return ScanOutcome(
         total_records=len({**old, **result.records}),
         events=events,

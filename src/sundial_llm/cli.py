@@ -1,4 +1,4 @@
-"""Command line: scan, status, check, events, costmap-patch."""
+"""Command line: scan, import, export, status, check, events, costmap-patch."""
 
 from __future__ import annotations
 
@@ -18,12 +18,14 @@ from sundial_llm.guard import IdentityResolver, LifecycleGuard
 from sundial_llm.matching import UpstreamModel, parse_upstream
 from sundial_llm.notify import Post, http_post, notify_events, render_event
 from sundial_llm.policy import Action
-from sundial_llm.scan import run_scan
+from sundial_llm.registry import build_document, parse_document, write_if_changed
+from sundial_llm.scan import ScanOutcome, run_import, run_scan
 from sundial_llm.sources import ALL_SOURCES, Fetch, http_fetch
 from sundial_llm.store import Store
 
 EXIT_OK = 0
 EXIT_ALL_SOURCES_FAILED = 1
+EXIT_BAD_INPUT = 2
 EXIT_MODEL_FLAGGED = 3
 
 
@@ -39,7 +41,16 @@ def _parser() -> argparse.ArgumentParser:
     common.add_argument("--db", help="path to the registry database (overrides the config)")
     commands = parser.add_subparsers(dest="command", required=True)
 
-    commands.add_parser("scan", parents=[common], help="fetch every provider source and record changes")
+    scan = commands.add_parser(
+        "scan", parents=[common], help="fetch every provider source and record changes"
+    )
+    scan.add_argument("--strict", action="store_true", help="exit 1 if any source failed, not only all")
+
+    importer = commands.add_parser("import", parents=[common], help="load a published registry document")
+    importer.add_argument("source", help="path or http(s) URL of a registry JSON document")
+
+    export = commands.add_parser("export", parents=[common], help="write the registry as a JSON document")
+    export.add_argument("--out", required=True, metavar="FILE")
 
     status = commands.add_parser("status", parents=[common], help="list upcoming retirements")
     status.add_argument("--within", type=int, default=90, metavar="DAYS")
@@ -65,11 +76,56 @@ def _config(args: argparse.Namespace, env: Mapping[str, str]) -> Config:
     return config.model_copy(update={"db": Path(args.db)}) if args.db else config
 
 
-def _scan(config: Config, fetch: Fetch, now: datetime, post: Post, out: TextIO) -> int:
+def _scan(config: Config, strict: bool, fetch: Fetch, now: datetime, post: Post, out: TextIO) -> int:
     outcome = run_scan(Store(config.db), ALL_SOURCES, fetch, now)
+    _report(outcome, config, post, out)
+    if not outcome.sources_ok or (strict and outcome.failures):
+        return EXIT_ALL_SOURCES_FAILED
+    return EXIT_OK
+
+
+def _read_source(source: str, fetch: Fetch) -> str:
+    if source.startswith(("http://", "https://")):
+        return fetch(source)
+    return Path(source).read_text(encoding="utf-8")
+
+
+def _import(config: Config, source: str, fetch: Fetch, now: datetime, post: Post, out: TextIO) -> int:
+    try:
+        text = _read_source(source, fetch)
+    except Exception as error:  # noqa: BLE001 - an unreachable source is reported like a failed scan
+        print(f"sundial: cannot read {source}: {error}", file=out)
+        return EXIT_ALL_SOURCES_FAILED
+    try:
+        document = parse_document(text)
+    except ValueError as error:
+        print(f"sundial: {source} is not a registry document: {error}", file=out)
+        return EXIT_BAD_INPUT
+    _report(run_import(Store(config.db), document, now), config, post, out)
+    return EXIT_OK
+
+
+def _export(config: Config, out_path: str, now: datetime, out: TextIO) -> int:
+    store = Store(config.db)
+    sources = store.last_scan_sources()
+    ok = [name for name, outcome in sources.items() if outcome == "ok"]
+    failures = {name: outcome for name, outcome in sources.items() if outcome != "ok"}
+    document = build_document(store, now, ok, failures)
+    count = len(document.records)
+    if write_if_changed(document, Path(out_path)):
+        print(f"Registry written to {out_path} ({count} records)", file=out)
+    else:
+        print(f"Registry unchanged ({count} records)", file=out)
+    return EXIT_OK
+
+
+def _report(outcome: ScanOutcome, config: Config, post: Post, out: TextIO) -> None:
+    """Print what a scan or import found and send its notifications."""
     ok, failed = len(outcome.sources_ok), len(outcome.failures)
+    total = ok + failed
     print(
-        f"Scanned {ok + failed} sources: {ok} ok, {failed} failed. {outcome.total_records} models tracked.",
+        f"Scanned {total} source{'' if total == 1 else 's'}: {ok} ok, {failed} failed. "
+        f"{outcome.total_records} models tracked.",
         file=out,
     )
     if outcome.baseline and ok:
@@ -85,7 +141,6 @@ def _scan(config: Config, fetch: Fetch, now: datetime, post: Post, out: TextIO) 
         print(f"  event    {render_event(event)}", file=out)
     for error in notify_events(outcome.events, config, post):
         print(f"  warning  {error}", file=out)
-    return EXIT_ALL_SOURCES_FAILED if ok == 0 else EXIT_OK
 
 
 def _status(config: Config, within: int, platform: str | None, now: datetime, out: TextIO) -> int:
@@ -180,10 +235,14 @@ def main(
         config = _config(args, os.environ if env is None else env)
     except (ValueError, OSError) as error:
         print(f"sundial: {error}", file=out)
-        return 2
+        return EXIT_BAD_INPUT
     moment = now()
     if args.command == "scan":
-        return _scan(config, fetch, moment, post, out)
+        return _scan(config, args.strict, fetch, moment, post, out)
+    if args.command == "import":
+        return _import(config, args.source, fetch, moment, post, out)
+    if args.command == "export":
+        return _export(config, args.out, moment, out)
     if args.command == "status":
         return _status(config, args.within, args.platform, moment, out)
     if args.command == "check":

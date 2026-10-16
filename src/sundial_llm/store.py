@@ -82,6 +82,16 @@ class Store:
             ).fetchone()
         return (datetime.fromisoformat(row[0]), datetime.fromisoformat(row[1])) if row else None
 
+    def seen_all(self) -> dict[RecordKey, tuple[datetime, datetime]]:
+        with closing(self._connect()) as conn:
+            rows = conn.execute(
+                "SELECT platform, model_id, version, first_seen, last_seen FROM records"
+            ).fetchall()
+        return {
+            (platform, model_id, version): (datetime.fromisoformat(first), datetime.fromisoformat(last))
+            for platform, model_id, version, first, last in rows
+        }
+
     def last_scan_at(self) -> datetime | None:
         value = self._meta("last_scan_at")
         return datetime.fromisoformat(value) if value else None
@@ -90,15 +100,23 @@ class Store:
         value = self._meta("baselined_sources")
         return frozenset(json.loads(value)) if value else frozenset()
 
+    def last_scan_sources(self) -> dict[str, str]:
+        """Each source of the last scan mapped to "ok" or the reason it failed."""
+        value = self._meta("last_scan_sources")
+        return json.loads(value) if value else {}
+
     def save_scan(
         self,
         records: Mapping[RecordKey, LifecycleRecord],
         events: Sequence[Event],
         at: datetime,
         sources_ok: Iterable[str] = (),
+        failures: Mapping[str, str] | None = None,
     ) -> None:
         stamp = at.isoformat()
-        baselined = sorted(self.baselined_sources() | frozenset(sources_ok))
+        ok = frozenset(sources_ok)
+        baselined = sorted(self.baselined_sources() | ok)
+        outcomes = {**dict.fromkeys(ok, "ok"), **(failures or {})}
         with closing(self._connect()) as conn, conn:
             conn.executemany(
                 _UPSERT_RECORD,
@@ -110,6 +128,7 @@ class Store:
             )
             conn.execute(_UPSERT_META, ("last_scan_at", stamp))
             conn.execute(_UPSERT_META, ("baselined_sources", json.dumps(baselined)))
+            conn.execute(_UPSERT_META, ("last_scan_sources", json.dumps(outcomes, sort_keys=True)))
 
     def events(self, limit: int = 50) -> list[StoredEvent]:
         with closing(self._connect()) as conn:

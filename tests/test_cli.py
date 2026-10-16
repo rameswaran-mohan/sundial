@@ -169,6 +169,110 @@ def test_costmap_patch_prints_changes_and_writes_a_patch_file(db, fixture_fetch,
     }
 
 
+def azure_down(fixture_fetch):
+    def fetch(url: str) -> str:
+        if "azure" in url:
+            raise OSError("network down")
+        return fixture_fetch(url)
+
+    return fetch
+
+
+def test_scan_strict_fails_when_any_source_fails(db, fixture_fetch) -> None:
+    plain_code, plain = run(["scan", "--db", str(db)], azure_down(fixture_fetch))
+    strict_code, strict = run(["scan", "--strict", "--db", str(db)], azure_down(fixture_fetch), now=T2)
+
+    assert plain_code == 0
+    assert strict_code == 1
+    assert "5 ok, 1 failed" in plain and "5 ok, 1 failed" in strict
+    assert "network down" in strict
+
+
+def test_scan_strict_passes_when_every_source_is_up(db, fixture_fetch) -> None:
+    code, _ = run(["scan", "--strict", "--db", str(db)], fixture_fetch)
+
+    assert code == 0
+
+
+def test_export_writes_every_record_then_reports_unchanged(db, fixture_fetch, tmp_path) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    target = tmp_path / "registry" / "lifecycle.json"
+
+    code, output = run(["export", "--out", str(target), "--db", str(db)], fixture_fetch)
+    document = json.loads(target.read_text(encoding="utf-8"))
+    tracked = len(Store(db).load_records())
+
+    assert code == 0
+    assert f"Registry written to {target} ({tracked} records)" in output
+    assert len(document["records"]) == tracked
+    assert document["sources"] == {name: "ok" for name in FIXTURE_BY_SOURCE}
+
+    run(["scan", "--db", str(db)], fixture_fetch, now=T2)
+    code, output = run(["export", "--out", str(target), "--db", str(db)], fixture_fetch, now=T2)
+
+    assert code == 0
+    assert f"Registry unchanged ({tracked} records)" in output
+
+
+def test_export_records_why_a_source_failed(db, fixture_fetch, tmp_path) -> None:
+    run(["scan", "--db", str(db)], azure_down(fixture_fetch))
+    target = tmp_path / "lifecycle.json"
+
+    run(["export", "--out", str(target), "--db", str(db)], fixture_fetch)
+
+    assert "network down" in json.loads(target.read_text(encoding="utf-8"))["sources"]["azure"]
+
+
+def test_import_of_an_exported_file_creates_a_baseline(db, fixture_fetch, tmp_path) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    target = tmp_path / "lifecycle.json"
+    run(["export", "--out", str(target), "--db", str(db)], fixture_fetch)
+    fresh = tmp_path / "fresh.db"
+
+    code, output = run(["import", str(target), "--db", str(fresh)], fixture_fetch, now=T2)
+
+    assert code == 0
+    assert "1 ok, 0 failed" in output
+    assert "Baseline created" in output
+    assert Store(fresh).load_records() == Store(db).load_records()
+
+
+def test_import_fetches_a_url_with_the_injected_fetch(db, fixture_fetch, tmp_path) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    target = tmp_path / "lifecycle.json"
+    run(["export", "--out", str(target), "--db", str(db)], fixture_fetch)
+    url = "https://example.test/registry/lifecycle.json"
+    requested: list[str] = []
+
+    def fetch(asked: str) -> str:
+        requested.append(asked)
+        return target.read_text(encoding="utf-8")
+
+    code, output = run(["import", url, "--db", str(tmp_path / "fresh.db")], fetch, now=T2)
+
+    assert code == 0
+    assert requested == [url]
+    assert "Baseline created" in output
+
+
+def test_import_of_something_that_is_not_a_registry_document_exits_2(db, fixture_fetch, tmp_path) -> None:
+    bad = tmp_path / "lifecycle.json"
+    bad.write_text("{}", encoding="utf-8")
+
+    code, output = run(["import", str(bad), "--db", str(db)], fixture_fetch)
+
+    assert code == 2
+    assert "schema_version" in output
+    assert Store(db).load_records() == {}
+
+
+def test_import_of_an_unreadable_source_exits_1(db, fixture_fetch, tmp_path) -> None:
+    code, output = run(["import", str(tmp_path / "missing.json"), "--db", str(db)], fixture_fetch)
+
+    assert code == 1
+    assert "missing.json" in output
+
+
 def test_config_file_supplies_the_database_path(tmp_path, fixture_fetch) -> None:
     config = tmp_path / "sundial.yaml"
     config.write_text(f"db: {(tmp_path / 'from-config.db').as_posix()}\n", encoding="utf-8")

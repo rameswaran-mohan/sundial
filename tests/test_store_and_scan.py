@@ -4,7 +4,8 @@ import pytest
 
 from sundial_llm.events import Event, EventType
 from sundial_llm.models import LifecycleRecord, LifecycleState
-from sundial_llm.scan import run_scan
+from sundial_llm.registry import RegistryDocument, StoredRecord, build_document
+from sundial_llm.scan import run_import, run_scan
 from sundial_llm.sources import ALL_SOURCES
 from sundial_llm.store import Store
 
@@ -32,6 +33,10 @@ def rec(model_id: str = "m", **extra: object) -> LifecycleRecord:
     return LifecycleRecord(**{**base, **extra})
 
 
+def stored(model_id: str, **extra: object) -> StoredRecord:
+    return StoredRecord(**rec(model_id, **extra).model_dump(), first_seen=T1, last_seen=T1)
+
+
 @pytest.fixture
 def store(tmp_path) -> Store:
     return Store(tmp_path / "sundial.db")
@@ -41,6 +46,14 @@ def store(tmp_path) -> Store:
 def fixture_fetch(load_fixture):
     by_url = {source.url: FIXTURE_BY_SOURCE[source.name] for source in ALL_SOURCES}
     return lambda url: load_fixture(by_url[url])
+
+
+@pytest.fixture
+def scanned(tmp_path, fixture_fetch) -> RegistryDocument:
+    """A registry document exported from a separate store scanned against the fixtures."""
+    source = Store(tmp_path / "source.db")
+    outcome = run_scan(source, ALL_SOURCES, fixture_fetch, T1)
+    return build_document(source, T1, outcome.sources_ok, outcome.failures)
 
 
 def test_new_store_is_empty(store: Store) -> None:
@@ -77,6 +90,21 @@ def test_record_missing_from_a_later_scan_is_kept(store: Store) -> None:
 
     assert set(store.load_records()) == {rec("old").key, rec("new").key}
     assert store.seen(rec("old").key) == (T1, T1)
+
+
+def test_seen_all_returns_every_key_with_first_and_last_seen(store: Store) -> None:
+    store.save_scan({rec("a").key: rec("a")}, (), T1)
+    store.save_scan({rec("a").key: rec("a"), rec("b").key: rec("b")}, (), T2)
+
+    assert store.seen_all() == {rec("a").key: (T1, T2), rec("b").key: (T2, T2)}
+
+
+def test_save_scan_remembers_which_sources_succeeded_and_why_others_failed(store: Store) -> None:
+    assert store.last_scan_sources() == {}
+
+    store.save_scan({}, (), T1, sources_ok=("gemini",), failures={"azure": "network down"})
+
+    assert store.last_scan_sources() == {"azure": "network down", "gemini": "ok"}
 
 
 def test_events_come_back_newest_first_with_their_time(store: Store) -> None:
@@ -131,6 +159,8 @@ def test_source_outage_neither_drops_records_nor_invents_events(store: Store, fi
     assert outcome.events == ()
     assert "azure" in outcome.failures
     assert len(store.load_records()) == before.total_records
+    assert "network down" in store.last_scan_sources()["azure"]
+    assert store.last_scan_sources()["gemini"] == "ok"
 
 
 def test_source_that_was_down_during_the_baseline_joins_without_a_flood(store: Store, fixture_fetch) -> None:
@@ -144,3 +174,46 @@ def test_source_that_was_down_during_the_baseline_joins_without_a_flood(store: S
 
     assert outcome.events == ()
     assert any(key[0] == "azure" for key in store.load_records())
+
+
+def test_import_into_an_empty_store_is_a_baseline(store: Store, scanned: RegistryDocument) -> None:
+    outcome = run_import(store, scanned, T2)
+
+    assert outcome.baseline is True
+    assert outcome.events == ()
+    assert outcome.failures == {}
+    assert outcome.sources_ok == ("registry",)
+    assert outcome.total_records == len(scanned.records)
+    assert store.load_records() == {r.key: r.lifecycle_record() for r in scanned.records}
+    assert store.last_scan_sources() == {"registry": "ok"}
+
+
+def test_import_reports_a_moved_retirement_date_once(
+    store: Store, scanned: RegistryDocument, fixture_fetch
+) -> None:
+    run_scan(store, ALL_SOURCES, fixture_fetch, T1)
+    key = ("openai", "gpt-5.4-cyber", "")
+    moved = scanned.model_copy(
+        update={
+            "records": tuple(
+                r.model_copy(update={"retire_on": date(2026, 11, 1)}) if r.key == key else r
+                for r in scanned.records
+            )
+        }
+    )
+
+    outcome = run_import(store, moved, T2)
+
+    assert [(e.type, e.key) for e in outcome.events] == [(EventType.RETIREMENT_DATE_CHANGED, key)]
+    assert store.load_records()[key].retire_on == date(2026, 11, 1)
+
+
+def test_import_keeps_records_the_document_does_not_mention(store: Store) -> None:
+    store.save_scan({rec("old").key: rec("old")}, (), T1)
+    only_new = RegistryDocument(generated_at=T2, sources={}, records=(stored("new"),))
+
+    outcome = run_import(store, only_new, T2)
+
+    assert set(store.load_records()) == {rec("old").key, rec("new").key}
+    assert outcome.total_records == 2
+    assert outcome.baseline is False
