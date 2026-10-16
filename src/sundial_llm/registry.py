@@ -9,7 +9,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, ValidationError, field_validator
 
-from sundial_llm.models import LifecycleRecord
+from sundial_llm.models import LifecycleRecord, RecordKey
 from sundial_llm.store import Store
 
 SCHEMA_VERSION = 1
@@ -44,6 +44,10 @@ class RegistryDocument(BaseModel):
     @classmethod
     def _sort_records(cls, records: tuple[StoredRecord, ...]) -> tuple[StoredRecord, ...]:
         return tuple(sorted(records, key=lambda record: record.key))
+
+    def lifecycle_records(self) -> dict[RecordKey, LifecycleRecord]:
+        """The records by key, without the times the registry saw them."""
+        return {stored.key: stored.lifecycle_record() for stored in self.records}
 
 
 def build_document(

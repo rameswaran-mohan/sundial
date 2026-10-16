@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -16,6 +16,7 @@ from sundial_llm.store import Store
 NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
 REGISTRY_URL = "https://registry.test/lifecycle.json"
 PROVIDER_URLS = {source.url for source in ALL_SOURCES}
+CYBER = ("openai", "gpt-5.4-cyber", "")
 
 FIXTURE_BY_SOURCE = {
     "openai-deprecations": "openai_deprecations.md",
@@ -212,25 +213,80 @@ def test_disabled_registry_is_never_requested(store: Store, fixture_fetch) -> No
     assert set(fetched) == PROVIDER_URLS
 
 
+def test_unchanged_published_registry_is_imported_every_day_without_scanning(
+    store: Store, tmp_path: Path, fixture_fetch
+) -> None:
+    text = published(tmp_path, fixture_fetch, NOW - timedelta(hours=9))  # never rewritten afterwards
+    fetched: list[str] = []
+    modes: list[str | None] = []
+
+    for day in range(3):
+        today = NOW + timedelta(hours=25 * day)
+        subject = scanner(
+            store, serving(fetched, text, offline), clock=lambda today=today: today, registry_url=REGISTRY_URL
+        )
+        assert subject.maybe_start() is True
+        modes.append(subject.last_mode)
+
+    assert modes == ["registry", "registry", "registry"]
+    assert set(fetched) == {REGISTRY_URL}
+    assert store.last_direct_scan_at() is None
+
+
+def scan_while_the_registry_is_down(store: Store, fetch: Fetch) -> None:
+    """Leave the store with a direct scan at NOW, made because the registry could not be fetched."""
+    subject = scanner(store, serving([], OSError("offline"), fetch), registry_url=REGISTRY_URL)
+    assert subject.maybe_start() is True
+    assert subject.last_mode == "scan"
+
+
 @pytest.mark.parametrize("age", [timedelta(hours=1), timedelta(0)], ids=["older", "same-time"])
-def test_registry_no_newer_than_the_local_data_is_skipped_for_a_scan(
+def test_older_registry_that_would_roll_back_a_direct_scan_is_skipped_for_a_scan(
     store: Store, fixture_fetch, age: timedelta, caplog: pytest.LogCaptureFixture
 ) -> None:
-    scanner(store, fixture_fetch).maybe_start()  # local data from a direct scan at NOW
-    text = document(NOW - age, ONLY_IN_THE_REGISTRY)
+    scan_while_the_registry_is_down(store, fixture_fetch)
+    scanned_retire_on = store.load_records()[CYBER].retire_on
+    assert scanned_retire_on != date(2026, 11, 1)
+    local = build_document(store, NOW - age, ["openai-deprecations"], {})
+    moved = local.model_copy(
+        update={
+            "records": tuple(
+                r.model_copy(update={"retire_on": date(2026, 11, 1)}) if r.key == CYBER else r
+                for r in local.records
+            )
+        }
+    )
     fetched: list[str] = []
     later = NOW + timedelta(hours=25)
     subject = scanner(
-        store, serving(fetched, text, fixture_fetch), clock=lambda: later, registry_url=REGISTRY_URL
+        store, serving(fetched, to_json(moved), fixture_fetch), clock=lambda: later, registry_url=REGISTRY_URL
     )
 
     assert subject.maybe_start() is True
 
     assert subject.last_mode == "scan"
-    assert ONLY_IN_THE_REGISTRY.key not in store.load_records()
+    assert store.load_records()[CYBER].retire_on == scanned_retire_on
     assert set(fetched) == {REGISTRY_URL} | PROVIDER_URLS
-    assert store.last_scan_at() == later
-    assert any("is not newer than the local data" in message for message in caplog.messages)
+    assert store.last_direct_scan_at() == later
+    assert any("would roll back" in message for message in caplog.messages)
+
+
+def test_older_registry_that_changes_nothing_is_imported(store: Store, fixture_fetch) -> None:
+    scan_while_the_registry_is_down(store, fixture_fetch)
+    text = to_json(build_document(store, NOW - timedelta(hours=1), ["openai-deprecations"], {}))
+    fetched: list[str] = []
+    subject = scanner(
+        store,
+        serving(fetched, text, offline),
+        clock=lambda: NOW + timedelta(hours=25),
+        registry_url=REGISTRY_URL,
+    )
+
+    assert subject.maybe_start() is True
+
+    assert subject.last_mode == "registry"
+    assert fetched == [REGISTRY_URL]
+    assert store.last_direct_scan_at() == NOW
 
 
 def test_newer_registry_is_imported_over_scanned_data_and_its_events_are_notified(

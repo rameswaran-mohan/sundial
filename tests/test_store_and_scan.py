@@ -195,6 +195,21 @@ def test_import_into_an_empty_store_is_a_baseline(store: Store, scanned: Registr
     assert store.last_scan_sources() == {"registry": "ok"}
 
 
+def test_only_a_direct_scan_sets_last_direct_scan_at(
+    store: Store, scanned: RegistryDocument, fixture_fetch
+) -> None:
+    run_import(store, scanned, T2)
+
+    assert store.last_scan_at() == T2
+    assert store.last_direct_scan_at() is None
+
+    run_scan(store, ALL_SOURCES, fixture_fetch, T3)
+    run_import(store, scanned, T4)
+
+    assert store.last_scan_at() == T4
+    assert store.last_direct_scan_at() == T3
+
+
 def test_import_reports_a_moved_retirement_date_once(
     store: Store, scanned: RegistryDocument, fixture_fetch
 ) -> None:

@@ -32,10 +32,10 @@ def run_import(store: Store, document: RegistryDocument, now: datetime) -> ScanO
 
     Each record keeps the first_seen and last_seen the document carries, not the import time.
     """
-    records = {stored.key: stored.lifecycle_record() for stored in document.records}
+    records = document.lifecycle_records()
     seen = {stored.key: (stored.first_seen, stored.last_seen) for stored in document.records}
     result = CollectResult(records, keys_by_source={"registry": frozenset(records)})
-    return _record(store, result, now, seen=seen)
+    return _record(store, result, now, seen=seen, direct=False)
 
 
 def _record(
@@ -43,6 +43,7 @@ def _record(
     result: CollectResult,
     now: datetime,
     seen: Mapping[RecordKey, tuple[datetime, datetime]] | None = None,
+    direct: bool = True,
 ) -> ScanOutcome:
     old = store.load_records()
     baselined = store.baselined_sources()
@@ -53,7 +54,13 @@ def _record(
     events = diff(old, comparable)
 
     store.save_scan(
-        result.records, events, now, sources_ok=result.keys_by_source, failures=result.failures, seen=seen
+        result.records,
+        events,
+        now,
+        sources_ok=result.keys_by_source,
+        failures=result.failures,
+        seen=seen,
+        direct=direct,
     )
     return ScanOutcome(
         total_records=len({**old, **result.records}),

@@ -103,6 +103,11 @@ class Store:
         value = self._meta("last_scan_at")
         return datetime.fromisoformat(value) if value else None
 
+    def last_direct_scan_at(self) -> datetime | None:
+        """When the provider pages were last scanned directly; registry imports do not count."""
+        value = self._meta("last_direct_scan_at")
+        return datetime.fromisoformat(value) if value else None
+
     def baselined_sources(self) -> frozenset[str]:
         value = self._meta("baselined_sources")
         return frozenset(json.loads(value)) if value else frozenset()
@@ -120,9 +125,11 @@ class Store:
         sources_ok: Iterable[str] = (),
         failures: Mapping[str, str] | None = None,
         seen: Mapping[RecordKey, tuple[datetime, datetime]] | None = None,
+        direct: bool = True,
     ) -> None:
         """Persist one scan. `seen` supplies (first_seen, last_seen) for keys whose history is
-        already known, such as records imported from a registry document; other keys are stamped `at`."""
+        already known, such as records imported from a registry document; other keys are stamped `at`.
+        `direct` is false for a registry import, which leaves `last_direct_scan_at` alone."""
         stamp = at.isoformat()
         ok = frozenset(sources_ok)
         baselined = sorted(self.baselined_sources() | ok)
@@ -141,6 +148,8 @@ class Store:
                 [(stamp, event.model_dump_json()) for event in events],
             )
             conn.execute(_UPSERT_META, ("last_scan_at", stamp))
+            if direct:
+                conn.execute(_UPSERT_META, ("last_direct_scan_at", stamp))
             conn.execute(_UPSERT_META, ("baselined_sources", json.dumps(baselined)))
             conn.execute(_UPSERT_META, ("last_scan_sources", json.dumps(outcomes, sort_keys=True)))
 

@@ -8,6 +8,7 @@ from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
 from sundial_llm.config import Config
+from sundial_llm.events import diff
 from sundial_llm.guard import LifecycleGuard, Records, Resolver
 from sundial_llm.notify import Post, http_post, notify_events
 from sundial_llm.registry import RegistryDocument, parse_document
@@ -90,28 +91,28 @@ class AutoScanner:
         return run_scan(self._store, ALL_SOURCES, self._fetch, now)
 
     def _published_document(self) -> RegistryDocument | None:
-        """The registry document if one is configured, readable and newer than the local data."""
+        """The registry document if one is configured and readable, unless it is older than the last
+        direct scan and importing it would roll back what that scan saw."""
         url = self._config.registry_url
         if url is None:
             return None
-        last = self._store.last_scan_at()
+        scanned_at = self._store.last_direct_scan_at()
         try:
             document = parse_document(self._fetch(url))
-            newer = last is None or document.generated_at > last
+            newer = scanned_at is None or document.generated_at > scanned_at
         except Exception as error:  # noqa: BLE001 - any registry problem means scanning the sources instead
             logger.warning("sundial: registry %s unavailable (%s); scanning sources directly", url, error)
             return None
-        if not newer:
-            # Importing it could roll back a change a direct scan already saw, and events would flap.
-            logger.warning(
-                "sundial: registry %s is not newer than the local data (generated %s, last refresh %s); "
-                "scanning sources directly",
-                url,
-                document.generated_at,
-                last,
-            )
-            return None
-        return document
+        if newer or not diff(self._store.load_records(), document.lifecycle_records()):
+            return document
+        logger.warning(
+            "sundial: registry %s (generated %s) is older than the direct scan at %s and would roll back "
+            "its changes; scanning sources directly",
+            url,
+            document.generated_at,
+            scanned_at,
+        )
+        return None
 
 
 def build_guard(
