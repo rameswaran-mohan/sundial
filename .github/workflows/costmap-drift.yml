@@ -1,0 +1,32 @@
+name: costmap-drift
+on:
+  schedule:
+    - cron: "47 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: registry
+  cancel-in-progress: false
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync
+      - run: git pull --ff-only
+      - run: uv run sundial import registry/lifecycle.json --db /tmp/registry.db
+      - run: curl -fsSL -o /tmp/cost_map.json https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json
+      - run: uv run sundial costmap-patch --db /tmp/registry.db --cost-map /tmp/cost_map.json --out registry/litellm-costmap-patch.json --report registry/litellm-costmap-drift.md
+      - name: Commit when changed
+        run: |
+          if ! git diff --quiet -- registry/; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add registry/litellm-costmap-patch.json registry/litellm-costmap-drift.md
+            git commit -m "chore(registry): litellm cost map drift report"
+            git push
+          fi

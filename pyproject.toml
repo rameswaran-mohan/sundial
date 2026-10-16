@@ -21,6 +21,10 @@ litellm = ["litellm>=1.60"]
 [project.scripts]
 sundial = "sundial_llm.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/rameswaran-mohan/sundial"
+Repository = "https://github.com/rameswaran-mohan/sundial"
+
 [dependency-groups]
 dev = [
     "pytest>=8",
