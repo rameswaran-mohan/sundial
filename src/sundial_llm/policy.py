@@ -12,7 +12,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from sundial_llm.matching import Match
-from sundial_llm.models import LifecycleRecord, LifecycleState
+from sundial_llm.models import LifecycleRecord, LifecycleState, RecordKey
 
 
 class Action(str, Enum):
@@ -74,6 +74,8 @@ class Decision:
     days_left: int | None = None
     target: str | None = None
     approximate: bool = False
+    # The matched lifecycle record, also on allowed decisions, so usage can be counted per record.
+    key: RecordKey | None = None
 
 
 ALLOW = Decision()
@@ -91,7 +93,7 @@ class Policy(BaseModel):
         record = match.record
         rule = next((r for r in self.rules if r.when.matches(record, today)), None)
         if rule is None or rule.action is Action.ALLOW:
-            return ALLOW
+            return Decision(key=record.key)
         action = rule.action
         target = self.successors.get(public_model) if action is Action.REDIRECT else None
         if action is Action.REDIRECT and target is None:
@@ -107,6 +109,7 @@ class Policy(BaseModel):
             days_left=record.days_until_retirement(today),
             target=target,
             approximate=match.approximate,
+            key=record.key,
         )
 
 

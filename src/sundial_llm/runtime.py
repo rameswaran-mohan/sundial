@@ -1,10 +1,12 @@
-"""Wiring for in-process use: a guard backed by the store, kept fresh by background scans."""
+"""Wiring for in-process use: a guard backed by the store, kept fresh by background scans, and a
+recorder that counts the requests it sees."""
 
 from __future__ import annotations
 
 import logging
 import threading
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from sundial_llm.config import Config
@@ -15,6 +17,7 @@ from sundial_llm.registry import RegistryDocument, parse_document
 from sundial_llm.scan import ScanOutcome, run_import, run_scan
 from sundial_llm.sources import ALL_SOURCES, Fetch, http_fetch
 from sundial_llm.store import Store
+from sundial_llm.usage import UsageRecorder
 
 logger = logging.getLogger("sundial")
 
@@ -115,6 +118,36 @@ class AutoScanner:
         return None
 
 
+@dataclass(frozen=True)
+class Runtime:
+    guard: LifecycleGuard
+    recorder: UsageRecorder | None  # None when usage_tracking is off
+
+
+def build_runtime(
+    config: Config,
+    resolver: Resolver,
+    *,
+    fetch: Fetch = http_fetch,
+    clock: Callable[[], datetime] = _utcnow,
+    spawn: Spawn = _thread_spawn,
+) -> Runtime:
+    store = Store(config.db)
+    scanner = AutoScanner(store, config, fetch, clock=clock, spawn=spawn)
+
+    def load() -> Records:
+        scanner.maybe_start()
+        return store.load_records()
+
+    guard = LifecycleGuard(load, resolver, config.policy, clock=clock, reload_seconds=config.reload_seconds)
+    recorder = (
+        UsageRecorder(store, clock=clock, retention_days=config.usage_retention_days)
+        if config.usage_tracking
+        else None
+    )
+    return Runtime(guard, recorder)
+
+
 def build_guard(
     config: Config,
     resolver: Resolver,
@@ -123,11 +156,4 @@ def build_guard(
     clock: Callable[[], datetime] = _utcnow,
     spawn: Spawn = _thread_spawn,
 ) -> LifecycleGuard:
-    store = Store(config.db)
-    scanner = AutoScanner(store, config, fetch, clock=clock, spawn=spawn)
-
-    def load() -> Records:
-        scanner.maybe_start()
-        return store.load_records()
-
-    return LifecycleGuard(load, resolver, config.policy, clock=clock, reload_seconds=config.reload_seconds)
+    return build_runtime(config, resolver, fetch=fetch, clock=clock, spawn=spawn).guard

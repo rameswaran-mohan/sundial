@@ -8,6 +8,8 @@ from sundial_llm.guard import IdentityResolver, LifecycleGuard
 from sundial_llm.integrations.asgi import SundialMiddleware
 from sundial_llm.models import LifecycleRecord, LifecycleState
 from sundial_llm.policy import load_policy
+from sundial_llm.store import Store
+from sundial_llm.usage import UsageRecorder, UsageRow
 
 pytestmark = pytest.mark.anyio
 
@@ -78,11 +80,28 @@ def app() -> EchoApp:
     return EchoApp()
 
 
+def identity_guard() -> LifecycleGuard:
+    return LifecycleGuard(lambda: RECORDS, IdentityResolver(), POLICY, clock=lambda: NOW)
+
+
+def gateway(app, guard=None, **kwargs) -> httpx.AsyncClient:
+    transport = httpx.ASGITransport(app=SundialMiddleware(app, guard or identity_guard(), **kwargs))
+    return httpx.AsyncClient(transport=transport, base_url="http://gateway.test")
+
+
 @pytest.fixture
 def client(app: EchoApp):
-    guard = LifecycleGuard(lambda: RECORDS, IdentityResolver(), POLICY, clock=lambda: NOW)
-    transport = httpx.ASGITransport(app=SundialMiddleware(app, guard))
-    return httpx.AsyncClient(transport=transport, base_url="http://gateway.test")
+    return gateway(app)
+
+
+@pytest.fixture
+def usage(tmp_path) -> Store:
+    return Store(tmp_path / "usage.db")
+
+
+@pytest.fixture
+def recorder(usage: Store) -> UsageRecorder:
+    return UsageRecorder(usage, clock=lambda: NOW)
 
 
 async def test_warned_request_passes_through_untouched_with_lifecycle_headers(client, app) -> None:
@@ -167,3 +186,43 @@ async def test_a_guard_that_raises_never_breaks_the_request(app) -> None:
 
     assert response.status_code == 200
     assert json.loads(response.json()["body"])["model"] == "gpt-dead"
+
+
+async def test_inference_post_records_usage_with_an_empty_team(app, usage, recorder) -> None:
+    async with gateway(app, recorder=recorder) as client:
+        await client.post("/v1/chat/completions", json={"model": "gpt-fading", "messages": []})
+    recorder.flush()
+
+    assert usage.usage_rows(NOW.date()) == [
+        UsageRow(NOW.date(), "gpt-fading", "", "openai", "gpt-fading", "", 1)
+    ]
+
+
+async def test_a_get_records_no_usage(app, usage, recorder) -> None:
+    async with gateway(app, recorder=recorder) as client:
+        await client.request("GET", "/v1/chat/completions", json={"model": "gpt-fading"})
+    recorder.flush()
+
+    assert usage.usage_rows(NOW.date()) == []
+
+
+async def test_a_redirected_request_is_recorded_under_the_name_the_client_sent(app, usage, recorder) -> None:
+    async with gateway(app, recorder=recorder) as client:
+        response = await client.post("/v1/chat/completions", json={"model": "gpt-leaving"})
+    recorder.flush()
+
+    assert json.loads(response.json()["body"])["model"] == "gpt-next"
+    assert [row.public_model for row in usage.usage_rows(NOW.date())] == ["gpt-leaving"]
+
+
+async def test_a_recorder_that_raises_never_breaks_the_request_or_the_decision(app) -> None:
+    class Exploding:
+        def record(self, public_model, team, key) -> None:
+            raise RuntimeError("boom")
+
+    async with gateway(app, recorder=Exploding()) as client:
+        refused = await client.post("/v1/chat/completions", json={"model": "gpt-dead"})
+        passed = await client.post("/v1/chat/completions", json={"model": "gpt-fine"})
+
+    assert refused.status_code == 410
+    assert passed.status_code == 200

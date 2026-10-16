@@ -11,10 +11,14 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Awaitable, Callable, MutableMapping
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
+from sundial_llm.models import RecordKey
 from sundial_llm.policy import Action, Decision
+
+if TYPE_CHECKING:
+    from sundial_llm.runtime import Runtime
 
 logger = logging.getLogger("sundial")
 
@@ -31,20 +35,30 @@ class Decider(Protocol):
     def decide(self, public_model: str) -> Decision: ...
 
 
-def _default_guard() -> Decider:
+class Recorder(Protocol):
+    def record(self, public_model: str, team: str | None, key: RecordKey | None) -> None: ...
+
+
+def _default_runtime() -> Runtime:
     from sundial_llm.config import load_config
     from sundial_llm.guard import IdentityResolver
-    from sundial_llm.runtime import build_guard
+    from sundial_llm.runtime import build_runtime
 
-    return build_guard(load_config(), IdentityResolver())
+    return build_runtime(load_config(), IdentityResolver())
 
 
 class SundialMiddleware:
     def __init__(
-        self, app: ASGIApp, guard: Decider | None = None, *, max_body_bytes: int = 8 * 1024 * 1024
+        self,
+        app: ASGIApp,
+        guard: Decider | None = None,
+        *,
+        recorder: Recorder | None = None,
+        max_body_bytes: int = 8 * 1024 * 1024,
     ) -> None:
         self.app = app
         self._guard = guard
+        self._recorder = recorder
         self._max_body_bytes = max_body_bytes
 
     def _inspectable(self, scope: Scope) -> bool:
@@ -62,11 +76,22 @@ class SundialMiddleware:
             if not isinstance(model, str) or not model:
                 return None, None, None
             if self._guard is None:
-                self._guard = _default_guard()
+                runtime = _default_runtime()
+                self._guard = runtime.guard
+                if self._recorder is None:
+                    self._recorder = runtime.recorder
             return self._guard.decide(model), payload, model
         except Exception:  # noqa: BLE001 - never let a lifecycle check break a request
             logger.debug("sundial: request not inspected", exc_info=True)
             return None, None, None
+
+    def _record(self, model: str, decision: Decision) -> None:
+        if self._recorder is None:
+            return
+        try:
+            self._recorder.record(model, None, decision.key)
+        except Exception:  # noqa: BLE001 - never let usage counting break a request
+            logger.exception("sundial: could not record usage for %s", model)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if not self._inspectable(scope):
@@ -85,6 +110,9 @@ class SundialMiddleware:
                 break
 
         decision, payload, model = self._decide(body)
+        if decision is not None and model is not None:
+            # Counted under the name the client sent, before any block or redirect.
+            self._record(model, decision)
         extra: dict[str, str] = {}
         if decision is not None and decision.action is not Action.ALLOW and model is not None:
             extra = decision_headers(decision)

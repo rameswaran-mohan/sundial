@@ -25,6 +25,7 @@ def test_missing_config_gives_safe_defaults(tmp_path: Path) -> None:
     assert config.policy == DEFAULT_POLICY
     assert config.auto_scan_hours == 24
     assert config.db.name == "sundial.db"
+    assert (config.usage_tracking, config.usage_retention_days) == (True, 90)
 
 
 def test_config_file_is_found_through_the_environment(tmp_path: Path) -> None:
@@ -44,7 +45,9 @@ def test_config_file_is_found_through_the_environment(tmp_path: Path) -> None:
         "new_models:\n"
         "  - name: claude\n"
         "    platform: anthropic\n"
-        "    model_glob: 'claude-sonnet-*'\n".format(db=(tmp_path / "x.db").as_posix()),
+        "    model_glob: 'claude-sonnet-*'\n"
+        "usage_tracking: false\n"
+        "usage_retention_days: 30\n".format(db=(tmp_path / "x.db").as_posix()),
         encoding="utf-8",
     )
 
@@ -56,6 +59,7 @@ def test_config_file_is_found_through_the_environment(tmp_path: Path) -> None:
     assert config.policy.successors == {"old": "new"}
     assert config.notify.slack_webhook == "https://hooks.test/slack"
     assert config.new_models[0].model_glob == "claude-sonnet-*"
+    assert (config.usage_tracking, config.usage_retention_days) == (False, 30)
 
 
 def test_published_registry_is_read_from_github_by_default() -> None:

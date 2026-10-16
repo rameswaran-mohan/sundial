@@ -13,6 +13,8 @@ from sundial_llm.integrations.litellm_hook import LitellmRouterResolver, Sundial
 from sundial_llm.matching import UpstreamModel  # noqa: E402
 from sundial_llm.models import LifecycleRecord, LifecycleState  # noqa: E402
 from sundial_llm.policy import load_policy  # noqa: E402
+from sundial_llm.store import Store  # noqa: E402
+from sundial_llm.usage import UsageRecorder, UsageRow  # noqa: E402
 
 pytestmark = pytest.mark.anyio
 
@@ -80,10 +82,27 @@ ROUTER = FakeRouter(
 )
 
 
+def router_guard() -> LifecycleGuard:
+    return LifecycleGuard(lambda: RECORDS, LitellmRouterResolver(lambda: ROUTER), POLICY, clock=lambda: NOW)
+
+
 @pytest.fixture
 def hook() -> SundialHook:
-    guard = LifecycleGuard(lambda: RECORDS, LitellmRouterResolver(lambda: ROUTER), POLICY, clock=lambda: NOW)
-    return SundialHook(guard)
+    return SundialHook(router_guard())
+
+
+@pytest.fixture
+def usage(tmp_path) -> Store:
+    return Store(tmp_path / "usage.db")
+
+
+@pytest.fixture
+def recorder(usage: Store) -> UsageRecorder:
+    return UsageRecorder(usage, clock=lambda: NOW)
+
+
+class TeamAuth:
+    team_id = "team-a"
 
 
 def test_resolver_reads_the_upstream_model_and_base_model_of_every_deployment() -> None:
@@ -174,3 +193,57 @@ async def test_internal_failure_never_breaks_the_request() -> None:
 
     assert await hook.async_pre_call_hook(None, None, {"model": "dead"}, "acompletion") == {"model": "dead"}
     assert await hook.async_post_call_response_headers_hook({"model": "dead"}, None, None) is None
+
+
+async def test_pre_call_buffers_one_call_for_the_public_model_team_and_matched_record(
+    usage: Store, recorder: UsageRecorder
+) -> None:
+    hook = SundialHook(router_guard(), recorder=recorder)
+
+    await hook.async_pre_call_hook(TeamAuth(), None, {"model": "fading"}, "acompletion")
+
+    assert usage.usage_rows(NOW.date()) == []  # still buffered in memory
+    recorder.flush()
+    assert usage.usage_rows(NOW.date()) == [
+        UsageRow(NOW.date(), "fading", "team-a", "openai", "gpt-fading", "", 1)
+    ]
+
+
+async def test_a_request_without_an_auth_object_records_an_empty_team(
+    usage: Store, recorder: UsageRecorder
+) -> None:
+    hook = SundialHook(router_guard(), recorder=recorder)
+
+    await hook.async_pre_call_hook(None, None, {"model": "fading"}, "acompletion")
+    recorder.flush()
+
+    assert [row.team for row in usage.usage_rows(NOW.date())] == [""]
+
+
+async def test_redirected_and_allowed_requests_are_recorded_under_the_name_the_client_sent(
+    usage: Store, recorder: UsageRecorder
+) -> None:
+    hook = SundialHook(router_guard(), recorder=recorder)
+
+    redirected = await hook.async_pre_call_hook(None, None, {"model": "leaving"}, "acompletion")
+    await hook.async_pre_call_hook(None, None, {"model": "openai/gpt-fine"}, "acompletion")
+    recorder.flush()
+
+    assert redirected["model"] == "next"
+    assert usage.usage_rows(NOW.date()) == [
+        UsageRow(NOW.date(), "leaving", "", "openai", "gpt-leaving", "", 1),
+        UsageRow(NOW.date(), "openai/gpt-fine", "", "", "", "", 1),
+    ]
+
+
+async def test_a_recorder_that_raises_never_breaks_the_request_or_the_decision() -> None:
+    class Exploding:
+        def record(self, public_model, team, key) -> None:
+            raise RuntimeError("boom")
+
+    hook = SundialHook(router_guard(), recorder=Exploding())
+
+    data = await hook.async_pre_call_hook(None, None, {"model": "leaving"}, "acompletion")
+    assert data["model"] == "next"
+    with pytest.raises(fastapi.HTTPException):
+        await hook.async_pre_call_hook(None, None, {"model": "dead"}, "acompletion")

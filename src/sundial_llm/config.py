@@ -55,6 +55,9 @@ class Config(BaseModel):
     registry_url: str | None = (
         "https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json"
     )
+    # Count requests per public model, team and matched record for `sundial status --in-use`.
+    usage_tracking: bool = True
+    usage_retention_days: int = 90
 
     @field_validator("db", mode="before")
     @classmethod

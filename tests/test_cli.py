@@ -1,13 +1,14 @@
 import io
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
 from sundial_llm.cli import main
 from sundial_llm.sources import ALL_SOURCES
 from sundial_llm.store import Store
+from sundial_llm.usage import UsageRow
 
 T1 = datetime(2026, 9, 19, 8, 0, tzinfo=timezone.utc)
 T2 = datetime(2026, 9, 20, 8, 0, tzinfo=timezone.utc)
@@ -93,6 +94,57 @@ def test_status_can_be_limited_to_one_platform(db, fixture_fetch) -> None:
 
     rows = [line for line in output.splitlines() if re.match(r"\s*\d+d\s", line)]
     assert rows and all(" bedrock " in row for row in rows)
+
+
+TABLE_ROW = re.compile(r"\s*-?\d+d\s")
+
+
+def seed_usage(db, day) -> None:
+    Store(db).add_usage(
+        [
+            UsageRow(day, "gpt-4-0613", "payments", "openai", "gpt-4-0613", "", 4),
+            UsageRow(day - timedelta(days=1), "gpt-4-0613", "payments", "openai", "gpt-4-0613", "", 3),
+            UsageRow(day, "gpt-mystery", "", "", "", "", 2),
+        ]
+    )
+
+
+def test_status_in_use_lists_only_retiring_models_your_traffic_uses(db, fixture_fetch) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    seed_usage(db, T1.date())
+    tracked = len(Store(db).load_records())
+
+    code, output = run(["status", "--in-use", "--days", "30", "--db", str(db)], fixture_fetch)
+
+    lines = output.splitlines()
+    rows = [line for line in lines if TABLE_ROW.match(line)]
+    assert code == 0
+    assert lines[0] == f"1 models in use retire within 90 days (2 models in use, {tracked} tracked)."
+    assert len(rows) == 1
+    assert all(part in rows[0] for part in ("34d", "gpt-4-0613", "calls=7", "teams=payments"))
+    assert lines[-2:] == ["Models in use with no lifecycle record:", "  gpt-mystery  calls=2"]
+
+
+def test_status_in_use_only_counts_usage_inside_the_look_back_window(db, fixture_fetch) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    seed_usage(db, T1.date() - timedelta(days=10))
+
+    code, output = run(["status", "--in-use", "--days", "1", "--db", str(db)], fixture_fetch)
+
+    assert code == 0
+    assert output.startswith("0 models in use retire within 90 days (0 models in use, ")
+    assert "gpt-4-0613" not in output and "gpt-mystery" not in output
+
+
+def test_status_in_use_leaves_out_models_retiring_after_the_horizon(db, fixture_fetch) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    seed_usage(db, T1.date())
+
+    _, output = run(["status", "--in-use", "--within", "20", "--db", str(db)], fixture_fetch)
+
+    assert output.startswith("0 models in use retire within 20 days (2 models in use, ")
+    assert not [line for line in output.splitlines() if TABLE_ROW.match(line)]
+    assert "  gpt-mystery  calls=2" in output
 
 
 def test_status_on_an_empty_registry_tells_you_to_scan(db, fixture_fetch) -> None:

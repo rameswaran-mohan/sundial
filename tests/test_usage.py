@@ -1,0 +1,134 @@
+import sqlite3
+from datetime import date, datetime, timedelta, timezone
+
+import pytest
+
+from sundial_llm.store import Store
+from sundial_llm.usage import UsageRecorder, UsageRow
+
+NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
+TODAY = NOW.date()
+GPT4 = ("openai", "gpt-4-0613", "")
+
+
+class Clock:
+    def __init__(self) -> None:
+        self.now = NOW
+
+    def __call__(self) -> datetime:
+        return self.now
+
+
+@pytest.fixture
+def store(tmp_path) -> Store:
+    return Store(tmp_path / "usage.db")
+
+
+def row(day: date, calls: int, team: str = "") -> UsageRow:
+    return UsageRow(day, "gpt-4", team, *GPT4, calls)
+
+
+def test_adding_usage_for_the_same_key_twice_sums_the_calls(store: Store) -> None:
+    store.add_usage([row(TODAY, 2)])
+    store.add_usage([row(TODAY, 3)])
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 5)]
+
+
+def test_usage_rows_leave_out_days_before_the_window(store: Store) -> None:
+    store.add_usage([row(TODAY - timedelta(days=10), 1), row(TODAY - timedelta(days=2), 4)])
+
+    assert store.usage_rows(TODAY - timedelta(days=5)) == [row(TODAY - timedelta(days=2), 4)]
+
+
+def test_prune_usage_deletes_older_days_and_returns_how_many_rows_went(store: Store) -> None:
+    old = TODAY - timedelta(days=100)
+    store.add_usage([row(old, 1), row(old, 1, team="payments"), row(TODAY, 1)])
+
+    assert store.prune_usage(TODAY - timedelta(days=90)) == 2
+    assert store.usage_rows(date.min) == [row(TODAY, 1)]
+    assert store.prune_usage(TODAY - timedelta(days=90)) == 0
+
+
+def test_reaching_flush_calls_writes_one_row_holding_every_call(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock(), flush_calls=5)
+
+    for _ in range(4):
+        recorder.record("gpt-4", "payments", GPT4)
+    assert store.usage_rows(TODAY) == []
+    recorder.record("gpt-4", "payments", GPT4)
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 5, team="payments")]
+
+
+def test_a_call_after_flush_seconds_flushes_everything_buffered(store: Store) -> None:
+    clock = Clock()
+    recorder = UsageRecorder(store, clock=clock, flush_seconds=30)
+
+    recorder.record("gpt-4", None, GPT4)
+    assert store.usage_rows(TODAY) == []
+    clock.now = NOW + timedelta(seconds=31)
+    recorder.record("gpt-4", None, GPT4)
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 2)]
+
+
+def test_untracked_models_and_unknown_teams_are_stored_as_empty_strings(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock())
+
+    recorder.record("gpt-mystery", None, None)
+    recorder.close()
+
+    assert store.usage_rows(TODAY) == [UsageRow(TODAY, "gpt-mystery", "", "", "", "", 1)]
+
+
+def test_a_failing_store_is_logged_and_never_raises(store: Store, caplog: pytest.LogCaptureFixture) -> None:
+    class Broken(Store):
+        def add_usage(self, rows) -> None:
+            raise sqlite3.OperationalError("database is locked")
+
+    recorder = UsageRecorder(Broken(store.path), clock=Clock(), flush_calls=1)
+
+    recorder.record("gpt-4", None, GPT4)
+    recorder.flush()
+
+    assert caplog.messages == ["sundial: usage flush failed; unwritten counts stay buffered"] * 2
+
+
+def test_counts_survive_a_failed_write_and_go_out_with_the_next_flush(store: Store) -> None:
+    class FailsOnce(Store):
+        failed = False
+
+        def add_usage(self, rows) -> None:
+            if not self.failed:
+                self.failed = True
+                raise sqlite3.OperationalError("database is locked")
+            super().add_usage(rows)
+
+    flaky = FailsOnce(store.path)
+    recorder = UsageRecorder(flaky, clock=Clock(), flush_calls=2)
+
+    recorder.record("gpt-4", None, GPT4)
+    recorder.record("gpt-4", None, GPT4)
+    assert flaky.failed and store.usage_rows(TODAY) == []
+    recorder.record("gpt-4", None, GPT4)
+    recorder.flush()
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 3)]
+
+
+def test_a_bad_record_call_is_logged_and_never_raises(store: Store, caplog: pytest.LogCaptureFixture) -> None:
+    recorder = UsageRecorder(store, clock=Clock())
+
+    recorder.record("gpt-4", None, ("not", "a key"))  # type: ignore[arg-type]
+
+    assert "sundial: could not record usage for gpt-4" in caplog.messages
+
+
+def test_flush_prunes_rows_older_than_the_retention(store: Store) -> None:
+    store.add_usage([row(TODAY - timedelta(days=91), 1), row(TODAY - timedelta(days=90), 1)])
+    recorder = UsageRecorder(store, clock=Clock(), retention_days=90)
+
+    recorder.flush()
+
+    assert store.usage_rows(date.min) == [row(TODAY - timedelta(days=90), 1)]

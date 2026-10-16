@@ -7,7 +7,7 @@ import json
 import os
 import sys
 from collections.abc import Callable, Mapping, Sequence
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import TextIO
 
@@ -16,6 +16,7 @@ from sundial_llm.config import Config, load_config
 from sundial_llm.costmap import build_patch
 from sundial_llm.guard import IdentityResolver, LifecycleGuard
 from sundial_llm.matching import UpstreamModel, parse_upstream
+from sundial_llm.models import LifecycleRecord, RecordKey
 from sundial_llm.notify import Post, http_post, notify_events, render_event
 from sundial_llm.policy import Action
 from sundial_llm.registry import build_document, parse_document, write_if_changed
@@ -55,6 +56,12 @@ def _parser() -> argparse.ArgumentParser:
     status = commands.add_parser("status", parents=[common], help="list upcoming retirements")
     status.add_argument("--within", type=int, default=90, metavar="DAYS")
     status.add_argument("--platform")
+    status.add_argument(
+        "--in-use", action="store_true", help="only the models the gateway's recorded traffic used"
+    )
+    status.add_argument(
+        "--days", type=int, default=30, metavar="N", help="usage look-back for --in-use (default 30)"
+    )
 
     check = commands.add_parser("check", parents=[common], help="evaluate one model against the policy")
     check.add_argument("model", help="gateway model string, for example azure/my-deployment")
@@ -143,6 +150,14 @@ def _report(outcome: ScanOutcome, config: Config, post: Post, out: TextIO) -> No
         print(f"  warning  {error}", file=out)
 
 
+def _retiring_in(record: LifecycleRecord, today: date, within: int, platform: str | None) -> int | None:
+    """Days to the record's firm retirement when that falls inside the horizon, otherwise None."""
+    if platform is not None and record.platform != platform:
+        return None
+    days = record.days_until_retirement(today)
+    return days if days is not None and 0 < days <= within else None
+
+
 def _status(config: Config, within: int, platform: str | None, now: datetime, out: TextIO) -> int:
     records = Store(config.db).load_records()
     if not records:
@@ -153,9 +168,7 @@ def _status(config: Config, within: int, platform: str | None, now: datetime, ou
         (
             (days, record)
             for record in records.values()
-            if (platform is None or record.platform == platform)
-            and (days := record.days_until_retirement(today)) is not None
-            and 0 < days <= within
+            if (days := _retiring_in(record, today, within, platform)) is not None
         ),
         key=lambda item: (item[0], item[1].key),
     )
@@ -164,6 +177,55 @@ def _status(config: Config, within: int, platform: str | None, now: datetime, ou
         name = f"{record.model_id} ({record.version})" if record.version else record.model_id
         successor = f"  -> {', '.join(record.replacements)}" if record.replacements else ""
         print(f"{days:>5}d  {record.retire_on}  {record.platform:<10} {name}{successor}", file=out)
+    return EXIT_OK
+
+
+def _status_in_use(
+    config: Config, within: int, days: int, platform: str | None, now: datetime, out: TextIO
+) -> int:
+    """Retirements among the public models the gateway served in the last `days` days."""
+    store = Store(config.db)
+    records = store.load_records()
+    if not records:
+        print("The registry is empty. Run `sundial scan` first.", file=out)
+        return EXIT_OK
+    today = now.date()
+    calls: dict[str, int] = {}
+    teams: dict[str, set[str]] = {}
+    keys: dict[str, set[RecordKey]] = {}
+    for row in store.usage_rows(today - timedelta(days=days)):
+        calls[row.public_model] = calls.get(row.public_model, 0) + row.calls
+        teams.setdefault(row.public_model, set()).add(row.team)
+        if row.platform:
+            keys.setdefault(row.public_model, set()).add((row.platform, row.model_id, row.version))
+    retiring: list[tuple[int, str, LifecycleRecord]] = []
+    for model, model_keys in keys.items():
+        upcoming = [
+            (left, model, record)
+            for key in model_keys
+            if (record := records.get(key)) is not None
+            and (left := _retiring_in(record, today, within, platform)) is not None
+        ]
+        if upcoming:
+            retiring.append(min(upcoming, key=lambda item: (item[0], item[2].key)))
+    retiring.sort(key=lambda item: (item[0], item[1]))
+    print(
+        f"{len(retiring)} models in use retire within {within} days "
+        f"({len(calls)} models in use, {len(records)} tracked).",
+        file=out,
+    )
+    for left, model, record in retiring:
+        team_list = ",".join(sorted(team for team in teams[model] if team)) or "-"
+        print(
+            f"{left:>5}d  {record.retire_on}  {record.platform:<10} {model}  "
+            f"calls={calls[model]}  teams={team_list}",
+            file=out,
+        )
+    untracked = sorted((model for model in calls if model not in keys), key=lambda m: (-calls[m], m))
+    if untracked:
+        print("Models in use with no lifecycle record:", file=out)
+        for model in untracked:
+            print(f"  {model}  calls={calls[model]}", file=out)
     return EXIT_OK
 
 
@@ -244,6 +306,8 @@ def main(
     if args.command == "export":
         return _export(config, args.out, moment, out)
     if args.command == "status":
+        if args.in_use:
+            return _status_in_use(config, args.within, args.days, args.platform, moment, out)
         return _status(config, args.within, args.platform, moment, out)
     if args.command == "check":
         return _check(config, args.model, args.base_model, moment, out)

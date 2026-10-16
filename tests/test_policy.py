@@ -5,7 +5,7 @@ import pytest
 from sundial_llm.headers import decision_headers
 from sundial_llm.matching import Match
 from sundial_llm.models import LifecycleRecord, LifecycleState
-from sundial_llm.policy import DEFAULT_POLICY, Action, Mode, load_policy
+from sundial_llm.policy import ALLOW, DEFAULT_POLICY, Action, Mode, load_policy
 
 TODAY = date(2026, 9, 19)
 
@@ -51,6 +51,20 @@ def test_model_outside_every_rule_is_allowed() -> None:
     assert decision.action is Action.ALLOW
 
 
+def test_matched_model_that_no_rule_hits_still_carries_its_record_key() -> None:
+    decision = POLICY.decide(match(retire_on=date(2027, 9, 1)), TODAY, "m")
+
+    assert decision.action is Action.ALLOW
+    assert decision.key == ("openai", "gpt-old", "")
+
+
+def test_unmatched_model_gets_the_shared_allow_with_no_key() -> None:
+    decision = POLICY.decide(None, TODAY, "m")
+
+    assert decision is ALLOW
+    assert decision.key is None
+
+
 def test_first_matching_rule_wins() -> None:
     decision = POLICY.decide(match(retire_on=date(2026, 9, 1)), TODAY, "m")
 
@@ -63,6 +77,7 @@ def test_warn_rule_reports_days_left() -> None:
 
     assert (decision.rule, decision.action, decision.days_left) == ("warn-90", Action.WARN, 30)
     assert decision.enforced is False
+    assert decision.key == ("openai", "gpt-old", "")
 
 
 def test_floor_dates_never_trigger_day_based_rules() -> None:

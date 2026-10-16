@@ -7,11 +7,12 @@ import sqlite3
 from collections.abc import Iterable, Mapping, Sequence
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 from sundial_llm.events import Event
 from sundial_llm.models import LifecycleRecord, RecordKey
+from sundial_llm.usage import UsageRow
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS records (
@@ -32,6 +33,16 @@ CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS usage (
+    day TEXT NOT NULL,            -- YYYY-MM-DD, UTC
+    public_model TEXT NOT NULL,
+    team TEXT NOT NULL,           -- "" when unknown
+    platform TEXT NOT NULL,       -- "" when no lifecycle record matched
+    model_id TEXT NOT NULL,
+    version TEXT NOT NULL,
+    calls INTEGER NOT NULL,
+    PRIMARY KEY (day, public_model, team, platform, model_id, version)
+);
 """
 
 # first_seen is never changed once a key exists. last_seen only moves forward, compared as instants
@@ -51,6 +62,15 @@ DO UPDATE SET
 _UPSERT_META = (
     "INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value"
 )
+
+_USAGE_COLUMNS = "day, public_model, team, platform, model_id, version, calls"
+
+_UPSERT_USAGE = f"""
+INSERT INTO usage ({_USAGE_COLUMNS})
+VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT (day, public_model, team, platform, model_id, version)
+DO UPDATE SET calls = usage.calls + excluded.calls
+"""
 
 
 @dataclass(frozen=True)
@@ -157,3 +177,36 @@ class Store:
         with closing(self._connect()) as conn:
             rows = conn.execute("SELECT at, data FROM events ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
         return [StoredEvent(datetime.fromisoformat(at), Event.model_validate_json(data)) for at, data in rows]
+
+    def add_usage(self, rows: Iterable[UsageRow]) -> None:
+        """Add call counts; a row for an existing (day, model, team, record) adds to its count."""
+        with closing(self._connect()) as conn, conn:
+            conn.executemany(
+                _UPSERT_USAGE,
+                [
+                    (
+                        row.day.isoformat(),
+                        row.public_model,
+                        row.team,
+                        row.platform,
+                        row.model_id,
+                        row.version,
+                        row.calls,
+                    )
+                    for row in rows
+                ],
+            )
+
+    def usage_rows(self, since_day: date) -> list[UsageRow]:
+        with closing(self._connect()) as conn:
+            rows = conn.execute(
+                f"SELECT {_USAGE_COLUMNS} FROM usage WHERE day >= ? "
+                "ORDER BY day, public_model, team, platform, model_id, version",
+                (since_day.isoformat(),),
+            ).fetchall()
+        return [UsageRow(date.fromisoformat(day), *rest) for day, *rest in rows]
+
+    def prune_usage(self, before_day: date) -> int:
+        """Delete usage from days before `before_day` and return how many rows went."""
+        with closing(self._connect()) as conn, conn:
+            return conn.execute("DELETE FROM usage WHERE day < ?", (before_day.isoformat(),)).rowcount

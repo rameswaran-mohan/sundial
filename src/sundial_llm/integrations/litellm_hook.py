@@ -18,6 +18,7 @@ from litellm.integrations.custom_logger import CustomLogger
 
 from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
 from sundial_llm.matching import UpstreamModel, parse_upstream
+from sundial_llm.models import RecordKey
 from sundial_llm.policy import ALLOW, Action, Decision
 
 logger = logging.getLogger("sundial")
@@ -27,6 +28,10 @@ _STASH = "sundial_headers"
 
 class Decider(Protocol):
     def decide(self, public_model: str) -> Decision: ...
+
+
+class Recorder(Protocol):
+    def record(self, public_model: str, team: str | None, key: RecordKey | None) -> None: ...
 
 
 class ModelBlocked(Exception):
@@ -82,17 +87,21 @@ def _refusal(message: str) -> Exception:
 
 
 class SundialHook(CustomLogger):
-    def __init__(self, guard: Decider | None = None) -> None:
+    def __init__(self, guard: Decider | None = None, recorder: Recorder | None = None) -> None:
         super().__init__()
         self._guard = guard
+        self._recorder = recorder
 
     def _decider(self) -> Decider:
         if self._guard is None:
             try:
                 from sundial_llm.config import load_config
-                from sundial_llm.runtime import build_guard
+                from sundial_llm.runtime import build_runtime
 
-                self._guard = build_guard(load_config(), LitellmRouterResolver())
+                runtime = build_runtime(load_config(), LitellmRouterResolver())
+                self._guard = runtime.guard
+                if self._recorder is None:
+                    self._recorder = runtime.recorder
             except Exception:  # noqa: BLE001 - a bad config disables Sundial, not the proxy
                 logger.exception("sundial: could not start; lifecycle checks are disabled")
                 self._guard = _AllowAll()
@@ -106,6 +115,14 @@ class SundialHook(CustomLogger):
             logger.exception("sundial: lifecycle check failed for %s", model)
             return ALLOW, {}
 
+    def _record(self, model: str, user_api_key_dict: Any, decision: Decision) -> None:
+        if self._recorder is None:
+            return
+        try:
+            self._recorder.record(model, getattr(user_api_key_dict, "team_id", None), decision.key)
+        except Exception:  # noqa: BLE001 - never let usage counting break a request
+            logger.exception("sundial: could not record usage for %s", model)
+
     async def async_pre_call_hook(
         self, user_api_key_dict: Any, cache: Any, data: dict, call_type: Any
     ) -> Any:
@@ -113,6 +130,8 @@ class SundialHook(CustomLogger):
         if not isinstance(model, str) or not model:
             return data
         decision, headers = self._evaluate(model)
+        # Counted under the name the client sent, before any block or redirect.
+        self._record(model, user_api_key_dict, decision)
         if decision.action is Action.ALLOW:
             return data
         if decision.enforced and decision.action is Action.BLOCK:

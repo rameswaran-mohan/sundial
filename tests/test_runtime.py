@@ -8,10 +8,11 @@ from sundial_llm.guard import IdentityResolver
 from sundial_llm.models import LifecycleState
 from sundial_llm.policy import Action
 from sundial_llm.registry import RegistryDocument, StoredRecord, build_document, parse_document, to_json
-from sundial_llm.runtime import AutoScanner, build_guard
+from sundial_llm.runtime import AutoScanner, build_guard, build_runtime
 from sundial_llm.scan import run_scan
 from sundial_llm.sources import ALL_SOURCES, Fetch
 from sundial_llm.store import Store
+from sundial_llm.usage import UsageRow
 
 NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
 REGISTRY_URL = "https://registry.test/lifecycle.json"
@@ -155,6 +156,32 @@ def test_built_guard_scans_on_first_use_and_then_decides_from_real_data(tmp_path
     assert decision.action is Action.WARN
     assert decision.days_left == 34
     assert guard.decide("gpt-6-astra").action is Action.ALLOW
+
+
+def test_runtime_recorder_writes_usage_to_the_configured_database_and_prunes_it(
+    tmp_path, fixture_fetch
+) -> None:
+    config = Config(db=tmp_path / "runtime.db", registry_url=None, usage_retention_days=7)
+    Store(config.db).add_usage([UsageRow(NOW.date() - timedelta(days=8), "gpt-old", "", "", "", "", 1)])
+
+    runtime = build_runtime(config, IdentityResolver(), fetch=fixture_fetch, clock=lambda: NOW, spawn=inline)
+    decision = runtime.guard.decide("gpt-4-0613")
+    assert runtime.recorder is not None
+    runtime.recorder.record("gpt-4-0613", None, decision.key)
+    runtime.recorder.close()
+
+    assert Store(config.db).usage_rows(date.min) == [
+        UsageRow(NOW.date(), "gpt-4-0613", "", "openai", "gpt-4-0613", "", 1)
+    ]
+
+
+def test_usage_tracking_off_gives_a_runtime_without_a_recorder(tmp_path, fixture_fetch) -> None:
+    config = Config(db=tmp_path / "runtime.db", registry_url=None, usage_tracking=False)
+
+    runtime = build_runtime(config, IdentityResolver(), fetch=fixture_fetch, clock=lambda: NOW, spawn=inline)
+
+    assert runtime.recorder is None
+    assert runtime.guard.decide("gpt-4-0613").action is Action.WARN
 
 
 def test_published_registry_fills_the_store_without_fetching_a_provider(
