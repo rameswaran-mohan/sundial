@@ -8,7 +8,7 @@ import pytest
 from sundial_llm.cli import main
 from sundial_llm.sources import ALL_SOURCES
 from sundial_llm.store import Store
-from sundial_llm.usage import UsageRow
+from sundial_llm.usage import UsageRecorder, UsageRow
 
 T1 = datetime(2026, 9, 19, 8, 0, tzinfo=timezone.utc)
 T2 = datetime(2026, 9, 20, 8, 0, tzinfo=timezone.utc)
@@ -122,6 +122,22 @@ def test_status_in_use_lists_only_retiring_models_your_traffic_uses(db, fixture_
     assert lines[0] == f"1 models in use retire within 90 days (2 models in use, {tracked} tracked)."
     assert rows == ["   34d  2026-10-23  openai     gpt-4-0613  calls=7  teams=payments"]
     assert lines[-2:] == ["Models in use with no lifecycle record:", "  gpt-mystery  calls=2"]
+
+
+def test_status_in_use_lists_other_with_the_models_that_have_no_lifecycle_record(db, fixture_fetch) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    recorder = UsageRecorder(Store(db), clock=lambda: T1, max_untracked_names=1)
+    for name in ("gpt-mystery", "junk-1", "junk-2", "gpt-mystery", "junk-3"):
+        recorder.record(name, None, None)
+    recorder.close()
+
+    _, output = run(["status", "--in-use", "--db", str(db)], fixture_fetch)
+
+    assert output.splitlines()[-3:] == [
+        "Models in use with no lifecycle record:",
+        "  (other)  calls=3",
+        "  gpt-mystery  calls=2",
+    ]
 
 
 def test_status_in_use_lists_overdue_models_first_with_negative_days(db, fixture_fetch) -> None:

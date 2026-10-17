@@ -286,6 +286,50 @@ def test_a_full_buffer_drops_new_models_and_warns_once_per_flush_cycle(
     assert ("model-c", 1) in {(row.public_model, row.calls) for row in store.usage_rows(TODAY)}
 
 
+def test_untracked_names_beyond_the_daily_cap_are_counted_under_other(
+    store: Store, caplog: pytest.LogCaptureFixture
+) -> None:
+    clock = Clock()
+    recorder = UsageRecorder(store, clock=clock, max_untracked_names=2, spawn=inline)
+
+    recorder.record("gpt-4", None, GPT4)  # names with a lifecycle record are never capped
+    for name in ("junk-a", "junk-b", "junk-c", "junk-d", "junk-a", "junk-c"):
+        recorder.record(name, None, None)
+    recorder.record("gpt-4", "payments", GPT4)
+    recorder.flush()
+
+    assert {(r.public_model, r.team, r.platform, r.calls) for r in store.usage_rows(TODAY)} == {
+        ("gpt-4", "", "openai", 1),
+        ("gpt-4", "payments", "openai", 1),
+        ("junk-a", "", "", 2),
+        ("junk-b", "", "", 1),
+        ("(other)", "", "", 3),
+    }
+    assert warnings_in(caplog) == [
+        "sundial: 2 distinct untracked model names seen today; further ones are counted as (other)"
+    ]
+    clock.now = NOW + timedelta(days=1)
+    recorder.record("junk-e", None, None)
+    recorder.flush()
+    assert store.usage_rows(TODAY + timedelta(days=1)) == [
+        UsageRow(TODAY + timedelta(days=1), "junk-e", "", "", "", "", 1)
+    ]
+
+
+def test_by_default_a_thousand_untracked_names_a_day_are_kept_apart(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock(), spawn=inline)
+
+    for number in range(1001):
+        recorder.record(f"junk-{number}", None, None)
+    recorder.flush()
+
+    rows = store.usage_rows(TODAY)
+    assert len(rows) == 1001
+    assert [(r.public_model, r.calls) for r in rows if not r.public_model.startswith("junk-")] == [
+        ("(other)", 1)
+    ]
+
+
 def test_flush_prunes_rows_older_than_the_retention(store: Store) -> None:
     store.add_usage([row(TODAY - timedelta(days=91), 1), row(TODAY - timedelta(days=90), 1)])
     recorder = UsageRecorder(store, clock=Clock(), retention_days=90)

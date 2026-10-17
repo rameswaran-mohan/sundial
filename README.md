@@ -183,11 +183,13 @@ day counts, most overdue first. When the public name differs from the provider's
 provider's model follows in brackets. `teams=-` means no call carried a team. `--days` sets how far
 back usage is counted (default 30) and `--within` sets the retirement horizon (default 90). Models
 that match no lifecycle record are listed last, because Sundial knows nothing about their dates.
+Each gateway process keeps at most 1,000 such names apart per day; requests for further ones are
+counted under `(other)`.
 
-Counts are buffered in memory and written after 50 calls, on the first call after 30 seconds, and
-at exit. Usage rows older than `usage_retention_days` (default 90) are deleted. Set
-`usage_tracking: false` to count nothing. Counts stay in the local database. They are never
-exported or sent anywhere.
+Counts are buffered in memory and written by a background thread after 50 calls or on the first
+call after 30 seconds, and at exit. Usage rows older than `usage_retention_days` (default 90) are
+deleted once a day. Set `usage_tracking: false` to count nothing. Counts stay in the local database.
+They are never exported or sent anywhere.
 
 ## Notifications and new models
 
