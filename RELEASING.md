@@ -60,3 +60,8 @@ version in the files, so check they match before tagging.
 Both nightly workflows push to `main` as `github-actions[bot]` and share one concurrency group, so
 they never push at the same time. If `main` is protected against direct pushes, allow GitHub
 Actions to bypass that rule or both workflows fail at `git push`.
+
+After the first push to `main`, run the `registry` workflow once by hand: open "Actions", then
+"registry", then "Run workflow". That creates `registry/lifecycle.json` before any install depends
+on it. Until it exists, installs find nothing at the default `registry_url` and scan the provider
+pages directly, and `costmap-drift.yml` fails because it has no registry to import.

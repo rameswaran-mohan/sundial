@@ -73,11 +73,12 @@ repository scans them every night and commits the result to `registry/lifecycle.
 The file only changes when a lifecycle fact changed. A source that fails one night keeps its last
 known records in the file, and the workflow run fails so the failure is visible.
 
-Every install reads that file by default, through `registry_url`. When the local registry is older
-than `auto_scan_hours`, the plugin refreshes it in the background by importing the file. It scans
-the provider pages directly only when the file is unreachable, cannot be parsed, or is older than a
-direct scan this install already made and would change records. Either way, the refresh is diffed
-and notified in the same way.
+Every install reads that file by default, through `registry_url`, at
+`https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json`. When the
+local registry is older than `auto_scan_hours`, the plugin or middleware refreshes it in the
+background by importing the file. It scans the provider pages directly only when the file is
+unreachable, cannot be parsed, or is older than a direct scan this install already made and would
+change records. Either way, the refresh is diffed and notified in the same way.
 
 To never read the file and always scan the provider pages yourself:
 
@@ -86,7 +87,12 @@ registry_url: null
 ```
 
 `registry_url` can also point at a copy you host. The CLI does not use it: `sundial scan` always
-reads the provider pages, and `sundial import` loads the file from a path or URL you give it.
+reads the provider pages, and `sundial import` loads the file from a path or URL you give it. To
+load the published file from the command line, without a checkout:
+
+```bash
+sundial import https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json
+```
 
 ## Policy
 
@@ -158,7 +164,7 @@ x-sundial-successor: current
 
 The litellm plugin and the ASGI middleware count the requests they inspect, per day and public
 model name, in the same SQLite file as the registry. A request is counted under the name the client
-sent, before any block or redirect. The litellm plugin also records the API key's team. The
+sent, before any block or redirect. The litellm plugin also records the key's team id. The
 middleware records no team. `sundial status --in-use` turns those counts into the retirements your
 traffic actually touches:
 
@@ -227,7 +233,7 @@ gate over the models your code depends on. `sundial scan` exits with 1 only when
 or with `--strict` when any source fails. `sundial import` exits with 1 when it cannot read the
 source and 2 when the file is not a registry document. `sundial export` and `sundial costmap-patch`
 exit with 1 and write nothing when the local registry is empty, so a published file is never
-replaced by an empty one. A broken config exits with 2.
+replaced by an empty one. A config that cannot be found, parsed or validated exits with 2.
 
 `costmap-patch` compares litellm's cost map with provider-published retirement dates. It proposes
 only exact matches with firm dates. `--out` writes a small patch mapping. `--report` writes a
@@ -275,9 +281,11 @@ when it scans directly. Otherwise it imports `registry/lifecycle.json`.
   it to `null`, or to a copy you control, if that matters to you.
 - Usage is counted per process and per SQLite file. Each replica of a multi-replica gateway keeps
   its own counts, so `status --in-use` only sees the traffic recorded in the file it reads.
+- When a provider page breaks the nightly parser, the nightly run goes red, but installs keep
+  importing that provider's last good records and log nothing, because the published file only
+  changes when a lifecycle fact changes.
 - Model names longer than 256 characters are not counted. At most 10,000 distinct entries wait in
-  memory between writes. Calls that would add another are not counted until the next write, and a
-  warning is logged.
+  memory between writes. Calls that would add another are dropped, and a warning is logged.
 - Counts still in memory when a process is killed without a clean exit are lost.
 
 ## Development
@@ -294,8 +302,9 @@ README there for how to refresh them.
 
 ## Releasing
 
-Releases go to PyPI from a version tag through GitHub Actions. [RELEASING.md](RELEASING.md) has the
-one-time setup, the steps for each release and what every workflow does.
+Releases go to PyPI from a version tag through GitHub Actions.
+[RELEASING.md](https://github.com/rameswaran-mohan/sundial/blob/main/RELEASING.md) has the one-time
+setup, the steps for each release and what every workflow does.
 
 ## Licence
 
