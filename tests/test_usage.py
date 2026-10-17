@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta, timezone
 import pytest
 
 from sundial_llm.store import Store
-from sundial_llm.usage import UsageRecorder, UsageRow
+from sundial_llm.usage import MAX_MODEL_NAME_LENGTH, UsageRecorder, UsageRow
 
 NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
 TODAY = NOW.date()
@@ -143,6 +143,38 @@ def test_a_bad_record_call_is_logged_and_never_raises(store: Store, caplog: pyte
     recorder.record("gpt-4", None, ("not", "a key"))  # type: ignore[arg-type]
 
     assert "sundial: could not record usage for gpt-4" in caplog.messages
+
+
+def test_a_model_name_longer_than_the_limit_is_not_recorded(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock())
+
+    recorder.record("x" * 300, None, None)
+    recorder.record("y" * MAX_MODEL_NAME_LENGTH, None, None)
+    recorder.flush()
+
+    assert [row.public_model for row in store.usage_rows(TODAY)] == ["y" * MAX_MODEL_NAME_LENGTH]
+
+
+def test_a_full_buffer_drops_new_models_and_warns_once_per_flush_cycle(
+    store: Store, caplog: pytest.LogCaptureFixture
+) -> None:
+    recorder = UsageRecorder(store, clock=Clock(), max_pending=2)
+
+    for name in ("model-a", "model-b", "model-c", "model-a", "model-d", "model-c"):
+        recorder.record(name, None, None)
+    warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+    recorder.flush()
+
+    assert {(row.public_model, row.calls) for row in store.usage_rows(TODAY)} == {
+        ("model-a", 2),
+        ("model-b", 1),
+    }
+    assert warnings == [
+        "sundial: usage buffer is full (2 entries); new models are not counted until it flushes"
+    ]
+    recorder.record("model-c", None, None)
+    recorder.flush()
+    assert ("model-c", 1) in {(row.public_model, row.calls) for row in store.usage_rows(TODAY)}
 
 
 def test_flush_prunes_rows_older_than_the_retention(store: Store) -> None:

@@ -76,7 +76,8 @@ class LifecycleGuard:
         ]
         if not decisions:
             return ALLOW
-        worst = max(decisions, key=lambda d: (d.action.severity, -(d.days_left or 0)))
+        # On a tie, a decision for a tracked deployment wins, so usage is counted against its record.
+        worst = max(decisions, key=lambda d: (d.action.severity, -(d.days_left or 0), d.key is not None))
         # A group is only blocked or redirected when every deployment behind it agrees.
         unanimous = all(d.enforced and d.action is worst.action for d in decisions)
         return worst if unanimous else replace(worst, enforced=False)

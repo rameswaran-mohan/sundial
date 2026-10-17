@@ -67,6 +67,18 @@ def test_group_is_blocked_only_when_every_deployment_is_blocked() -> None:
     assert half.enforced is False
 
 
+def test_healthy_group_reports_its_tracked_deployment_whatever_the_order() -> None:
+    resolver = GroupResolver(
+        {"unknown-first": ["gpt-unknown", "gpt-live"], "tracked-first": ["gpt-live", "gpt-unknown"]}
+    )
+    subject = guard(index(RETIRED, LIVE), resolver)
+
+    for group in ("unknown-first", "tracked-first"):
+        decision = subject.decide(group)
+        assert decision.action is Action.ALLOW
+        assert decision.key == LIVE.key
+
+
 def test_group_with_no_deployments_is_allowed() -> None:
     assert guard(index(RETIRED), GroupResolver({})).decide("ghost").action is Action.ALLOW
 

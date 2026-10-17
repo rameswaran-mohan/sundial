@@ -20,6 +20,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("sundial")
 
+# Model names come from clients, so both how long one may be and how many are buffered are bounded.
+MAX_MODEL_NAME_LENGTH = 256
+MAX_PENDING_BUCKETS = 10_000
+
 _Bucket = tuple[date, str, str, str, str, str]  # day, public_model, team, platform, model_id, version
 
 
@@ -47,29 +51,45 @@ class UsageRecorder:
         flush_calls: int = 50,
         flush_seconds: float = 30.0,
         retention_days: int = 90,
+        max_pending: int = MAX_PENDING_BUCKETS,
     ) -> None:
         self._store = store
         self._clock = clock
         self._flush_calls = flush_calls
         self._flush_seconds = flush_seconds
         self._retention_days = retention_days
+        self._max_pending = max_pending
         self._lock = threading.Lock()
         self._pending: dict[_Bucket, int] = {}
         self._buffered = 0  # calls since the last flush attempt
         self._last_flush = clock()
+        self._warned_full = False  # one warning per flush cycle while the buffer is full
 
     def record(self, public_model: str, team: str | None, key: RecordKey | None) -> None:
-        """Count one request. `key` is the matched lifecycle record, None when nothing matched."""
+        """Count one request. `key` is the matched lifecycle record, None when nothing matched.
+        Names longer than MAX_MODEL_NAME_LENGTH are ignored, and while MAX_PENDING_BUCKETS distinct
+        entries wait to be written, calls that would add another are dropped."""
         try:
+            if len(public_model) > MAX_MODEL_NAME_LENGTH:
+                return
             now = self._clock()
             platform, model_id, version = key or ("", "", "")
             bucket = (now.date(), public_model, team or "", platform, model_id, version)
+            warn_full = False
             with self._lock:
-                self._pending[bucket] = self._pending.get(bucket, 0) + 1
-                self._buffered += 1
+                if bucket in self._pending or len(self._pending) < self._max_pending:
+                    self._pending[bucket] = self._pending.get(bucket, 0) + 1
+                    self._buffered += 1
+                elif not self._warned_full:
+                    self._warned_full = warn_full = True
                 due = (
                     self._buffered >= self._flush_calls
                     or (now - self._last_flush).total_seconds() >= self._flush_seconds
+                )
+            if warn_full:
+                logger.warning(
+                    "sundial: usage buffer is full (%d entries); new models are not counted until it flushes",
+                    self._max_pending,
                 )
             if due:
                 self.flush()
@@ -84,6 +104,7 @@ class UsageRecorder:
                 now = self._clock()
                 self._last_flush = now
                 self._buffered = 0
+                self._warned_full = False
                 if self._pending:
                     self._store.add_usage(
                         [UsageRow(*bucket, calls) for bucket, calls in self._pending.items()]
