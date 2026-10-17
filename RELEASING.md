@@ -47,12 +47,12 @@ version in the files, so check they match before tagging.
 - `ci.yml` runs ruff and the test suite on Python 3.10 and 3.12 for every pull request and every
   push to `main`.
 - `registry.yml` runs nightly at 03:17 UTC and on demand. It seeds a fresh database from the
-  committed `registry/lifecycle.json`, scans every source, exports the result back to
-  `registry/lifecycle.json` and commits it to `main` when it changed. That file is the default
-  `registry_url` every Sundial install reads, so this workflow is what keeps installs current. If
-  the seed import fails the job stops before export, so the published file is never overwritten
-  from an empty database. If some sources fail the scan, the job still exports and commits what it
-  has, then fails so the run shows red.
+  committed `registry/lifecycle.json` when that file exists, scans every source, exports the result
+  back to `registry/lifecycle.json` and commits it to `main` when it changed. That file is the
+  default `registry_url` every Sundial install reads, so this workflow is what keeps installs
+  current. If the seed import fails the job stops before export, so the published file is never
+  overwritten from an empty database. If some sources fail the scan, the job still exports what it
+  has and commits it when it changed, then fails so the run shows red.
 - `costmap-drift.yml` runs nightly at 03:47 UTC and on demand. It imports the published registry,
   compares it with litellm's cost map, and commits `registry/litellm-costmap-patch.json` and
   `registry/litellm-costmap-drift.md` when they changed.
