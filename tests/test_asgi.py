@@ -198,6 +198,22 @@ async def test_inference_post_records_usage_with_an_empty_team(app, usage, recor
     ]
 
 
+async def test_a_model_name_with_a_lone_surrogate_does_not_stop_usage_tracking(app, usage, recorder) -> None:
+    async with gateway(app, recorder=recorder) as client:
+        await client.post(
+            "/v1/chat/completions",
+            content=b'{"model": "\\ud800"}',
+            headers={"content-type": "application/json"},
+        )
+        for _ in range(5):
+            await client.post("/v1/chat/completions", json={"model": "gpt-fading"})
+    recorder.flush()
+
+    assert usage.usage_rows(NOW.date()) == [
+        UsageRow(NOW.date(), "gpt-fading", "", "openai", "gpt-fading", "", 5)
+    ]
+
+
 async def test_a_get_records_no_usage(app, usage, recorder) -> None:
     async with gateway(app, recorder=recorder) as client:
         await client.request("GET", "/v1/chat/completions", json={"model": "gpt-fading"})

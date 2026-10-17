@@ -7,8 +7,9 @@ happens inline once enough calls or enough time have accumulated. Nothing here e
 from __future__ import annotations
 
 import logging
+import sqlite3
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from typing import TYPE_CHECKING
@@ -23,6 +24,10 @@ logger = logging.getLogger("sundial")
 # Model names come from clients, so both how long one may be and how many are buffered are bounded.
 MAX_MODEL_NAME_LENGTH = 256
 MAX_PENDING_BUCKETS = 10_000
+
+# A write that fails with one of these may succeed later, so its counts stay buffered. Any other failure
+# means some row can never be written: the batch is retried row by row and those rows are dropped.
+_TRANSIENT = (sqlite3.OperationalError, OSError)
 
 _Bucket = tuple[date, str, str, str, str, str]  # day, public_model, team, platform, model_id, version
 
@@ -40,6 +45,16 @@ class UsageRow:
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _printable(value: object) -> bool:
+    """Ordinary text, non-ASCII included. Rejects surrogates SQLite cannot encode, control characters
+    and escape sequences, so a client cannot poison a flush or a terminal."""
+    return isinstance(value, str) and value.isprintable()
+
+
+def _bucket(row: UsageRow) -> _Bucket:
+    return (row.day, row.public_model, row.team, row.platform, row.model_id, row.version)
 
 
 class UsageRecorder:
@@ -67,10 +82,13 @@ class UsageRecorder:
 
     def record(self, public_model: str, team: str | None, key: RecordKey | None) -> None:
         """Count one request. `key` is the matched lifecycle record, None when nothing matched.
-        Names longer than MAX_MODEL_NAME_LENGTH are ignored, and while MAX_PENDING_BUCKETS distinct
-        entries wait to be written, calls that would add another are dropped."""
+        Names that are not printable or longer than MAX_MODEL_NAME_LENGTH, and teams that are not
+        printable, are ignored. While MAX_PENDING_BUCKETS distinct entries wait to be written, calls that
+        would add another are dropped."""
         try:
-            if len(public_model) > MAX_MODEL_NAME_LENGTH:
+            if not _printable(public_model) or len(public_model) > MAX_MODEL_NAME_LENGTH:
+                return
+            if team is not None and not _printable(team):
                 return
             now = self._clock()
             platform, model_id, version = key or ("", "", "")
@@ -97,22 +115,73 @@ class UsageRecorder:
             logger.exception("sundial: could not record usage for %s", public_model)
 
     def flush(self) -> None:
-        """Write the buffered counts and prune rows older than the retention. A failed write keeps the
-        counts buffered for the next flush."""
+        """Write the buffered counts and prune rows older than the retention. Counts that fail to write
+        for a reason that may pass, such as a locked database, stay buffered for the next flush."""
         try:
             with self._lock:
                 now = self._clock()
-                self._last_flush = now
-                self._buffered = 0
-                self._warned_full = False
-                if self._pending:
-                    self._store.add_usage(
-                        [UsageRow(*bucket, calls) for bucket, calls in self._pending.items()]
-                    )
-                    self._pending.clear()
-                self._store.prune_usage(now.date() - timedelta(days=self._retention_days))
+                batch = self._take(now)
+            self._write(batch, now.date())
         except Exception:  # noqa: BLE001 - counting usage must never take a request down
             logger.exception("sundial: usage flush failed; unwritten counts stay buffered")
 
     def close(self) -> None:
         self.flush()
+
+    def _take(self, now: datetime) -> list[UsageRow]:
+        """Empty the buffer into a batch and start a new flush cycle. Call with the lock held."""
+        batch = [UsageRow(*bucket, calls) for bucket, calls in self._pending.items()]
+        self._pending = {}
+        self._last_flush = now
+        self._buffered = 0
+        self._warned_full = False
+        return batch
+
+    def _write(self, batch: Sequence[UsageRow], today: date) -> None:
+        """Write a batch and prune. Logs and swallows every error."""
+        try:
+            if batch:
+                self._add(batch)
+            self._store.prune_usage(today - timedelta(days=self._retention_days))
+        except Exception:  # noqa: BLE001 - counting usage must never take a request down
+            logger.exception("sundial: usage flush failed; unwritten counts stay buffered")
+
+    def _add(self, batch: Sequence[UsageRow]) -> None:
+        """Add a batch to the store. A transient failure puts the unwritten rows back in the buffer and
+        is raised. Any other failure is retried row by row, and the rows that still fail are dropped."""
+        try:
+            self._store.add_usage(batch)
+            return
+        except _TRANSIENT:
+            self._restore(batch)
+            raise
+        except Exception:  # noqa: BLE001 - some row can never be written; find it below
+            logger.debug("sundial: usage batch rejected; writing it row by row", exc_info=True)
+        dropped = 0
+        try:
+            for index, row in enumerate(batch):
+                try:
+                    self._store.add_usage([row])
+                except _TRANSIENT:
+                    self._restore(batch[index:])
+                    raise
+                except Exception:  # noqa: BLE001 - this row can never be written
+                    dropped += 1
+        finally:
+            if dropped:
+                logger.warning(
+                    "sundial: dropped %d usage %s that could not be written",
+                    dropped,
+                    "row" if dropped == 1 else "rows",
+                )
+
+    def _restore(self, rows: Sequence[UsageRow]) -> None:
+        """Return unwritten rows to the buffer, ahead of entries buffered since they were taken."""
+        with self._lock:
+            merged = {_bucket(row): row.calls for row in rows}
+            for bucket, calls in self._pending.items():
+                if bucket in merged:
+                    merged[bucket] += calls
+                elif len(merged) < self._max_pending:
+                    merged[bucket] = calls
+            self._pending = merged

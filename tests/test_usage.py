@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 from datetime import date, datetime, timedelta, timezone
 
@@ -115,14 +116,19 @@ def test_close_at_exit_with_a_failing_store_logs_and_never_raises(
     assert caplog.messages == [FLUSH_FAILED] * 2
 
 
-def test_counts_survive_a_failed_write_and_go_out_with_the_next_flush(store: Store) -> None:
+@pytest.mark.parametrize(
+    "error",
+    [sqlite3.OperationalError("database is locked"), OSError("disk I/O error")],
+    ids=lambda error: type(error).__name__,
+)
+def test_counts_survive_a_failed_write_and_go_out_with_the_next_flush(store: Store, error: Exception) -> None:
     class FailsOnce(Store):
         failed = False
 
         def add_usage(self, rows) -> None:
             if not self.failed:
                 self.failed = True
-                raise sqlite3.OperationalError("database is locked")
+                raise error
             super().add_usage(rows)
 
     flaky = FailsOnce(store.path)
@@ -153,6 +159,103 @@ def test_a_model_name_longer_than_the_limit_is_not_recorded(store: Store) -> Non
     recorder.flush()
 
     assert [row.public_model for row in store.usage_rows(TODAY)] == ["y" * MAX_MODEL_NAME_LENGTH]
+
+
+@pytest.mark.parametrize("name", ["\ud800", "gpt-4\n", "gpt-4\x1b[31m", "gpt\t4", "gpt-4\x00"], ids=repr)
+def test_a_model_name_that_is_not_printable_is_not_recorded(store: Store, name: str) -> None:
+    recorder = UsageRecorder(store, clock=Clock())
+
+    recorder.record(name, None, None)
+    recorder.record("modèle-été", None, None)
+    recorder.flush()
+
+    assert [row.public_model for row in store.usage_rows(TODAY)] == ["modèle-été"]
+
+
+def test_a_team_that_is_not_printable_is_not_recorded(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock())
+
+    recorder.record("gpt-4", "pay\nments", GPT4)
+    recorder.record("gpt-4", "\udcff", GPT4)
+    recorder.record("gpt-4", "équipe", GPT4)
+    recorder.flush()
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 1, team="équipe")]
+
+
+UNWRITABLE = [
+    UnicodeEncodeError("utf-8", "\ud800", 0, 1, "surrogates not allowed"),
+    sqlite3.InterfaceError("Error binding parameter 2"),
+    sqlite3.ProgrammingError("Error binding parameter 2"),
+]
+
+
+def poisoned_store(path, error: Exception) -> Store:
+    """A store that raises `error` for any write that includes the public model `poison`."""
+
+    class Poisoned(Store):
+        attempts = 0
+
+        def add_usage(self, rows) -> None:
+            rows = list(rows)
+            if any(row.public_model == "poison" for row in rows):
+                self.attempts += 1
+                raise error
+            super().add_usage(rows)
+
+    return Poisoned(path)
+
+
+def warnings_in(caplog: pytest.LogCaptureFixture) -> list[str]:
+    return [record.getMessage() for record in caplog.records if record.levelno == logging.WARNING]
+
+
+@pytest.mark.parametrize("error", UNWRITABLE, ids=lambda error: type(error).__name__)
+def test_a_row_that_can_never_be_written_is_dropped_and_the_rest_are_written(
+    store: Store, error: Exception, caplog: pytest.LogCaptureFixture
+) -> None:
+    poisoned = poisoned_store(store.path, error)
+    recorder = UsageRecorder(poisoned, clock=Clock())
+
+    recorder.record("gpt-4", None, GPT4)
+    recorder.record("poison", None, None)
+    recorder.record("gpt-4", None, GPT4)
+    recorder.record("gpt-mystery", None, None)
+    recorder.flush()
+    recorder.flush()  # the buffer was cleared, so the poisoned row is not tried again
+
+    assert {(r.public_model, r.calls) for r in store.usage_rows(TODAY)} == {("gpt-4", 2), ("gpt-mystery", 1)}
+    assert poisoned.attempts == 2  # once in the batch, once on its own
+    assert warnings_in(caplog) == ["sundial: dropped 1 usage row that could not be written"]
+
+
+def test_a_transient_failure_while_writing_row_by_row_keeps_the_unwritten_rows(
+    store: Store, caplog: pytest.LogCaptureFixture
+) -> None:
+    class LockedAfterThePoison(Store):
+        locked = True
+
+        def add_usage(self, rows) -> None:
+            rows = list(rows)
+            if any(row.public_model == "poison" for row in rows):
+                raise UNWRITABLE[0]
+            if self.locked:
+                raise sqlite3.OperationalError("database is locked")
+            super().add_usage(rows)
+
+    flaky = LockedAfterThePoison(store.path)
+    recorder = UsageRecorder(flaky, clock=Clock())
+
+    recorder.record("poison", None, None)
+    recorder.record("gpt-4", None, GPT4)
+    recorder.flush()
+    assert store.usage_rows(TODAY) == []
+    flaky.locked = False
+    recorder.flush()
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 1)]
+    assert warnings_in(caplog) == ["sundial: dropped 1 usage row that could not be written"]
+    assert FLUSH_FAILED in caplog.messages
 
 
 def test_a_full_buffer_drops_new_models_and_warns_once_per_flush_cycle(
