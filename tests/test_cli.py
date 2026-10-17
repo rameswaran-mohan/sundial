@@ -479,3 +479,17 @@ def test_config_file_supplies_the_database_path(tmp_path, fixture_fetch) -> None
 
     assert code == 0
     assert (tmp_path / "from-config.db").exists()
+
+
+@pytest.mark.parametrize(
+    "text", [None, "rules: {\n", "42\n", "ruels: []\n"], ids=["missing", "unparseable", "scalar", "invalid"]
+)
+def test_a_config_that_cannot_be_found_parsed_or_validated_exits_2(tmp_path, fixture_fetch, text) -> None:
+    config = tmp_path / "sundial.yaml"
+    if text is not None:
+        config.write_text(text, encoding="utf-8")
+
+    code, output = run(["status", "--config", str(config), "--db", str(tmp_path / "cli.db")], fixture_fetch)
+
+    assert code == 2
+    assert output.startswith("sundial: ")

@@ -69,15 +69,31 @@ class Config(BaseModel):
         return Policy(rules=self.rules, successors=self.successors)
 
 
+def _yaml_problem(error: yaml.YAMLError) -> str:
+    """One line saying what is wrong with the YAML and where."""
+    problem = getattr(error, "problem", None)
+    mark = getattr(error, "problem_mark", None)
+    if problem and mark is not None:
+        return f"{problem} at line {mark.line + 1}, column {mark.column + 1}"
+    return " ".join(str(error).split())
+
+
 def load_config(path: str | Path | None = None, env: Mapping[str, str] = os.environ) -> Config:
     location = path or env.get("SUNDIAL_CONFIG")
+    invalid = f"invalid sundial config{f' at {location}' if location else ''}"
     raw: dict[str, Any] = {}
     if location:
-        loaded = yaml.safe_load(Path(location).expanduser().read_text(encoding="utf-8"))
+        text = Path(location).expanduser().read_text(encoding="utf-8")
+        try:
+            loaded = yaml.safe_load(text)
+        except yaml.YAMLError as error:
+            raise ValueError(f"{invalid}: {_yaml_problem(error)}") from error
+        if loaded is not None and not isinstance(loaded, dict):
+            raise ValueError(f"{invalid}: the top level must be a mapping, not {type(loaded).__name__}")
         raw = dict(loaded or {})
     if env.get("SUNDIAL_DB"):
         raw["db"] = env["SUNDIAL_DB"]
     try:
         return Config.model_validate(raw)
     except ValidationError as error:
-        raise ValueError(f"invalid sundial config{f' at {location}' if location else ''}: {error}") from error
+        raise ValueError(f"{invalid}: {error}") from error

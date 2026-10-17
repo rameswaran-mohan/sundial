@@ -96,6 +96,29 @@ def test_unknown_config_keys_are_rejected(tmp_path: Path) -> None:
         load_config(path, env={})
 
 
+def test_a_config_that_is_not_valid_yaml_is_a_config_error_naming_the_file(tmp_path: Path) -> None:
+    path = tmp_path / "broken.yaml"
+    path.write_text("rules: {\n", encoding="utf-8")
+
+    with pytest.raises(ValueError) as raised:
+        load_config(path, env={})
+
+    message = str(raised.value)
+    assert message.startswith(f"invalid sundial config at {path}: ")
+    assert "\n" not in message
+
+
+@pytest.mark.parametrize("text", ["42\n", "- [db, other.db]\n"], ids=["scalar", "list"])
+def test_a_config_whose_top_level_is_not_a_mapping_is_a_config_error(tmp_path: Path, text: str) -> None:
+    path = tmp_path / "not-a-mapping.yaml"
+    path.write_text(text, encoding="utf-8")
+
+    with pytest.raises(ValueError) as raised:
+        load_config(path, env={})
+
+    assert str(raised.value).startswith(f"invalid sundial config at {path}: ")
+
+
 def test_deprecation_event_names_model_date_replacement_and_source() -> None:
     after = rec(state=LifecycleState.DEPRECATED, retire_on=date(2026, 10, 1), replacements=("gpt-y",))
 
