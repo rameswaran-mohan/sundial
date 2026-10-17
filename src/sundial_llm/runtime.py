@@ -3,6 +3,7 @@ recorder that counts the requests it sees."""
 
 from __future__ import annotations
 
+import atexit
 import logging
 import threading
 from collections.abc import Callable
@@ -22,6 +23,7 @@ from sundial_llm.usage import UsageRecorder
 logger = logging.getLogger("sundial")
 
 Spawn = Callable[[Callable[[], None]], None]
+AtExit = Callable[[Callable[[], None]], object]
 
 
 def _utcnow() -> datetime:
@@ -131,7 +133,10 @@ def build_runtime(
     fetch: Fetch = http_fetch,
     clock: Callable[[], datetime] = _utcnow,
     spawn: Spawn = _thread_spawn,
+    at_exit: AtExit = atexit.register,
 ) -> Runtime:
+    """The guard and, unless usage tracking is off, a recorder whose buffered counts are flushed at
+    interpreter exit through `at_exit`."""
     store = Store(config.db)
     scanner = AutoScanner(store, config, fetch, clock=clock, spawn=spawn)
 
@@ -140,11 +145,10 @@ def build_runtime(
         return store.load_records()
 
     guard = LifecycleGuard(load, resolver, config.policy, clock=clock, reload_seconds=config.reload_seconds)
-    recorder = (
-        UsageRecorder(store, clock=clock, retention_days=config.usage_retention_days)
-        if config.usage_tracking
-        else None
-    )
+    if not config.usage_tracking:
+        return Runtime(guard, None)
+    recorder = UsageRecorder(store, clock=clock, retention_days=config.usage_retention_days)
+    at_exit(recorder.close)  # close() logs and swallows every error, so exit never fails on it
     return Runtime(guard, recorder)
 
 
@@ -156,4 +160,6 @@ def build_guard(
     clock: Callable[[], datetime] = _utcnow,
     spawn: Spawn = _thread_spawn,
 ) -> LifecycleGuard:
-    return build_runtime(config, resolver, fetch=fetch, clock=clock, spawn=spawn).guard
+    # Only the guard is handed back, so a recorder would never be fed; do not create one.
+    untracked = config.model_copy(update={"usage_tracking": False})
+    return build_runtime(untracked, resolver, fetch=fetch, clock=clock, spawn=spawn).guard

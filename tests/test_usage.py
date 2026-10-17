@@ -82,17 +82,37 @@ def test_untracked_models_and_unknown_teams_are_stored_as_empty_strings(store: S
     assert store.usage_rows(TODAY) == [UsageRow(TODAY, "gpt-mystery", "", "", "", "", 1)]
 
 
-def test_a_failing_store_is_logged_and_never_raises(store: Store, caplog: pytest.LogCaptureFixture) -> None:
-    class Broken(Store):
-        def add_usage(self, rows) -> None:
-            raise sqlite3.OperationalError("database is locked")
+class BrokenStore(Store):
+    def add_usage(self, rows) -> None:
+        raise sqlite3.OperationalError("database is locked")
 
-    recorder = UsageRecorder(Broken(store.path), clock=Clock(), flush_calls=1)
+    def prune_usage(self, before_day: date) -> int:
+        raise sqlite3.OperationalError("database is locked")
+
+
+FLUSH_FAILED = "sundial: usage flush failed; unwritten counts stay buffered"
+
+
+def test_a_failing_store_is_logged_and_never_raises(store: Store, caplog: pytest.LogCaptureFixture) -> None:
+    recorder = UsageRecorder(BrokenStore(store.path), clock=Clock(), flush_calls=1)
 
     recorder.record("gpt-4", None, GPT4)
     recorder.flush()
 
-    assert caplog.messages == ["sundial: usage flush failed; unwritten counts stay buffered"] * 2
+    assert caplog.messages == [FLUSH_FAILED] * 2
+
+
+def test_close_at_exit_with_a_failing_store_logs_and_never_raises(
+    store: Store, caplog: pytest.LogCaptureFixture
+) -> None:
+    idle = UsageRecorder(BrokenStore(store.path), clock=Clock())
+    busy = UsageRecorder(BrokenStore(store.path), clock=Clock())
+    busy.record("gpt-4", None, GPT4)
+
+    idle.close()  # nothing buffered: only the prune runs, and it fails
+    busy.close()
+
+    assert caplog.messages == [FLUSH_FAILED] * 2
 
 
 def test_counts_survive_a_failed_write_and_go_out_with_the_next_flush(store: Store) -> None:

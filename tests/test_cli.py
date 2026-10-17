@@ -120,9 +120,44 @@ def test_status_in_use_lists_only_retiring_models_your_traffic_uses(db, fixture_
     rows = [line for line in lines if TABLE_ROW.match(line)]
     assert code == 0
     assert lines[0] == f"1 models in use retire within 90 days (2 models in use, {tracked} tracked)."
-    assert len(rows) == 1
-    assert all(part in rows[0] for part in ("34d", "gpt-4-0613", "calls=7", "teams=payments"))
+    assert rows == ["   34d  2026-10-23  openai     gpt-4-0613  calls=7  teams=payments"]
     assert lines[-2:] == ["Models in use with no lifecycle record:", "  gpt-mystery  calls=2"]
+
+
+def test_status_in_use_lists_overdue_models_first_with_negative_days(db, fixture_fetch) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    seed_usage(db, T1.date())
+    Store(db).add_usage(
+        [UsageRow(T1.date(), "chatgpt-4o-latest", "support", "openai", "chatgpt-4o-latest", "", 5)]
+    )
+
+    _, output = run(["status", "--in-use", "--db", str(db)], fixture_fetch)
+    _, plain = run(["status", "--db", str(db)], fixture_fetch)
+
+    lines = output.splitlines()
+    assert lines[0].startswith("2 models in use retire within 90 days (3 models in use, ")
+    assert [line for line in lines if TABLE_ROW.match(line)] == [
+        " -214d  2026-02-17  openai     chatgpt-4o-latest  calls=5  teams=support",
+        "   34d  2026-10-23  openai     gpt-4-0613  calls=7  teams=payments",
+    ]
+    assert "chatgpt-4o-latest" not in plain
+
+
+def test_status_in_use_names_the_upstream_model_when_the_public_name_differs(db, fixture_fetch) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    Store(db).add_usage(
+        [
+            UsageRow(T1.date(), "legacy-gpt4", "", "openai", "gpt-4-0613", "", 3),
+            UsageRow(T1.date(), "prod-chat", "", "azure", "gpt-4o", "2024-05-13", 6),
+        ]
+    )
+
+    _, output = run(["status", "--in-use", "--db", str(db)], fixture_fetch)
+
+    assert [line for line in output.splitlines() if TABLE_ROW.match(line)] == [
+        "   12d  2026-10-01  azure      prod-chat [gpt-4o (2024-05-13)]  calls=6  teams=-",
+        "   34d  2026-10-23  openai     legacy-gpt4 [gpt-4-0613]  calls=3  teams=-",
+    ]
 
 
 def test_status_in_use_only_counts_usage_inside_the_look_back_window(db, fixture_fetch) -> None:

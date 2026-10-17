@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from sundial_llm import runtime as runtime_module
 from sundial_llm.config import Config, NotifyConfig
 from sundial_llm.guard import IdentityResolver
 from sundial_llm.models import LifecycleState
@@ -164,7 +165,14 @@ def test_runtime_recorder_writes_usage_to_the_configured_database_and_prunes_it(
     config = Config(db=tmp_path / "runtime.db", registry_url=None, usage_retention_days=7)
     Store(config.db).add_usage([UsageRow(NOW.date() - timedelta(days=8), "gpt-old", "", "", "", "", 1)])
 
-    runtime = build_runtime(config, IdentityResolver(), fetch=fixture_fetch, clock=lambda: NOW, spawn=inline)
+    runtime = build_runtime(
+        config,
+        IdentityResolver(),
+        fetch=fixture_fetch,
+        clock=lambda: NOW,
+        spawn=inline,
+        at_exit=lambda f: None,
+    )
     decision = runtime.guard.decide("gpt-4-0613")
     assert runtime.recorder is not None
     runtime.recorder.record("gpt-4-0613", None, decision.key)
@@ -175,12 +183,56 @@ def test_runtime_recorder_writes_usage_to_the_configured_database_and_prunes_it(
     ]
 
 
+def test_runtime_registers_its_recorder_to_flush_at_exit(tmp_path, fixture_fetch) -> None:
+    registered: list = []
+
+    runtime = build_runtime(
+        Config(db=tmp_path / "runtime.db", registry_url=None),
+        IdentityResolver(),
+        fetch=fixture_fetch,
+        clock=lambda: NOW,
+        spawn=inline,
+        at_exit=registered.append,
+    )
+
+    assert runtime.recorder is not None
+    assert registered == [runtime.recorder.close]
+
+
+def test_a_bare_guard_creates_no_recorder_to_flush_at_exit(
+    tmp_path, fixture_fetch, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def no_recorder(*args, **kwargs):
+        raise AssertionError("build_guard returns only the guard, so it must not create a recorder")
+
+    monkeypatch.setattr(runtime_module, "UsageRecorder", no_recorder)
+
+    guard = build_guard(
+        Config(db=tmp_path / "guard.db", registry_url=None),
+        IdentityResolver(),
+        fetch=fixture_fetch,
+        clock=lambda: NOW,
+        spawn=inline,
+    )
+
+    assert guard.decide("gpt-4-0613").action is Action.WARN
+
+
 def test_usage_tracking_off_gives_a_runtime_without_a_recorder(tmp_path, fixture_fetch) -> None:
     config = Config(db=tmp_path / "runtime.db", registry_url=None, usage_tracking=False)
+    registered: list = []
 
-    runtime = build_runtime(config, IdentityResolver(), fetch=fixture_fetch, clock=lambda: NOW, spawn=inline)
+    runtime = build_runtime(
+        config,
+        IdentityResolver(),
+        fetch=fixture_fetch,
+        clock=lambda: NOW,
+        spawn=inline,
+        at_exit=registered.append,
+    )
 
     assert runtime.recorder is None
+    assert registered == []
     assert runtime.guard.decide("gpt-4-0613").action is Action.WARN
 
 

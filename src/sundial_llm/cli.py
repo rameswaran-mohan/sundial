@@ -150,12 +150,21 @@ def _report(outcome: ScanOutcome, config: Config, post: Post, out: TextIO) -> No
         print(f"  warning  {error}", file=out)
 
 
-def _retiring_in(record: LifecycleRecord, today: date, within: int, platform: str | None) -> int | None:
-    """Days to the record's firm retirement when that falls inside the horizon, otherwise None."""
+def _retiring_in(
+    record: LifecycleRecord, today: date, within: int, platform: str | None, *, overdue: bool = False
+) -> int | None:
+    """Days to the record's firm retirement when that falls inside the horizon, otherwise None.
+    With `overdue`, dates already reached count too, as zero or negative days."""
     if platform is not None and record.platform != platform:
         return None
     days = record.days_until_retirement(today)
-    return days if days is not None and 0 < days <= within else None
+    if days is None or days > within or (days <= 0 and not overdue):
+        return None
+    return days
+
+
+def _record_name(record: LifecycleRecord) -> str:
+    return f"{record.model_id} ({record.version})" if record.version else record.model_id
 
 
 def _status(config: Config, within: int, platform: str | None, now: datetime, out: TextIO) -> int:
@@ -174,7 +183,7 @@ def _status(config: Config, within: int, platform: str | None, now: datetime, ou
     )
     print(f"{len(upcoming)} models retire within {within} days ({len(records)} tracked).", file=out)
     for days, record in upcoming:
-        name = f"{record.model_id} ({record.version})" if record.version else record.model_id
+        name = _record_name(record)
         successor = f"  -> {', '.join(record.replacements)}" if record.replacements else ""
         print(f"{days:>5}d  {record.retire_on}  {record.platform:<10} {name}{successor}", file=out)
     return EXIT_OK
@@ -183,7 +192,8 @@ def _status(config: Config, within: int, platform: str | None, now: datetime, ou
 def _status_in_use(
     config: Config, within: int, days: int, platform: str | None, now: datetime, out: TextIO
 ) -> int:
-    """Retirements among the public models the gateway served in the last `days` days."""
+    """Retirements among the public models the gateway served in the last `days` days, including
+    models still in use after their retirement date, most overdue first."""
     store = Store(config.db)
     records = store.load_records()
     if not records:
@@ -204,7 +214,7 @@ def _status_in_use(
             (left, model, record)
             for key in model_keys
             if (record := records.get(key)) is not None
-            and (left := _retiring_in(record, today, within, platform)) is not None
+            and (left := _retiring_in(record, today, within, platform, overdue=True)) is not None
         ]
         if upcoming:
             retiring.append(min(upcoming, key=lambda item: (item[0], item[2].key)))
@@ -215,9 +225,10 @@ def _status_in_use(
         file=out,
     )
     for left, model, record in retiring:
+        name = model if model == record.model_id else f"{model} [{_record_name(record)}]"
         team_list = ",".join(sorted(team for team in teams[model] if team)) or "-"
         print(
-            f"{left:>5}d  {record.retire_on}  {record.platform:<10} {model}  "
+            f"{left:>5}d  {record.retire_on}  {record.platform:<10} {name}  "
             f"calls={calls[model]}  teams={team_list}",
             file=out,
         )
