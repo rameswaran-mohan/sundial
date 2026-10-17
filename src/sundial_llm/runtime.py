@@ -31,7 +31,7 @@ def _utcnow() -> datetime:
 
 
 def _thread_spawn(job: Callable[[], None]) -> None:
-    threading.Thread(target=job, name="sundial-scan", daemon=True).start()
+    threading.Thread(target=job, name="sundial-background", daemon=True).start()
 
 
 class AutoScanner:
@@ -136,7 +136,7 @@ def build_runtime(
     at_exit: AtExit = atexit.register,
 ) -> Runtime:
     """The guard and, unless usage tracking is off, a recorder whose buffered counts are flushed at
-    interpreter exit through `at_exit`."""
+    interpreter exit through `at_exit`. Background scans and usage flushes both run through `spawn`."""
     store = Store(config.db)
     scanner = AutoScanner(store, config, fetch, clock=clock, spawn=spawn)
 
@@ -147,7 +147,7 @@ def build_runtime(
     guard = LifecycleGuard(load, resolver, config.policy, clock=clock, reload_seconds=config.reload_seconds)
     if not config.usage_tracking:
         return Runtime(guard, None)
-    recorder = UsageRecorder(store, clock=clock, retention_days=config.usage_retention_days)
+    recorder = UsageRecorder(store, clock=clock, retention_days=config.usage_retention_days, spawn=spawn)
     at_exit(recorder.close)  # close() logs and swallows every error, so exit never fails on it
     return Runtime(guard, recorder)
 

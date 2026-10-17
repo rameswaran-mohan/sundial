@@ -1,5 +1,7 @@
 import logging
 import sqlite3
+import threading
+from contextlib import closing
 from datetime import date, datetime, timedelta, timezone
 
 import pytest
@@ -18,6 +20,10 @@ class Clock:
 
     def __call__(self) -> datetime:
         return self.now
+
+
+def inline(job) -> None:
+    job()
 
 
 @pytest.fixture
@@ -52,7 +58,7 @@ def test_prune_usage_deletes_older_days_and_returns_how_many_rows_went(store: St
 
 
 def test_reaching_flush_calls_writes_one_row_holding_every_call(store: Store) -> None:
-    recorder = UsageRecorder(store, clock=Clock(), flush_calls=5)
+    recorder = UsageRecorder(store, clock=Clock(), flush_calls=5, spawn=inline)
 
     for _ in range(4):
         recorder.record("gpt-4", "payments", GPT4)
@@ -64,7 +70,7 @@ def test_reaching_flush_calls_writes_one_row_holding_every_call(store: Store) ->
 
 def test_a_call_after_flush_seconds_flushes_everything_buffered(store: Store) -> None:
     clock = Clock()
-    recorder = UsageRecorder(store, clock=clock, flush_seconds=30)
+    recorder = UsageRecorder(store, clock=clock, flush_seconds=30, spawn=inline)
 
     recorder.record("gpt-4", None, GPT4)
     assert store.usage_rows(TODAY) == []
@@ -95,7 +101,7 @@ FLUSH_FAILED = "sundial: usage flush failed; unwritten counts stay buffered"
 
 
 def test_a_failing_store_is_logged_and_never_raises(store: Store, caplog: pytest.LogCaptureFixture) -> None:
-    recorder = UsageRecorder(BrokenStore(store.path), clock=Clock(), flush_calls=1)
+    recorder = UsageRecorder(BrokenStore(store.path), clock=Clock(), flush_calls=1, spawn=inline)
 
     recorder.record("gpt-4", None, GPT4)
     recorder.flush()
@@ -132,7 +138,7 @@ def test_counts_survive_a_failed_write_and_go_out_with_the_next_flush(store: Sto
             super().add_usage(rows)
 
     flaky = FailsOnce(store.path)
-    recorder = UsageRecorder(flaky, clock=Clock(), flush_calls=2)
+    recorder = UsageRecorder(flaky, clock=Clock(), flush_calls=2, spawn=inline)
 
     recorder.record("gpt-4", None, GPT4)
     recorder.record("gpt-4", None, GPT4)
@@ -287,3 +293,170 @@ def test_flush_prunes_rows_older_than_the_retention(store: Store) -> None:
     recorder.flush()
 
     assert store.usage_rows(date.min) == [row(TODAY - timedelta(days=90), 1)]
+
+
+class Watched(Store):
+    """Remembers which thread ran each usage write and every prune cutoff."""
+
+    def __init__(self, path) -> None:
+        self.writers: list[threading.Thread] = []
+        self.prunes: list[date] = []
+        self.written = threading.Event()
+        super().__init__(path)
+
+    def add_usage(self, rows) -> None:
+        super().add_usage(rows)
+        self.writers.append(threading.current_thread())
+        self.written.set()
+
+    def prune_usage(self, before_day: date) -> int:
+        self.prunes.append(before_day)
+        return super().prune_usage(before_day)
+
+
+def test_a_due_flush_is_written_on_a_daemon_thread_by_default(store: Store) -> None:
+    watched = Watched(store.path)
+    recorder = UsageRecorder(watched, clock=Clock(), flush_calls=2)
+
+    recorder.record("gpt-4", None, GPT4)
+    recorder.record("gpt-4", None, GPT4)
+
+    assert watched.written.wait(5)
+    assert watched.writers[0] is not threading.current_thread()
+    assert watched.writers[0].daemon
+    assert store.usage_rows(TODAY) == [row(TODAY, 2)]
+
+
+def test_a_due_flush_is_handed_to_spawn_and_not_written_by_the_recording_call(store: Store) -> None:
+    jobs: list = []
+    recorder = UsageRecorder(store, clock=Clock(), flush_calls=2, spawn=jobs.append)
+
+    recorder.record("gpt-4", None, GPT4)
+    recorder.record("gpt-4", None, GPT4)
+
+    assert len(jobs) == 1
+    assert store.usage_rows(TODAY) == []
+    jobs[0]()
+    assert store.usage_rows(TODAY) == [row(TODAY, 2)]
+
+
+def test_only_one_flush_is_in_flight_and_later_counts_wait_for_the_next_due_point(store: Store) -> None:
+    jobs: list = []
+    recorder = UsageRecorder(store, clock=Clock(), flush_calls=1, spawn=jobs.append)
+
+    recorder.record("model-a", None, None)  # due: model-a goes to a flush
+    recorder.record("model-b", None, None)  # due, but a flush is in flight: model-b stays buffered
+    assert len(jobs) == 1
+    jobs[0]()
+    assert [r.public_model for r in store.usage_rows(TODAY)] == ["model-a"]
+    recorder.record("model-c", None, None)
+
+    assert len(jobs) == 2
+    jobs[1]()
+    assert {(r.public_model, r.calls) for r in store.usage_rows(TODAY)} == {
+        ("model-a", 1),
+        ("model-b", 1),
+        ("model-c", 1),
+    }
+
+
+def test_a_flush_that_cannot_start_a_thread_keeps_its_counts_buffered(
+    store: Store, caplog: pytest.LogCaptureFixture
+) -> None:
+    def no_threads(job) -> None:
+        raise RuntimeError("can't start new thread")
+
+    recorder = UsageRecorder(store, clock=Clock(), flush_calls=1, spawn=no_threads)
+
+    recorder.record("gpt-4", None, GPT4)
+    recorder.record("gpt-4", None, GPT4)
+    recorder.close()
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 2)]
+    assert "sundial: could not start a usage flush; counts stay buffered" in caplog.messages
+
+
+def test_usage_is_pruned_once_per_utc_day(store: Store) -> None:
+    watched = Watched(store.path)
+    clock = Clock()
+    recorder = UsageRecorder(watched, clock=clock, flush_calls=1, spawn=inline, retention_days=90)
+
+    for _ in range(3):
+        recorder.record("gpt-4", None, GPT4)
+    recorder.flush()
+    assert watched.prunes == [TODAY - timedelta(days=90)]
+    clock.now = NOW + timedelta(days=1)
+    recorder.record("gpt-4", None, GPT4)
+    recorder.record("gpt-4", None, GPT4)
+
+    assert watched.prunes == [TODAY - timedelta(days=90), TODAY - timedelta(days=89)]
+
+
+def test_a_failed_prune_is_tried_again_at_the_next_flush(store: Store) -> None:
+    class PruneFailsOnce(Watched):
+        def prune_usage(self, before_day: date) -> int:
+            if not self.prunes:
+                self.prunes.append(before_day)
+                raise sqlite3.OperationalError("database is locked")
+            return super().prune_usage(before_day)
+
+    flaky = PruneFailsOnce(store.path)
+    recorder = UsageRecorder(flaky, clock=Clock())
+
+    recorder.flush()
+    recorder.flush()
+    recorder.flush()
+
+    assert flaky.prunes == [TODAY - timedelta(days=90)] * 2
+
+
+def test_close_writes_on_the_calling_thread(store: Store) -> None:
+    def no_spawn(job) -> None:
+        raise AssertionError("close must not hand its flush to another thread")
+
+    watched = Watched(store.path)
+    recorder = UsageRecorder(watched, clock=Clock(), spawn=no_spawn)
+
+    recorder.record("gpt-4", None, GPT4)
+    recorder.close()
+
+    assert watched.writers == [threading.current_thread()]
+    assert store.usage_rows(TODAY) == [row(TODAY, 1)]
+
+
+def test_close_waits_for_a_flush_in_flight_then_writes_the_rest(store: Store) -> None:
+    def shortly(job) -> None:
+        threading.Timer(0.3, job).start()
+
+    recorder = UsageRecorder(store, clock=Clock(), flush_calls=1, spawn=shortly)
+
+    recorder.record("model-a", None, None)  # handed to a flush that starts 0.3 s later
+    recorder.record("model-b", None, None)  # stays buffered while that flush is in flight
+    recorder.close()
+
+    assert {(r.public_model, r.calls) for r in store.usage_rows(TODAY)} == {("model-a", 1), ("model-b", 1)}
+
+
+def test_the_store_uses_write_ahead_logging(store: Store) -> None:
+    with closing(sqlite3.connect(store.path)) as conn:
+        assert conn.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
+
+
+def test_usage_writes_wait_at_most_one_second_for_a_locked_database(tmp_path) -> None:
+    class Timeouts(Store):
+        def __init__(self, path) -> None:
+            self.timeouts: list[int] = []
+            super().__init__(path)
+
+        def _connect(self, *args, **kwargs) -> sqlite3.Connection:
+            conn = super()._connect(*args, **kwargs)
+            self.timeouts.append(conn.execute("PRAGMA busy_timeout").fetchone()[0])
+            return conn
+
+    timed = Timeouts(tmp_path / "usage.db")
+    timed.timeouts.clear()
+
+    timed.add_usage([row(TODAY, 1)])
+    timed.prune_usage(TODAY - timedelta(days=90))
+
+    assert timed.timeouts == [1000, 1000]

@@ -183,6 +183,28 @@ def test_runtime_recorder_writes_usage_to_the_configured_database_and_prunes_it(
     ]
 
 
+def test_runtime_hands_due_usage_flushes_to_its_spawn(tmp_path, fixture_fetch) -> None:
+    jobs: list = []
+    config = Config(db=tmp_path / "runtime.db", registry_url=None, auto_scan_hours=0)
+
+    runtime = build_runtime(
+        config,
+        IdentityResolver(),
+        fetch=fixture_fetch,
+        clock=lambda: NOW,
+        spawn=jobs.append,
+        at_exit=lambda f: None,
+    )
+    assert runtime.recorder is not None
+    for _ in range(50):  # the default number of calls between flushes
+        runtime.recorder.record("gpt-mystery", None, None)
+
+    assert len(jobs) == 1
+    assert Store(config.db).usage_rows(date.min) == []
+    jobs[0]()
+    assert Store(config.db).usage_rows(date.min) == [UsageRow(NOW.date(), "gpt-mystery", "", "", "", "", 50)]
+
+
 def test_runtime_registers_its_recorder_to_flush_at_exit(tmp_path, fixture_fetch) -> None:
     registered: list = []
 

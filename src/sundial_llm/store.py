@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from collections.abc import Iterable, Mapping, Sequence
-from contextlib import closing
+from contextlib import closing, suppress
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -73,6 +73,11 @@ DO UPDATE SET calls = usage.calls + excluded.calls
 """
 
 
+# Usage is written from a running gateway, so a usage write waits at most this long for another
+# connection's lock before failing; its counts stay buffered for the next flush.
+_USAGE_BUSY_TIMEOUT_SECONDS = 1.0
+
+
 @dataclass(frozen=True)
 class StoredEvent:
     at: datetime
@@ -84,10 +89,15 @@ class Store:
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with closing(self._connect()) as conn, conn:
+            # Write-ahead logging lets readers and the usage writer work without blocking each other.
+            # The mode is stored in the file, so this is a no-op after the first time.
+            with suppress(sqlite3.DatabaseError):  # a read-only file keeps its rollback journal
+                conn.execute("PRAGMA journal_mode=WAL")
             conn.executescript(_SCHEMA)
 
-    def _connect(self) -> sqlite3.Connection:
-        return sqlite3.connect(self.path)
+    def _connect(self, timeout: float = 5.0) -> sqlite3.Connection:
+        """`timeout` is how many seconds a statement waits for another connection's lock."""
+        return sqlite3.connect(self.path, timeout=timeout)
 
     def _meta(self, key: str) -> str | None:
         with closing(self._connect()) as conn:
@@ -180,7 +190,7 @@ class Store:
 
     def add_usage(self, rows: Iterable[UsageRow]) -> None:
         """Add call counts; a row for an existing (day, model, team, record) adds to its count."""
-        with closing(self._connect()) as conn, conn:
+        with closing(self._connect(_USAGE_BUSY_TIMEOUT_SECONDS)) as conn, conn:
             conn.executemany(
                 _UPSERT_USAGE,
                 [
@@ -208,5 +218,5 @@ class Store:
 
     def prune_usage(self, before_day: date) -> int:
         """Delete usage from days before `before_day` and return how many rows went."""
-        with closing(self._connect()) as conn, conn:
+        with closing(self._connect(_USAGE_BUSY_TIMEOUT_SECONDS)) as conn, conn:
             return conn.execute("DELETE FROM usage WHERE day < ?", (before_day.isoformat(),)).rowcount

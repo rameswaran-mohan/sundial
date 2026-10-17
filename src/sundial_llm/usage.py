@@ -1,7 +1,8 @@
 """Per-request usage counts, buffered in memory and flushed to the store in batches.
 
-Recording sits in the request path, so it only increments a counter under a lock; the SQLite write
-happens inline once enough calls or enough time have accumulated. Nothing here ever raises.
+Recording sits in the request path, so it only increments a counter under a lock. Once enough calls or
+enough time have accumulated, the buffered counts are handed to a background thread that writes them
+to SQLite, one flush at a time. Nothing here ever raises.
 """
 
 from __future__ import annotations
@@ -29,7 +30,11 @@ MAX_PENDING_BUCKETS = 10_000
 # means some row can never be written: the batch is retried row by row and those rows are dropped.
 _TRANSIENT = (sqlite3.OperationalError, OSError)
 
+# How long close() waits for a background flush still writing before it flushes the rest itself.
+_CLOSE_WAIT_SECONDS = 5.0
+
 _Bucket = tuple[date, str, str, str, str, str]  # day, public_model, team, platform, model_id, version
+Spawn = Callable[[Callable[[], None]], None]
 
 
 @dataclass(frozen=True)
@@ -45,6 +50,10 @@ class UsageRow:
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _daemon_spawn(job: Callable[[], None]) -> None:
+    threading.Thread(target=job, name="sundial-usage", daemon=True).start()
 
 
 def _printable(value: object) -> bool:
@@ -67,6 +76,7 @@ class UsageRecorder:
         flush_seconds: float = 30.0,
         retention_days: int = 90,
         max_pending: int = MAX_PENDING_BUCKETS,
+        spawn: Spawn = _daemon_spawn,
     ) -> None:
         self._store = store
         self._clock = clock
@@ -74,17 +84,25 @@ class UsageRecorder:
         self._flush_seconds = flush_seconds
         self._retention_days = retention_days
         self._max_pending = max_pending
+        self._spawn = spawn
         self._lock = threading.Lock()
         self._pending: dict[_Bucket, int] = {}
         self._buffered = 0  # calls since the last flush attempt
         self._last_flush = clock()
         self._warned_full = False  # one warning per flush cycle while the buffer is full
+        self._idle = threading.Event()  # cleared while a background flush is in flight
+        self._idle.set()
+        self._pruned_day: date | None = None  # old rows are pruned once per UTC day
 
     def record(self, public_model: str, team: str | None, key: RecordKey | None) -> None:
         """Count one request. `key` is the matched lifecycle record, None when nothing matched.
         Names that are not printable or longer than MAX_MODEL_NAME_LENGTH, and teams that are not
         printable, are ignored. While MAX_PENDING_BUCKETS distinct entries wait to be written, calls that
-        would add another are dropped."""
+        would add another are dropped.
+
+        When a flush is due, the buffered counts go to a background flush through `spawn`. Only one is
+        in flight at a time; while it runs, new counts stay buffered until the next call that finds a
+        flush due."""
         try:
             if not _printable(public_model) or len(public_model) > MAX_MODEL_NAME_LENGTH:
                 return
@@ -94,6 +112,7 @@ class UsageRecorder:
             platform, model_id, version = key or ("", "", "")
             bucket = (now.date(), public_model, team or "", platform, model_id, version)
             warn_full = False
+            batch: list[UsageRow] | None = None
             with self._lock:
                 if bucket in self._pending or len(self._pending) < self._max_pending:
                     self._pending[bucket] = self._pending.get(bucket, 0) + 1
@@ -104,19 +123,23 @@ class UsageRecorder:
                     self._buffered >= self._flush_calls
                     or (now - self._last_flush).total_seconds() >= self._flush_seconds
                 )
+                if due and self._idle.is_set():
+                    batch = self._take(now)
+                    self._idle.clear()
             if warn_full:
                 logger.warning(
                     "sundial: usage buffer is full (%d entries); new models are not counted until it flushes",
                     self._max_pending,
                 )
-            if due:
-                self.flush()
+            if batch is not None:
+                self._flush_in_background(batch, now.date())
         except Exception:  # noqa: BLE001 - counting usage must never take a request down
             logger.exception("sundial: could not record usage for %s", public_model)
 
     def flush(self) -> None:
-        """Write the buffered counts and prune rows older than the retention. Counts that fail to write
-        for a reason that may pass, such as a locked database, stay buffered for the next flush."""
+        """Write the buffered counts on the calling thread, and prune rows older than the retention once
+        per UTC day. Counts that fail to write for a reason that may pass, such as a locked database,
+        stay buffered for the next flush."""
         try:
             with self._lock:
                 now = self._clock()
@@ -126,7 +149,31 @@ class UsageRecorder:
             logger.exception("sundial: usage flush failed; unwritten counts stay buffered")
 
     def close(self) -> None:
+        """Flush on the calling thread, as at interpreter exit, after giving a background flush still
+        in flight a few seconds to finish."""
+        try:
+            self._idle.wait(_CLOSE_WAIT_SECONDS)
+        except Exception:  # noqa: BLE001 - closing must never fail
+            logger.exception("sundial: could not wait for the usage flush in flight")
         self.flush()
+
+    def _flush_in_background(self, batch: list[UsageRow], today: date) -> None:
+        """Hand a batch to `spawn`. If no flush can be started, the counts go back into the buffer."""
+
+        def job() -> None:
+            try:
+                self._write(batch, today)
+            finally:
+                with self._lock:
+                    self._idle.set()
+
+        try:
+            self._spawn(job)
+        except Exception:  # noqa: BLE001 - counting usage must never take a request down
+            logger.exception("sundial: could not start a usage flush; counts stay buffered")
+            self._restore(batch)
+            with self._lock:
+                self._idle.set()
 
     def _take(self, now: datetime) -> list[UsageRow]:
         """Empty the buffer into a batch and start a new flush cycle. Call with the lock held."""
@@ -138,11 +185,14 @@ class UsageRecorder:
         return batch
 
     def _write(self, batch: Sequence[UsageRow], today: date) -> None:
-        """Write a batch and prune. Logs and swallows every error."""
+        """Write a batch, then prune unless that already happened today. Logs and swallows every
+        error, since it also runs on the background flush thread."""
         try:
             if batch:
                 self._add(batch)
-            self._store.prune_usage(today - timedelta(days=self._retention_days))
+            if self._pruned_day != today:
+                self._store.prune_usage(today - timedelta(days=self._retention_days))
+                self._pruned_day = today
         except Exception:  # noqa: BLE001 - counting usage must never take a request down
             logger.exception("sundial: usage flush failed; unwritten counts stay buffered")
 
