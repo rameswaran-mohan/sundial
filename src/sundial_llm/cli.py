@@ -29,6 +29,8 @@ EXIT_ALL_SOURCES_FAILED = 1
 EXIT_BAD_INPUT = 2
 EXIT_MODEL_FLAGGED = 3
 
+_EMPTY_REGISTRY = "sundial: the registry is empty; run sundial scan or sundial import first"
+
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
@@ -127,7 +129,7 @@ def _export(config: Config, out_path: str, now: datetime, out: TextIO) -> int:
     document = build_document(store, now, ok, failures)
     count = len(document.records)
     if not count:  # never replace a published registry with an empty one
-        print("sundial: the registry is empty; run sundial scan or sundial import first", file=out)
+        print(_EMPTY_REGISTRY, file=out)
         return EXIT_ALL_SOURCES_FAILED
     if write_if_changed(document, Path(out_path)):
         print(f"Registry written to {out_path} ({count} records)", file=out)
@@ -297,8 +299,12 @@ def _costmap(
     now: datetime,
     out: TextIO,
 ) -> int:
+    records = Store(config.db).load_records()
+    if not records:  # an empty registry would report every cost map entry as matching
+        print(_EMPTY_REGISTRY, file=out)
+        return EXIT_ALL_SOURCES_FAILED
     cost_map = json.loads(Path(cost_map_path).read_text(encoding="utf-8"))
-    patch = build_patch(cost_map, Store(config.db).load_records(), now.date())
+    patch = build_patch(cost_map, records, now.date())
     print(f"{len(patch.changes)} cost map entries differ from provider-published dates.", file=out)
     for change in patch.changes:
         print(f"  {change.key}: {change.old or 'none'} -> {change.new}  ({change.source_url})", file=out)

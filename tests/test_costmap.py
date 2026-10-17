@@ -153,6 +153,13 @@ def test_report_lists_every_change_and_the_patch_as_sorted_json() -> None:
     )
 
 
+def test_report_counts_a_single_change_in_the_singular() -> None:
+    report = render_report(CostMapPatch(TWO_CHANGES.changes[:1]), COST_MAP_URL)
+
+    assert "\n1 entry differs from provider-published retirement dates.\n" in report
+    assert "entries" not in report
+
+
 def test_report_patch_block_parses_back_to_the_patch_mapping() -> None:
     report = render_report(TWO_CHANGES, COST_MAP_URL)
 

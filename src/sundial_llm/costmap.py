@@ -71,8 +71,10 @@ def render_report(patch: CostMapPatch, cost_map_url: str) -> str:
     if not patch.changes:
         lines.append("No entries differ from provider-published retirement dates.")
         return "\n".join(lines) + "\n"
+    count = len(patch.changes)
+    differ = "entry differs" if count == 1 else "entries differ"
     lines += [
-        f"{len(patch.changes)} entries differ from provider-published retirement dates.",
+        f"{count} {differ} from provider-published retirement dates.",
         "",
         "| Cost map key | litellm | Provider | Source |",
         "|---|---|---|---|",
