@@ -55,9 +55,7 @@ version in the files, so check they match before tagging.
   has, then fails so the run shows red.
 - `costmap-drift.yml` runs nightly at 03:47 UTC and on demand. It imports the published registry,
   compares it with litellm's cost map, and commits `registry/litellm-costmap-patch.json` and
-  `registry/litellm-costmap-drift.md` when they changed. It calls `sundial costmap-patch --report`,
-  which is implemented in Task 5 of the release 2 plan; until that lands, this workflow fails at
-  that step.
+  `registry/litellm-costmap-drift.md` when they changed.
 
 Both nightly workflows push to `main` as `github-actions[bot]` and share one concurrency group, so
 they never push at the same time. If `main` is protected against direct pushes, allow GitHub

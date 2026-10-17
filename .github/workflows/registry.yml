@@ -17,6 +17,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync
+      - run: git pull --ff-only
       - name: Seed from the committed registry
         run: |
           if [ -f registry/lifecycle.json ]; then uv run sundial import registry/lifecycle.json --db /tmp/registry.db; fi

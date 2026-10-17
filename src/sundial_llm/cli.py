@@ -13,7 +13,7 @@ from typing import TextIO
 
 from sundial_llm import __version__
 from sundial_llm.config import Config, load_config
-from sundial_llm.costmap import build_patch
+from sundial_llm.costmap import LITELLM_COST_MAP_URL, build_patch, render_report
 from sundial_llm.guard import IdentityResolver, LifecycleGuard
 from sundial_llm.matching import UpstreamModel, parse_upstream
 from sundial_llm.models import LifecycleRecord, RecordKey
@@ -75,6 +75,13 @@ def _parser() -> argparse.ArgumentParser:
     )
     costmap.add_argument("--cost-map", required=True, metavar="PATH")
     costmap.add_argument("--out", metavar="FILE", help="write the patch mapping as JSON")
+    costmap.add_argument("--report", metavar="FILE", help="write the drift report as markdown")
+    costmap.add_argument(
+        "--cost-map-url",
+        default=LITELLM_COST_MAP_URL,
+        metavar="URL",
+        help="where the cost map came from; only named in the report",
+    )
     return parser
 
 
@@ -119,6 +126,9 @@ def _export(config: Config, out_path: str, now: datetime, out: TextIO) -> int:
     failures = {name: outcome for name, outcome in sources.items() if outcome != "ok"}
     document = build_document(store, now, ok, failures)
     count = len(document.records)
+    if not count:  # never replace a published registry with an empty one
+        print("sundial: the registry is empty; run sundial scan or sundial import first", file=out)
+        return EXIT_ALL_SOURCES_FAILED
     if write_if_changed(document, Path(out_path)):
         print(f"Registry written to {out_path} ({count} records)", file=out)
     else:
@@ -278,7 +288,15 @@ def _events(config: Config, limit: int, out: TextIO) -> int:
     return EXIT_OK
 
 
-def _costmap(config: Config, cost_map_path: str, out_path: str | None, now: datetime, out: TextIO) -> int:
+def _costmap(
+    config: Config,
+    cost_map_path: str,
+    out_path: str | None,
+    report_path: str | None,
+    cost_map_url: str,
+    now: datetime,
+    out: TextIO,
+) -> int:
     cost_map = json.loads(Path(cost_map_path).read_text(encoding="utf-8"))
     patch = build_patch(cost_map, Store(config.db).load_records(), now.date())
     print(f"{len(patch.changes)} cost map entries differ from provider-published dates.", file=out)
@@ -287,6 +305,10 @@ def _costmap(config: Config, cost_map_path: str, out_path: str | None, now: date
     if out_path:
         Path(out_path).write_text(json.dumps(patch.as_mapping(), indent=2) + "\n", encoding="utf-8")
         print(f"Patch written to {out_path}", file=out)
+    if report_path:  # written even without drift, so the nightly job always has the file to stage
+        report = render_report(patch, cost_map_url)
+        Path(report_path).write_text(report, encoding="utf-8", newline="\n")
+        print(f"Report written to {report_path}", file=out)
     return EXIT_OK
 
 
@@ -324,7 +346,7 @@ def main(
         return _check(config, args.model, args.base_model, moment, out)
     if args.command == "events":
         return _events(config, args.limit, out)
-    return _costmap(config, args.cost_map, args.out, moment, out)
+    return _costmap(config, args.cost_map, args.out, args.report, args.cost_map_url, moment, out)
 
 
 if __name__ == "__main__":
