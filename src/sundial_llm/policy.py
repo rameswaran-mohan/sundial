@@ -75,6 +75,7 @@ class Decision:
     target: str | None = None
     approximate: bool = False
     # The matched lifecycle record, also on allowed decisions, so usage can be counted per record.
+    # Allowed decisions for a matched record also carry days_left.
     key: RecordKey | None = None
 
 
@@ -93,7 +94,9 @@ class Policy(BaseModel):
         record = match.record
         rule = next((r for r in self.rules if r.when.matches(record, today)), None)
         if rule is None or rule.action is Action.ALLOW:
-            return Decision(key=record.key)
+            # No headers on an allowed request, but days_left lets a group prefer the deployment
+            # retiring soonest when several are healthy.
+            return Decision(key=record.key, days_left=record.days_until_retirement(today))
         action = rule.action
         target = self.successors.get(public_model) if action is Action.REDIRECT else None
         if action is Action.REDIRECT and target is None:

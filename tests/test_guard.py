@@ -79,6 +79,27 @@ def test_healthy_group_reports_its_tracked_deployment_whatever_the_order() -> No
         assert decision.key == LIVE.key
 
 
+SOON = rec("gpt-soon", state=LifecycleState.ACTIVE, retire_on=date(2027, 1, 1))
+LATER = rec("gpt-later", state=LifecycleState.ACTIVE, retire_on=date(2028, 1, 1))
+
+
+def test_healthy_group_reports_the_deployment_retiring_soonest_whatever_the_order() -> None:
+    resolver = GroupResolver(
+        {
+            "soon-first": ["gpt-soon", "gpt-later"],
+            "later-first": ["gpt-later", "gpt-soon"],
+            "undated-first": ["gpt-unknown", "gpt-live", "gpt-later", "gpt-soon"],
+            "undated-last": ["gpt-later", "gpt-soon", "gpt-live", "gpt-unknown"],
+        }
+    )
+    subject = guard(index(RETIRED, LIVE, SOON, LATER), resolver)
+
+    for group in resolver.groups:
+        decision = subject.decide(group)
+        assert decision.action is Action.ALLOW
+        assert decision.key == SOON.key, group
+
+
 def test_group_with_no_deployments_is_allowed() -> None:
     assert guard(index(RETIRED), GroupResolver({})).decide("ghost").action is Action.ALLOW
 

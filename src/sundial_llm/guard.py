@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 from datetime import datetime, timezone
@@ -10,7 +11,7 @@ from typing import Protocol
 
 from sundial_llm.matching import UpstreamModel, find_record, parse_upstream
 from sundial_llm.models import LifecycleRecord, RecordKey
-from sundial_llm.policy import ALLOW, DEFAULT_POLICY, Decision, Policy
+from sundial_llm.policy import ALLOW, DEFAULT_POLICY, Action, Decision, Policy
 
 logger = logging.getLogger("sundial")
 
@@ -32,6 +33,18 @@ class IdentityResolver:
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _rank(decision: Decision) -> tuple[int, float, bool]:
+    """Which deployment's decision speaks for a group: the most severe, then the one retiring soonest,
+    then a tracked one, so usage is counted against its record. A rule hit with no retirement date
+    ranks as due now; an allowed deployment with no date ranks after every dated one."""
+    days: float
+    if decision.days_left is not None:
+        days = decision.days_left
+    else:
+        days = math.inf if decision.action is Action.ALLOW else 0
+    return (decision.action.severity, -days, decision.key is not None)
 
 
 class LifecycleGuard:
@@ -76,8 +89,7 @@ class LifecycleGuard:
         ]
         if not decisions:
             return ALLOW
-        # On a tie, a decision for a tracked deployment wins, so usage is counted against its record.
-        worst = max(decisions, key=lambda d: (d.action.severity, -(d.days_left or 0), d.key is not None))
+        worst = max(decisions, key=_rank)
         # A group is only blocked or redirected when every deployment behind it agrees.
         unanimous = all(d.enforced and d.action is worst.action for d in decisions)
         return worst if unanimous else replace(worst, enforced=False)

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, ConfigDict, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from sundial_llm.models import LifecycleRecord
 from sundial_llm.policy import DEFAULT_POLICY, Policy, Rule
@@ -57,7 +57,7 @@ class Config(BaseModel):
     )
     # Count requests per public model, team and matched record for `sundial status --in-use`.
     usage_tracking: bool = True
-    usage_retention_days: int = 90
+    usage_retention_days: int = Field(default=90, ge=1)
 
     @field_validator("db", mode="before")
     @classmethod

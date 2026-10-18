@@ -16,17 +16,17 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-      - run: uv sync
+      - run: uv sync --locked --no-dev
       - run: git pull --ff-only
       - name: Seed from the committed registry
         run: |
-          if [ -f registry/lifecycle.json ]; then uv run sundial import registry/lifecycle.json --db /tmp/registry.db; fi
+          if [ -f registry/lifecycle.json ]; then uv run --no-dev sundial import registry/lifecycle.json --db /tmp/registry.db; fi
       - name: Scan every source
         id: scan
         continue-on-error: true
-        run: uv run sundial scan --strict --db /tmp/registry.db
+        run: uv run --no-dev sundial scan --strict --db /tmp/registry.db
       - name: Export
-        run: uv run sundial export --out registry/lifecycle.json --db /tmp/registry.db
+        run: uv run --no-dev sundial export --out registry/lifecycle.json --db /tmp/registry.db
       - name: Commit when changed
         run: |
           git add registry/lifecycle.json

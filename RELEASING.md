@@ -59,7 +59,10 @@ version in the files, so check they match before tagging.
 
 Both nightly workflows push to `main` as `github-actions[bot]` and share one concurrency group, so
 they never push at the same time. If `main` is protected against direct pushes, allow GitHub
-Actions to bypass that rule or both workflows fail at `git push`.
+Actions to bypass that rule or both workflows fail at `git push`. They install Sundial without the
+dev dependency group, so litellm and the test tools never run in a job that can push. GitHub
+disables scheduled workflows in a public repository after 60 days without repository activity; if
+the nightly registry stops, re-enable it from the Actions tab.
 
 After the first push to `main`, run the `registry` workflow once by hand: open "Actions", then
 "registry", then "Run workflow". That creates `registry/lifecycle.json` before any install depends

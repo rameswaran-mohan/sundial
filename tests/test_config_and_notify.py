@@ -62,6 +62,19 @@ def test_config_file_is_found_through_the_environment(tmp_path: Path) -> None:
     assert (config.usage_tracking, config.usage_retention_days) == (False, 30)
 
 
+@pytest.mark.parametrize("days", [0, -1])
+def test_usage_retention_below_one_day_is_rejected(tmp_path: Path, days: int) -> None:
+    path = tmp_path / "sundial.yaml"
+    path.write_text(f"usage_retention_days: {days}\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="usage_retention_days"):
+        load_config(path, env={})
+
+
+def test_one_day_of_usage_retention_is_accepted() -> None:
+    assert Config.model_validate({"usage_retention_days": 1}).usage_retention_days == 1
+
+
 def test_published_registry_is_read_from_github_by_default() -> None:
     config = load_config(None, env={})
 

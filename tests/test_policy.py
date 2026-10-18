@@ -58,6 +58,13 @@ def test_matched_model_that_no_rule_hits_still_carries_its_record_key() -> None:
     assert decision.key == ("openai", "gpt-old", "")
 
 
+def test_matched_model_that_no_rule_hits_carries_its_days_left_but_gets_no_headers() -> None:
+    decision = POLICY.decide(match(retire_on=date(2027, 9, 1)), TODAY, "m")
+
+    assert (decision.action, decision.days_left) == (Action.ALLOW, 347)
+    assert decision_headers(decision) == {}
+
+
 def test_unmatched_model_gets_the_shared_allow_with_no_key() -> None:
     decision = POLICY.decide(None, TODAY, "m")
 

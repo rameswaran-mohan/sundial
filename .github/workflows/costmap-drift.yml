@@ -16,11 +16,11 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-      - run: uv sync
+      - run: uv sync --locked --no-dev
       - run: git pull --ff-only
-      - run: uv run sundial import registry/lifecycle.json --db /tmp/registry.db
+      - run: uv run --no-dev sundial import registry/lifecycle.json --db /tmp/registry.db
       - run: curl -fsSL -o /tmp/cost_map.json https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json
-      - run: uv run sundial costmap-patch --db /tmp/registry.db --cost-map /tmp/cost_map.json --out registry/litellm-costmap-patch.json --report registry/litellm-costmap-drift.md
+      - run: uv run --no-dev sundial costmap-patch --db /tmp/registry.db --cost-map /tmp/cost_map.json --out registry/litellm-costmap-patch.json --report registry/litellm-costmap-drift.md
       - name: Commit when changed
         run: |
           git add registry/litellm-costmap-patch.json registry/litellm-costmap-drift.md
