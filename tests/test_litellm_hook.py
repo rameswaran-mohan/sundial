@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from pathlib import Path
 
 import pytest
 
@@ -234,6 +235,55 @@ async def test_redirected_and_allowed_requests_are_recorded_under_the_name_the_c
         UsageRow(NOW.date(), "leaving", "", "openai", "gpt-leaving", "", 1),
         UsageRow(NOW.date(), "openai/gpt-fine", "", "", "", "", 1),
     ]
+
+
+class ListRecorder:
+    def __init__(self) -> None:
+        self.calls: list[tuple] = []
+
+    def record(self, public_model, team, key) -> None:
+        self.calls.append((public_model, team, key))
+
+
+def offline_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Point SUNDIAL_CONFIG at a config that never touches the network; return its database path."""
+    db = tmp_path / "wired.db"
+    config = tmp_path / "sundial.yaml"
+    config.write_text(f"db: {db.as_posix()}\nregistry_url: null\nauto_scan_hours: 0\n", encoding="utf-8")
+    monkeypatch.setenv("SUNDIAL_CONFIG", str(config))
+    monkeypatch.delenv("SUNDIAL_DB", raising=False)
+    return db
+
+
+async def test_a_hook_with_no_arguments_records_usage_through_the_runtime_it_builds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db = offline_config(tmp_path, monkeypatch)
+    hook = SundialHook()
+
+    data = await hook.async_pre_call_hook(TeamAuth(), None, {"model": "gpt-wired"}, "acompletion")
+    adopted = hook._recorder
+    assert isinstance(adopted, UsageRecorder)
+    adopted.close()
+
+    assert data["model"] == "gpt-wired"
+    assert [(row.public_model, row.team, row.calls) for row in Store(db).usage_rows(date.min)] == [
+        ("gpt-wired", "team-a", 1)
+    ]
+
+
+async def test_an_explicit_recorder_is_kept_when_the_guard_is_built_lazily(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db = offline_config(tmp_path, monkeypatch)
+    explicit = ListRecorder()
+    hook = SundialHook(recorder=explicit)
+
+    await hook.async_pre_call_hook(TeamAuth(), None, {"model": "gpt-wired"}, "acompletion")
+
+    assert hook._recorder is explicit
+    assert explicit.calls == [("gpt-wired", "team-a", None)]
+    assert Store(db).usage_rows(date.min) == []
 
 
 async def test_a_recorder_that_raises_never_breaks_the_request_or_the_decision() -> None:

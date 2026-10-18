@@ -1,5 +1,6 @@
 import json
 from datetime import date, datetime, timezone
+from pathlib import Path
 
 import httpx
 import pytest
@@ -229,6 +230,71 @@ async def test_a_redirected_request_is_recorded_under_the_name_the_client_sent(a
 
     assert json.loads(response.json()["body"])["model"] == "gpt-next"
     assert [row.public_model for row in usage.usage_rows(NOW.date())] == ["gpt-leaving"]
+
+
+class ListRecorder:
+    def __init__(self) -> None:
+        self.calls: list[tuple] = []
+
+    def record(self, public_model, team, key) -> None:
+        self.calls.append((public_model, team, key))
+
+
+def offline_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Point SUNDIAL_CONFIG at a config that never touches the network; return its database path."""
+    db = tmp_path / "wired.db"
+    config = tmp_path / "sundial.yaml"
+    config.write_text(f"db: {db.as_posix()}\nregistry_url: null\nauto_scan_hours: 0\n", encoding="utf-8")
+    monkeypatch.setenv("SUNDIAL_CONFIG", str(config))
+    monkeypatch.delenv("SUNDIAL_DB", raising=False)
+    return db
+
+
+async def test_a_middleware_with_no_arguments_records_usage_through_the_runtime_it_builds(
+    app, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db = offline_config(tmp_path, monkeypatch)
+    middleware = SundialMiddleware(app)
+
+    transport = httpx.ASGITransport(app=middleware)
+    async with httpx.AsyncClient(transport=transport, base_url="http://gateway.test") as client:
+        response = await client.post("/v1/chat/completions", json={"model": "gpt-wired"})
+    adopted = middleware._recorder
+    assert isinstance(adopted, UsageRecorder)
+    adopted.close()
+
+    assert response.status_code == 200
+    assert [(row.public_model, row.team, row.calls) for row in Store(db).usage_rows(date.min)] == [
+        ("gpt-wired", "", 1)
+    ]
+
+
+async def test_an_explicit_recorder_is_kept_when_the_guard_is_built_lazily(
+    app, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db = offline_config(tmp_path, monkeypatch)
+    explicit = ListRecorder()
+    middleware = SundialMiddleware(app, recorder=explicit)
+
+    transport = httpx.ASGITransport(app=middleware)
+    async with httpx.AsyncClient(transport=transport, base_url="http://gateway.test") as client:
+        await client.post("/v1/chat/completions", json={"model": "gpt-wired"})
+
+    assert middleware._recorder is explicit
+    assert explicit.calls == [("gpt-wired", None, None)]
+    assert Store(db).usage_rows(date.min) == []
+
+
+async def test_a_post_whose_body_is_not_json_records_nothing(app) -> None:
+    recorder = ListRecorder()
+
+    async with gateway(app, recorder=recorder) as client:
+        response = await client.post(
+            "/v1/chat/completions", content=b"not json at all", headers={"content-type": "text/plain"}
+        )
+
+    assert response.status_code == 200
+    assert recorder.calls == []
 
 
 async def test_a_recorder_that_raises_never_breaks_the_request_or_the_decision(app) -> None:
