@@ -1,3 +1,5 @@
+import sqlite3
+from contextlib import closing
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -10,7 +12,7 @@ from sundial_llm.models import LifecycleState
 from sundial_llm.policy import Action
 from sundial_llm.registry import RegistryDocument, StoredRecord, build_document, parse_document, to_json
 from sundial_llm.runtime import AutoScanner, build_guard, build_runtime
-from sundial_llm.scan import run_scan
+from sundial_llm.scan import run_import, run_scan
 from sundial_llm.sources import ALL_SOURCES, Fetch
 from sundial_llm.store import Store
 from sundial_llm.usage import UsageRow
@@ -370,6 +372,94 @@ def test_older_registry_that_would_roll_back_a_direct_scan_is_skipped_for_a_scan
     assert set(fetched) == {REGISTRY_URL} | PROVIDER_URLS
     assert store.last_direct_scan_at() == later
     assert any("would roll back" in message for message in caplog.messages)
+
+
+def with_cyber(document: RegistryDocument, **change: object) -> str:
+    """The document as JSON, with `change` applied to the gpt-5.4-cyber record."""
+    records = tuple(r.model_copy(update=change) if r.key == CYBER else r for r in document.records)
+    return to_json(document.model_copy(update={"records": records}))
+
+
+@pytest.mark.parametrize("field", ["ambiguous", "retire_on_is_floor", "replacements", "deprecated_on"])
+def test_older_registry_that_changes_a_field_without_an_event_is_still_skipped(
+    store: Store, fixture_fetch, field: str
+) -> None:
+    scan_while_the_registry_is_down(store, fixture_fetch)
+    scanned = store.load_records()[CYBER]
+    change = {
+        "ambiguous": not scanned.ambiguous,
+        "retire_on_is_floor": not scanned.retire_on_is_floor,
+        "replacements": (*scanned.replacements, "gpt-extra"),
+        "deprecated_on": date(2020, 1, 1),
+    }[field]
+    assert getattr(scanned, field) != change
+    text = with_cyber(
+        build_document(store, NOW - timedelta(hours=1), ["openai-deprecations"], {}), **{field: change}
+    )
+    subject = scanner(
+        store,
+        serving([], text, fixture_fetch),
+        clock=lambda: NOW + timedelta(hours=25),
+        registry_url=REGISTRY_URL,
+    )
+
+    assert subject.maybe_start() is True
+
+    assert subject.last_mode == "scan"
+    assert store.load_records()[CYBER] == scanned
+
+
+def forget_the_direct_scan_time(store: Store) -> None:
+    """Make the store look like release 1, which never recorded when it last scanned directly."""
+    with closing(sqlite3.connect(store.path)) as conn, conn:
+        conn.execute("DELETE FROM meta WHERE key = 'last_direct_scan_at'")
+    assert store.last_direct_scan_at() is None
+
+
+def test_a_release_1_store_counts_its_last_scan_as_direct(store: Store, fixture_fetch) -> None:
+    run_scan(store, ALL_SOURCES, fixture_fetch, NOW)
+    forget_the_direct_scan_time(store)
+    scanned_retire_on = store.load_records()[CYBER].retire_on
+    text = with_cyber(
+        build_document(store, NOW - timedelta(hours=1), ["openai-deprecations"], {}),
+        retire_on=date(2026, 11, 1),
+    )
+    subject = scanner(
+        store,
+        serving([], text, fixture_fetch),
+        clock=lambda: NOW + timedelta(hours=25),
+        registry_url=REGISTRY_URL,
+    )
+
+    assert subject.maybe_start() is True
+
+    assert subject.last_mode == "scan"
+    assert store.load_records()[CYBER].retire_on == scanned_retire_on
+
+
+def test_a_store_last_filled_from_the_registry_has_no_direct_scan_to_protect(
+    store: Store, tmp_path: Path, fixture_fetch
+) -> None:
+    imported = published(tmp_path, fixture_fetch, NOW - timedelta(hours=2))
+    run_import(store, parse_document(imported), NOW)
+    assert store.last_direct_scan_at() is None
+    text = with_cyber(
+        parse_document(imported).model_copy(update={"generated_at": NOW - timedelta(hours=1)}),
+        retire_on=date(2026, 11, 1),
+    )
+    fetched: list[str] = []
+    subject = scanner(
+        store,
+        serving(fetched, text, offline),
+        clock=lambda: NOW + timedelta(hours=25),
+        registry_url=REGISTRY_URL,
+    )
+
+    assert subject.maybe_start() is True
+
+    assert subject.last_mode == "registry"
+    assert fetched == [REGISTRY_URL]
+    assert store.load_records()[CYBER].retire_on == date(2026, 11, 1)
 
 
 def test_older_registry_that_changes_nothing_is_imported(store: Store, fixture_fetch) -> None:

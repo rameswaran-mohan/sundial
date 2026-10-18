@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from sundial_llm.config import Config
-from sundial_llm.events import diff
 from sundial_llm.guard import LifecycleGuard, Records, Resolver
 from sundial_llm.notify import Post, http_post, notify_events
 from sundial_llm.registry import RegistryDocument, parse_document
@@ -101,14 +100,14 @@ class AutoScanner:
         url = self._config.registry_url
         if url is None:
             return None
-        scanned_at = self._store.last_direct_scan_at()
+        scanned_at = self._last_direct_scan()
         try:
             document = parse_document(self._fetch(url))
             newer = scanned_at is None or document.generated_at > scanned_at
         except Exception as error:  # noqa: BLE001 - any registry problem means scanning the sources instead
             logger.warning("sundial: registry %s unavailable (%s); scanning sources directly", url, error)
             return None
-        if newer or not diff(self._store.load_records(), document.lifecycle_records()):
+        if newer or self._changes_nothing(document):
             return document
         logger.warning(
             "sundial: registry %s (generated %s) is older than the direct scan at %s and would roll back "
@@ -118,6 +117,19 @@ class AutoScanner:
             scanned_at,
         )
         return None
+
+    def _last_direct_scan(self) -> datetime | None:
+        """When the provider pages were last scanned directly. A release-1 store never recorded that,
+        but every scan it made was direct, so its last scan counts unless that was a registry import."""
+        direct = self._store.last_direct_scan_at()
+        if direct is not None or "registry" in self._store.last_scan_sources():
+            return direct
+        return self._store.last_scan_at()
+
+    def _changes_nothing(self, document: RegistryDocument) -> bool:
+        """Whether every record in the document equals the stored record for its key, field by field."""
+        stored = self._store.load_records()
+        return all(stored.get(key) == record for key, record in document.lifecycle_records().items())
 
 
 @dataclass(frozen=True)
