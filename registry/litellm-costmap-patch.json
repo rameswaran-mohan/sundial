@@ -1,0 +1,20 @@
+{
+  "writer.palmyra-x4-v1:0": {
+    "deprecation_date": "2027-03-09"
+  },
+  "writer.palmyra-x5-v1:0": {
+    "deprecation_date": "2027-03-21"
+  },
+  "anthropic.claude-3-5-sonnet-20240620-v1:0": {
+    "deprecation_date": "2026-11-13"
+  },
+  "anthropic.claude-3-5-sonnet-20241022-v2:0": {
+    "deprecation_date": "2026-11-13"
+  },
+  "anthropic.claude-3-7-sonnet-20250219-v1:0": {
+    "deprecation_date": "2026-11-13"
+  },
+  "azure_ai/claude-opus-5-5-fast": {
+    "deprecation_date": "2027-01-15"
+  }
+}
