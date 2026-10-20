@@ -1,9 +1,6 @@
 {
-  "writer.palmyra-x4-v1:0": {
-    "deprecation_date": "2027-03-09"
-  },
-  "writer.palmyra-x5-v1:0": {
-    "deprecation_date": "2027-03-21"
+  "twelvelabs.marengo-embed-3-0-v1:0": {
+    "deprecation_date": "2027-03-22"
   },
   "anthropic.claude-3-5-sonnet-20240620-v1:0": {
     "deprecation_date": "2026-11-13"
