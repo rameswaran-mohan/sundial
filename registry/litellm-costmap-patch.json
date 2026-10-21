@@ -11,6 +11,21 @@
   "anthropic.claude-3-7-sonnet-20250219-v1:0": {
     "deprecation_date": "2026-11-13"
   },
+  "azure_ai/Phi-4": {
+    "deprecation_date": "2027-01-17"
+  },
+  "azure_ai/Phi-4-mini-instruct": {
+    "deprecation_date": "2027-01-17"
+  },
+  "azure_ai/Phi-4-multimodal-instruct": {
+    "deprecation_date": "2027-01-17"
+  },
+  "azure_ai/Phi-4-mini-reasoning": {
+    "deprecation_date": "2027-01-17"
+  },
+  "azure_ai/Phi-4-reasoning": {
+    "deprecation_date": "2027-01-17"
+  },
   "azure_ai/claude-opus-5-5-fast": {
     "deprecation_date": "2027-01-15"
   }
