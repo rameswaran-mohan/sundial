@@ -11,6 +11,9 @@
   "anthropic.claude-3-7-sonnet-20250219-v1:0": {
     "deprecation_date": "2026-11-13"
   },
+  "azure_ai/gpt-oss-120b": {
+    "deprecation_date": "2027-09-15"
+  },
   "azure_ai/Cohere-embed-v3-english": {
     "deprecation_date": "2027-02-15"
   },
@@ -31,6 +34,12 @@
   },
   "azure_ai/Phi-4-reasoning": {
     "deprecation_date": "2027-01-17"
+  },
+  "azure_ai/cohere-command-a": {
+    "deprecation_date": "2027-02-15"
+  },
+  "azure_ai/embed-v-4-0": {
+    "deprecation_date": "2027-06-01"
   },
   "azure_ai/grok-4-1-fast-non-reasoning": {
     "deprecation_date": "2027-05-19"
