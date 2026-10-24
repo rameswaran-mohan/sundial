@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-23T08:38:12.631802Z",
+  "generated_at": "2026-10-24T08:13:06.219021Z",
   "sources": {
     "anthropic": "ok",
     "azure": "ok",
@@ -28,7 +28,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -48,7 +48,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -68,7 +68,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -88,7 +88,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -108,7 +108,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -128,7 +128,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -148,7 +148,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -168,7 +168,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -188,7 +188,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -208,7 +208,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -228,7 +228,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -248,7 +248,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -268,7 +268,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -286,7 +286,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -304,7 +304,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -322,7 +322,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -340,7 +340,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -360,7 +360,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -380,7 +380,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -400,7 +400,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -418,7 +418,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -436,7 +436,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -454,7 +454,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -474,7 +474,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -494,7 +494,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -512,7 +512,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -530,7 +530,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -548,7 +548,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -566,7 +566,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -584,7 +584,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -602,7 +602,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -622,7 +622,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -642,7 +642,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -660,7 +660,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -678,7 +678,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "anthropic",
@@ -696,25 +696,25 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "Codestral-2501",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| Codestral-2501 | 2 | GA | — | — |",
+      "evidence": "| Codestral-2501 | 2 | GA | 2027-02-15 | — |",
       "version": "2",
       "vendor": "Mistral AI",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-02-15",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -736,7 +736,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -754,7 +754,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -772,7 +772,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -793,7 +793,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -814,7 +814,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -832,7 +832,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -853,7 +853,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -873,7 +873,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -893,7 +893,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -913,7 +913,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -933,7 +933,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -953,7 +953,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -973,7 +973,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -993,7 +993,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1013,7 +1013,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1033,7 +1033,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1051,7 +1051,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1069,79 +1069,79 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "FLUX-1.1-pro",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| FLUX-1.1-pro | 1 | GA | — | — |",
+      "evidence": "| FLUX-1.1-pro | 1 | GA | 2027-01-05 | — |",
       "version": "1",
       "vendor": "Black Forest Labs",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-05",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "FLUX.1-Kontext-pro",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| FLUX.1-Kontext-pro | 1 | GA | — | — |",
+      "evidence": "| FLUX.1-Kontext-pro | 1 | GA | 2027-01-05 | — |",
       "version": "1",
       "vendor": "Black Forest Labs",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-05",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "FLUX.2-flex",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| FLUX.2-flex | 1 | GA | — | — |",
+      "evidence": "| FLUX.2-flex | 1 | GA | 2027-01-20 | — |",
       "version": "1",
       "vendor": "Black Forest Labs",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-20",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "FLUX.2-pro",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| FLUX.2-pro | 1 | GA | — | — |",
+      "evidence": "| FLUX.2-pro | 1 | GA | 2027-01-20 | — |",
       "version": "1",
       "vendor": "Black Forest Labs",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-20",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1159,7 +1159,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1177,7 +1177,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1195,7 +1195,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1213,7 +1213,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1231,7 +1231,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1247,9 +1247,9 @@
       "retire_on": "2027-01-31",
       "retire_on_is_floor": false,
       "replacements": [],
-      "ambiguous": true,
+      "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1265,27 +1265,27 @@
       "retire_on": "2026-11-19",
       "retire_on_is_floor": false,
       "replacements": [],
-      "ambiguous": true,
+      "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "Llama-4-Scout-17B-16E-Instruct",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| Llama-4-Scout-17B-16E-Instruct | — | GA | — | — |",
+      "evidence": "| Llama-4-Scout-17B-16E-Instruct | — | GA | 2027-01-31 | — |",
       "version": null,
       "vendor": "Meta",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-31",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1305,7 +1305,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1323,7 +1323,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1341,7 +1341,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1359,7 +1359,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1379,7 +1379,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1399,7 +1399,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1417,7 +1417,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1435,7 +1435,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1453,7 +1453,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1473,7 +1473,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1491,7 +1491,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1511,7 +1511,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1531,7 +1531,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1551,7 +1551,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1571,7 +1571,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1591,7 +1591,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1609,7 +1609,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1627,7 +1627,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1645,7 +1645,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1666,7 +1666,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1684,7 +1684,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1702,7 +1702,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1720,7 +1720,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1738,7 +1738,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1756,7 +1756,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1774,7 +1774,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1794,7 +1794,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1812,7 +1812,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1830,7 +1830,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1848,7 +1848,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1866,7 +1866,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1884,7 +1884,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1902,7 +1902,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1920,7 +1920,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1938,7 +1938,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1958,7 +1958,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1976,7 +1976,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -1994,7 +1994,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2012,7 +2012,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2030,7 +2030,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2052,7 +2052,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2073,7 +2073,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2091,7 +2091,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2109,7 +2109,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2127,7 +2127,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2147,7 +2147,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2167,7 +2167,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2187,7 +2187,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2205,7 +2205,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2223,7 +2223,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2241,7 +2241,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2259,7 +2259,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2277,7 +2277,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2295,7 +2295,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2313,7 +2313,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2331,7 +2331,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2351,7 +2351,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2371,7 +2371,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2389,7 +2389,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2407,7 +2407,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2425,7 +2425,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2443,7 +2443,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2461,7 +2461,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2481,7 +2481,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2499,7 +2499,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2517,7 +2517,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2535,7 +2535,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2553,7 +2553,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2573,7 +2573,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2593,7 +2593,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2611,7 +2611,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2631,7 +2631,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2649,7 +2649,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2667,7 +2667,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2685,7 +2685,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2703,7 +2703,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2721,7 +2721,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2739,7 +2739,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2757,7 +2757,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2775,7 +2775,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2793,7 +2793,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2811,7 +2811,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2829,7 +2829,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2847,7 +2847,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2865,7 +2865,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2883,7 +2883,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2901,7 +2901,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2919,7 +2919,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2937,7 +2937,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2955,7 +2955,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2973,7 +2973,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -2991,7 +2991,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3009,7 +3009,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3027,7 +3027,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3045,7 +3045,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3063,7 +3063,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3081,7 +3081,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3099,7 +3099,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3117,27 +3117,27 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "gpt-realtime-2",
       "state": "preview",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| gpt-realtime-2 | 2026-05-06 | Preview | — | gpt-realtime-2.1 |",
+      "evidence": "| gpt-realtime-2 | 2026-05-06 | Preview | 2027-01-20 | gpt-realtime-2.1 |",
       "version": "2026-05-06",
       "vendor": "Azure OpenAI",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-20",
       "retire_on_is_floor": false,
       "replacements": [
         "gpt-realtime-2.1"
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3155,7 +3155,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3173,7 +3173,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3191,7 +3191,7 @@
       "replacements": [],
       "ambiguous": true,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3209,7 +3209,7 @@
       "replacements": [],
       "ambiguous": true,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3229,7 +3229,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3249,25 +3249,25 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "grok-4",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| grok-4 | 1 | GA | — | — |",
+      "evidence": "| grok-4 | 1 | GA | 2027-01-31 | — |",
       "version": "1",
       "vendor": "xAI",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-31",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3285,7 +3285,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3303,7 +3303,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3321,7 +3321,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3339,7 +3339,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3359,7 +3359,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3379,25 +3379,25 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
       "model_id": "grok-code-fast-1",
       "state": "active",
       "source_url": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "evidence": "| grok-code-fast-1 | 1 | GA | — | — |",
+      "evidence": "| grok-code-fast-1 | 1 | GA | 2027-01-31 | — |",
       "version": "1",
       "vendor": "xAI",
       "released_on": null,
       "announced_on": null,
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-31",
       "retire_on_is_floor": false,
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3418,7 +3418,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3438,7 +3438,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3458,7 +3458,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3478,7 +3478,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3496,7 +3496,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3514,7 +3514,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3532,7 +3532,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3552,7 +3552,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3572,7 +3572,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3592,7 +3592,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3612,7 +3612,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3632,7 +3632,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3652,7 +3652,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3672,7 +3672,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3692,7 +3692,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3710,7 +3710,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3728,7 +3728,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3746,7 +3746,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3764,7 +3764,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3782,7 +3782,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3802,7 +3802,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3820,7 +3820,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3838,7 +3838,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "azure",
@@ -3856,7 +3856,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -3874,7 +3874,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -3892,7 +3892,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -3910,7 +3910,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -3928,7 +3928,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -3946,7 +3946,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -3964,7 +3964,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -3982,7 +3982,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4000,7 +4000,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4018,7 +4018,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4036,7 +4036,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4054,7 +4054,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4072,7 +4072,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4090,7 +4090,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4108,7 +4108,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4126,7 +4126,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4144,7 +4144,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4162,7 +4162,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4180,7 +4180,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4198,7 +4198,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4216,7 +4216,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4234,7 +4234,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4252,7 +4252,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4270,7 +4270,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4288,7 +4288,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4306,7 +4306,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4324,7 +4324,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4342,7 +4342,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4360,7 +4360,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4378,7 +4378,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4396,7 +4396,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4414,7 +4414,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4432,7 +4432,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4450,7 +4450,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4468,7 +4468,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4486,7 +4486,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4504,7 +4504,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4522,7 +4522,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4540,7 +4540,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4558,7 +4558,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4576,7 +4576,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4594,7 +4594,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4612,7 +4612,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4630,7 +4630,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-20T08:38:54.711088Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4648,7 +4648,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-20T08:38:54.711088Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4666,7 +4666,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4684,7 +4684,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4702,7 +4702,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "bedrock",
@@ -4720,7 +4720,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4740,7 +4740,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4760,7 +4760,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4780,7 +4780,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4800,7 +4800,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4820,7 +4820,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4840,7 +4840,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4860,7 +4860,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4880,7 +4880,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4900,7 +4900,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4920,7 +4920,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4940,7 +4940,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4960,7 +4960,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4978,7 +4978,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -4998,7 +4998,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5018,7 +5018,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5036,7 +5036,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5056,7 +5056,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5076,7 +5076,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5096,7 +5096,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5116,7 +5116,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5137,7 +5137,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5155,7 +5155,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5175,7 +5175,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5195,7 +5195,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5215,7 +5215,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5236,7 +5236,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5256,7 +5256,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5274,7 +5274,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5294,7 +5294,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5314,7 +5314,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5334,7 +5334,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5354,7 +5354,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5374,7 +5374,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5392,7 +5392,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5412,7 +5412,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5432,7 +5432,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5453,7 +5453,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5471,7 +5471,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5491,7 +5491,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5509,7 +5509,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5527,7 +5527,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5545,7 +5545,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5563,7 +5563,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5581,7 +5581,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5601,7 +5601,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5619,7 +5619,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5637,7 +5637,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5655,7 +5655,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5673,7 +5673,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5691,7 +5691,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5711,7 +5711,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5729,7 +5729,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5749,7 +5749,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5769,7 +5769,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5789,7 +5789,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5807,7 +5807,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5825,7 +5825,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5845,7 +5845,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5865,7 +5865,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5885,7 +5885,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5903,7 +5903,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-20T08:38:54.711088Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5921,7 +5921,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-20T08:38:54.711088Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5941,7 +5941,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5961,7 +5961,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -5981,7 +5981,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6001,7 +6001,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6021,7 +6021,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6041,7 +6041,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6059,7 +6059,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6079,7 +6079,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6097,7 +6097,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6115,7 +6115,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6135,7 +6135,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6155,7 +6155,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6175,7 +6175,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6195,7 +6195,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6215,7 +6215,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6235,7 +6235,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6255,7 +6255,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6275,7 +6275,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "gemini",
@@ -6295,7 +6295,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6313,7 +6313,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6333,7 +6333,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6353,7 +6353,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6373,7 +6373,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6393,14 +6393,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "chatgpt-image-latest",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 1, 2026   | `chatgpt-image-latest` | `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare` |",
+      "evidence": "| Dec 1, 2026   | `chatgpt-image-latest`                        | `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare` |",
       "version": null,
       "vendor": null,
       "released_on": "2025-12-16",
@@ -6414,7 +6414,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6434,7 +6434,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6454,7 +6454,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6474,7 +6474,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6494,7 +6494,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6514,7 +6514,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6534,7 +6534,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6554,7 +6554,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6574,7 +6574,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6594,7 +6594,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6614,7 +6614,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6634,7 +6634,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6654,7 +6654,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6674,7 +6674,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6696,7 +6696,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6718,7 +6718,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6738,7 +6738,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6758,7 +6758,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6778,7 +6778,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6798,7 +6798,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6818,7 +6818,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6838,7 +6838,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6858,7 +6858,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6878,7 +6878,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6898,7 +6898,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6918,7 +6918,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6938,7 +6938,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6958,7 +6958,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6978,7 +6978,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -6998,7 +6998,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7018,7 +7018,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7038,7 +7038,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7058,7 +7058,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7078,7 +7078,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7098,7 +7098,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7118,7 +7118,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7138,7 +7138,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7158,7 +7158,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7178,7 +7178,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7198,7 +7198,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7218,7 +7218,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7238,7 +7238,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7258,7 +7258,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7278,7 +7278,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7298,7 +7298,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7318,7 +7318,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7338,7 +7338,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7358,7 +7358,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7378,7 +7378,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7396,7 +7396,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7416,7 +7416,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7434,7 +7434,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7454,7 +7454,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7474,7 +7474,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7494,7 +7494,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7514,7 +7514,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7532,7 +7532,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7552,7 +7552,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7572,7 +7572,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7592,14 +7592,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-audio",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-4o-audio`                      | `gpt-audio-1.5`                     |",
+      "evidence": "| Jan 20, 2027  | `gpt-4o-audio`                                        | `gpt-audio-1.5`                     |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -7612,7 +7612,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7632,7 +7632,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7652,7 +7652,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7670,7 +7670,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7690,14 +7690,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-mini-audio",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-4o-mini-audio`                 | `gpt-audio-1.5`                     |",
+      "evidence": "| Jan 20, 2027  | `gpt-4o-mini-audio`                                   | `gpt-audio-1.5`                     |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -7710,7 +7710,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7730,14 +7730,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-mini-realtime",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-4o-mini-realtime`              | `gpt-realtime-2.1-mini`             |",
+      "evidence": "| Jan 20, 2027  | `gpt-4o-mini-realtime`                                | `gpt-realtime-2.1-mini`             |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -7750,7 +7750,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7770,7 +7770,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7788,7 +7788,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7808,14 +7808,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-mini-transcribe",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Feb 26, 2027  | `gpt-4o-mini-transcribe`    | `gpt-live-transcribe` or `gpt-transcribe` |",
+      "evidence": "| Feb 26, 2027  | `gpt-4o-mini-transcribe` \\| `gpt-4o-mini-transcribe-2025-12-15` | `gpt-live-transcribe` or `gpt-transcribe` |",
       "version": null,
       "vendor": null,
       "released_on": "2025-12-15",
@@ -7829,14 +7829,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-mini-transcribe-2025-03-20",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-4o-mini-transcribe-2025-03-20` | `gpt-4o-mini-transcribe-2025-12-15` |",
+      "evidence": "| Jan 20, 2027  | `gpt-4o-mini-transcribe-2025-03-20`                   | `gpt-4o-mini-transcribe-2025-12-15` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -7849,32 +7849,55 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-4o-mini-transcribe-2025-12-15",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Feb 26, 2027  | `gpt-4o-mini-transcribe` \\| `gpt-4o-mini-transcribe-2025-12-15` | `gpt-live-transcribe` or `gpt-transcribe` |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-08-26",
+      "deprecated_on": null,
+      "retire_on": "2027-02-26",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-live-transcribe",
+        "gpt-transcribe"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-mini-tts",
-      "state": "active",
-      "source_url": "https://developers.openai.com/api/docs/changelog.md",
-      "evidence": "Feature · Model: gpt-realtime-mini · Model: gpt-audio-mini · Model: gpt-4o-mini-transcribe · Model: gpt-4o-mini-tts",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Jan 6, 2027   | `gpt-4o-mini-tts` \\| `gpt-4o-mini-tts-2025-03-20` | `gpt-realtime-2.1-mini` |",
       "version": null,
       "vendor": null,
       "released_on": "2025-12-15",
-      "announced_on": null,
+      "announced_on": "2026-10-01",
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2027-01-06",
       "retire_on_is_floor": false,
-      "replacements": [],
+      "replacements": [
+        "gpt-realtime-2.1-mini"
+      ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-mini-tts-2025-03-20",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 6, 2027   | `gpt-4o-mini-tts-2025-03-20` | `gpt-realtime-2.1-mini` |",
+      "evidence": "| Jan 6, 2027   | `gpt-4o-mini-tts` \\| `gpt-4o-mini-tts-2025-03-20` | `gpt-realtime-2.1-mini` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -7887,14 +7910,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-mini-tts-2025-12-15",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 6, 2027   | `gpt-4o-mini-tts-2025-12-15` | `gpt-realtime-2.1-mini` |",
+      "evidence": "| Jan 6, 2027   | `gpt-4o-mini-tts` \\| `gpt-4o-mini-tts-2025-12-15` | `gpt-realtime-2.1-mini` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -7907,14 +7930,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-realtime",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-4o-realtime`                   | `gpt-realtime-2.1`                  |",
+      "evidence": "| Jan 20, 2027  | `gpt-4o-realtime`                                     | `gpt-realtime-2.1`                  |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -7927,7 +7950,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7947,7 +7970,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7967,7 +7990,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -7987,7 +8010,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8007,7 +8030,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8025,7 +8048,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8045,14 +8068,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-transcribe",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Feb 26, 2027  | `gpt-4o-transcribe`         | `gpt-live-transcribe` or `gpt-transcribe` |",
+      "evidence": "| Feb 26, 2027  | `gpt-4o-transcribe`                                             | `gpt-live-transcribe` or `gpt-transcribe` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -8066,14 +8089,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-4o-transcribe-diarize",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Feb 26, 2027  | `gpt-4o-transcribe-diarize` | `gpt-live-transcribe` or `gpt-transcribe` |",
+      "evidence": "| Feb 26, 2027  | `gpt-4o-transcribe-diarize`                                     | `gpt-live-transcribe` or `gpt-transcribe` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -8087,14 +8110,34 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-5",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Dec 11, 2026  | `gpt-5` \\| `gpt-5-2025-08-07`           | `gpt-5.6-sol`                         |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-06-11",
+      "deprecated_on": null,
+      "retire_on": "2026-12-11",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-5.6-sol"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5-2025-08-07",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 11, 2026  | `gpt-5-2025-08-07`      | `gpt-5.6-sol`                         |",
+      "evidence": "| Dec 11, 2026  | `gpt-5` \\| `gpt-5-2025-08-07`           | `gpt-5.6-sol`                         |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -8107,7 +8150,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8127,7 +8170,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8147,14 +8190,34 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-5-mini",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Dec 11, 2026  | `gpt-5-mini` \\| `gpt-5-mini-2025-08-07` | `gpt-5.6-terra`                       |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-06-11",
+      "deprecated_on": null,
+      "retire_on": "2026-12-11",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-5.6-terra"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5-mini-2025-08-07",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 11, 2026  | `gpt-5-mini-2025-08-07` | `gpt-5.6-terra`                       |",
+      "evidence": "| Dec 11, 2026  | `gpt-5-mini` \\| `gpt-5-mini-2025-08-07` | `gpt-5.6-terra`                       |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -8167,14 +8230,34 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-5-nano",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Dec 11, 2026  | `gpt-5-nano` \\| `gpt-5-nano-2025-08-07` | `gpt-5.6-luna`                        |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-06-11",
+      "deprecated_on": null,
+      "retire_on": "2026-12-11",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-5.6-luna"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5-nano-2025-08-07",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 11, 2026  | `gpt-5-nano-2025-08-07` | `gpt-5.6-luna`                        |",
+      "evidence": "| Dec 11, 2026  | `gpt-5-nano` \\| `gpt-5-nano-2025-08-07` | `gpt-5.6-luna`                        |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -8187,32 +8270,34 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5-pro",
-      "state": "active",
-      "source_url": "https://developers.openai.com/api/docs/changelog.md",
-      "evidence": "Feature · Model: gpt-5-pro · Model: gpt-realtime-mini · Model: gpt-audio-mini · Model: gpt-image-1-mini · Model: sora-2 · Model: sora-2-pro · API: v1/responses · API: v1/batch · API: v1/chat/completions · API: v1/videos · API: v1/realtime · API: v1/images/generations",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Dec 11, 2026  | `gpt-5-pro` \\| `gpt-5-pro-2025-10-06`   | `gpt-5.6-sol` (`reasoning.mode: pro`) |",
       "version": null,
       "vendor": null,
       "released_on": "2025-10-06",
-      "announced_on": null,
+      "announced_on": "2026-06-11",
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2026-12-11",
       "retire_on_is_floor": false,
-      "replacements": [],
+      "replacements": [
+        "gpt-5.6-sol"
+      ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5-pro-2025-10-06",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 11, 2026  | `gpt-5-pro-2025-10-06`  | `gpt-5.6-sol` (`reasoning.mode: pro`) |",
+      "evidence": "| Dec 11, 2026  | `gpt-5-pro` \\| `gpt-5-pro-2025-10-06`   | `gpt-5.6-sol` (`reasoning.mode: pro`) |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -8225,14 +8310,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5.1",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Apr 1, 2027   | `gpt-5.1`       | `gpt-6-sol`             |",
+      "evidence": "| Apr 1, 2027   | `gpt-5.1` \\| `gpt-5.1-2025-11-13`           | `gpt-6-sol`             |",
       "version": null,
       "vendor": null,
       "released_on": "2025-11-13",
@@ -8245,7 +8330,27 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-5.1-2025-11-13",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Apr 1, 2027   | `gpt-5.1` \\| `gpt-5.1-2025-11-13`           | `gpt-6-sol`             |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-10-01",
+      "deprecated_on": null,
+      "retire_on": "2027-04-01",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-6-sol"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8265,7 +8370,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8285,7 +8390,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8305,7 +8410,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8325,7 +8430,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8343,7 +8448,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8363,7 +8468,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8383,7 +8488,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8403,14 +8508,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5.3-codex",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Apr 1, 2027   | `gpt-5.3-codex` | `gpt-6-sol`             |",
+      "evidence": "| Apr 1, 2027   | `gpt-5.3-codex`                             | `gpt-6-sol`             |",
       "version": null,
       "vendor": null,
       "released_on": "2026-02-24",
@@ -8423,7 +8528,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8441,7 +8546,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8459,7 +8564,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8477,14 +8582,14 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-5.4-nano",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Apr 1, 2027   | `gpt-5.4-nano`  | `gpt-6-luna`            |",
+      "evidence": "| Apr 1, 2027   | `gpt-5.4-nano` \\| `gpt-5.4-nano-2026-03-17` | `gpt-6-luna`            |",
       "version": null,
       "vendor": null,
       "released_on": "2026-03-17",
@@ -8497,7 +8602,27 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-5.4-nano-2026-03-17",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Apr 1, 2027   | `gpt-5.4-nano` \\| `gpt-5.4-nano-2026-03-17` | `gpt-6-luna`            |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-10-01",
+      "deprecated_on": null,
+      "retire_on": "2027-04-01",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-6-luna"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8515,7 +8640,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8533,7 +8658,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8551,7 +8676,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8569,7 +8694,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8587,7 +8712,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8605,7 +8730,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8623,7 +8748,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8641,7 +8766,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8659,7 +8784,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8677,7 +8802,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8695,14 +8820,14 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-audio",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-audio`                         | `gpt-audio-1.5`                     |",
+      "evidence": "| Jan 20, 2027  | `gpt-audio` \\| `gpt-audio-2025-08-28`                 | `gpt-audio-1.5`                     |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -8715,7 +8840,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8733,14 +8858,34 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-audio-2025-08-28",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Jan 20, 2027  | `gpt-audio` \\| `gpt-audio-2025-08-28`                 | `gpt-audio-1.5`                     |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-07-20",
+      "deprecated_on": null,
+      "retire_on": "2027-01-20",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-audio-1.5"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-audio-mini",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-audio-mini`                    | `gpt-audio-1.5`                     |",
+      "evidence": "| Jan 20, 2027  | `gpt-audio-mini` \\| `gpt-audio-mini-2025-12-15`       | `gpt-audio-1.5`                     |",
       "version": null,
       "vendor": null,
       "released_on": "2025-10-06",
@@ -8753,7 +8898,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8773,7 +8918,27 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-audio-mini-2025-12-15",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Jan 20, 2027  | `gpt-audio-mini` \\| `gpt-audio-mini-2025-12-15`       | `gpt-audio-1.5`                     |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-07-20",
+      "deprecated_on": null,
+      "retire_on": "2027-01-20",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-audio-1.5"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8791,7 +8956,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8809,7 +8974,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8830,14 +8995,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-image-1-mini",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 1, 2026   | `gpt-image-1-mini`     | `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare` |",
+      "evidence": "| Dec 1, 2026   | `gpt-image-1-mini`                            | `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare` |",
       "version": null,
       "vendor": null,
       "released_on": "2025-10-06",
@@ -8851,14 +9016,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-image-1.5",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 1, 2026   | `gpt-image-1.5`        | `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare` |",
+      "evidence": "| Dec 1, 2026   | `gpt-image-1.5` \\| `gpt-image-1.5-2025-12-16` | `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare` |",
       "version": null,
       "vendor": null,
       "released_on": "2025-12-16",
@@ -8872,7 +9037,28 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-image-1.5-2025-12-16",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Dec 1, 2026   | `gpt-image-1.5` \\| `gpt-image-1.5-2025-12-16` | `gpt-image-2.5-sunburst` or `gpt-image-2.5-flare` |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-06-02",
+      "deprecated_on": null,
+      "retire_on": "2026-12-01",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-image-2.5-sunburst",
+        "gpt-image-2.5-flare"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8890,7 +9076,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8908,7 +9094,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8926,7 +9112,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8944,7 +9130,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8962,7 +9148,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8980,7 +9166,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -8998,14 +9184,14 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-realtime",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-realtime`                      | `gpt-realtime-2.1`                  |",
+      "evidence": "| Jan 20, 2027  | `gpt-realtime` \\| `gpt-realtime-2025-08-28`           | `gpt-realtime-2.1`                  |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -9018,7 +9204,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9036,7 +9222,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9054,7 +9240,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9072,7 +9258,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9090,14 +9276,34 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-realtime-2025-08-28",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Jan 20, 2027  | `gpt-realtime` \\| `gpt-realtime-2025-08-28`           | `gpt-realtime-2.1`                  |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-07-20",
+      "deprecated_on": null,
+      "retire_on": "2027-01-20",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-realtime-2.1"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "gpt-realtime-mini",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 20, 2027  | `gpt-realtime-mini`                 | `gpt-realtime-2.1-mini`             |",
+      "evidence": "| Jan 20, 2027  | `gpt-realtime-mini` \\| `gpt-realtime-mini-2025-12-15` | `gpt-realtime-2.1-mini`             |",
       "version": null,
       "vendor": null,
       "released_on": "2025-10-06",
@@ -9110,7 +9316,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9130,7 +9336,27 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "gpt-realtime-mini-2025-12-15",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Jan 20, 2027  | `gpt-realtime-mini` \\| `gpt-realtime-mini-2025-12-15` | `gpt-realtime-2.1-mini`             |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-07-20",
+      "deprecated_on": null,
+      "retire_on": "2027-01-20",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-realtime-2.1-mini"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9148,7 +9374,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9166,7 +9392,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9184,7 +9410,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9202,7 +9428,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9222,7 +9448,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9242,7 +9468,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9262,7 +9488,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9282,7 +9508,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9302,7 +9528,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9322,14 +9548,34 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
+    },
+    {
+      "platform": "openai",
+      "model_id": "o3",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Dec 11, 2026  | `o3` \\| `o3-2025-04-16`                 | `gpt-5.6-sol`                         |",
+      "version": null,
+      "vendor": null,
+      "released_on": null,
+      "announced_on": "2026-06-11",
+      "deprecated_on": null,
+      "retire_on": "2026-12-11",
+      "retire_on_is_floor": false,
+      "replacements": [
+        "gpt-5.6-sol"
+      ],
+      "ambiguous": false,
+      "first_seen": "2026-10-24T08:13:04.711857Z",
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "o3-2025-04-16",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 11, 2026  | `o3-2025-04-16`         | `gpt-5.6-sol`                         |",
+      "evidence": "| Dec 11, 2026  | `o3` \\| `o3-2025-04-16`                 | `gpt-5.6-sol`                         |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -9342,7 +9588,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9362,7 +9608,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9382,7 +9628,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9402,7 +9648,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9422,32 +9668,34 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "o3-pro",
-      "state": "active",
-      "source_url": "https://developers.openai.com/api/docs/changelog.md",
-      "evidence": "Feature · Model: o3-pro · API: v1/responses · API: v1/batch",
+      "state": "deprecated",
+      "source_url": "https://developers.openai.com/api/docs/deprecations.md",
+      "evidence": "| Dec 11, 2026  | `o3-pro` \\| `o3-pro-2025-06-10`         | `gpt-5.6-sol` (`reasoning.mode: pro`) |",
       "version": null,
       "vendor": null,
       "released_on": "2025-06-10",
-      "announced_on": null,
+      "announced_on": "2026-06-11",
       "deprecated_on": null,
-      "retire_on": null,
+      "retire_on": "2026-12-11",
       "retire_on_is_floor": false,
-      "replacements": [],
+      "replacements": [
+        "gpt-5.6-sol"
+      ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "o3-pro-2025-06-10",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Dec 11, 2026  | `o3-pro-2025-06-10`     | `gpt-5.6-sol` (`reasoning.mode: pro`) |",
+      "evidence": "| Dec 11, 2026  | `o3-pro` \\| `o3-pro-2025-06-10`         | `gpt-5.6-sol` (`reasoning.mode: pro`) |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -9460,7 +9708,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9480,7 +9728,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9500,7 +9748,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9520,7 +9768,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9540,7 +9788,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9558,7 +9806,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9576,7 +9824,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9594,7 +9842,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9612,7 +9860,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9630,7 +9878,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9648,7 +9896,7 @@
       "replacements": [],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9668,7 +9916,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9688,7 +9936,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9708,7 +9956,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9728,7 +9976,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9748,7 +9996,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9768,7 +10016,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9788,7 +10036,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9808,7 +10056,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9828,7 +10076,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9848,7 +10096,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9868,7 +10116,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9888,7 +10136,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9908,7 +10156,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9928,7 +10176,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9948,7 +10196,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9968,7 +10216,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -9988,7 +10236,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -10008,7 +10256,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -10028,7 +10276,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -10048,7 +10296,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -10068,7 +10316,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
@@ -10088,14 +10336,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "tts-1",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 6, 2027   | `tts-1`                      | `gpt-realtime-2.1-mini` |",
+      "evidence": "| Jan 6, 2027   | `tts-1`                                           | `gpt-realtime-2.1-mini` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -10108,14 +10356,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "tts-1-hd",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Jan 6, 2027   | `tts-1-hd`                   | `gpt-realtime-2.1-mini` |",
+      "evidence": "| Jan 6, 2027   | `tts-1-hd`                                        | `gpt-realtime-2.1-mini` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -10128,14 +10376,14 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     },
     {
       "platform": "openai",
       "model_id": "whisper-1",
       "state": "deprecated",
       "source_url": "https://developers.openai.com/api/docs/deprecations.md",
-      "evidence": "| Feb 26, 2027  | `whisper-1`                 | `gpt-live-transcribe` or `gpt-transcribe` |",
+      "evidence": "| Feb 26, 2027  | `whisper-1`                                                     | `gpt-live-transcribe` or `gpt-transcribe` |",
       "version": null,
       "vendor": null,
       "released_on": null,
@@ -10149,7 +10397,7 @@
       ],
       "ambiguous": false,
       "first_seen": "2026-10-19T00:01:14.246902Z",
-      "last_seen": "2026-10-23T08:38:11.210202Z"
+      "last_seen": "2026-10-24T08:13:04.711857Z"
     }
   ]
 }
