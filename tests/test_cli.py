@@ -1,11 +1,17 @@
 import io
 import json
 import re
+import sys
+import types
 from datetime import datetime, timedelta, timezone
 
+import httpx
 import pytest
 
+from sundial_llm import cli
 from sundial_llm.cli import main
+from sundial_llm.integrations.service import DecisionService
+from sundial_llm.runtime import build_runtime
 from sundial_llm.sources import ALL_SOURCES
 from sundial_llm.store import Store
 from sundial_llm.usage import UsageRecorder, UsageRow
@@ -34,9 +40,11 @@ def db(tmp_path):
     return tmp_path / "cli.db"
 
 
-def run(args: list[str], fetch, now=T1, env=None) -> tuple[int, str]:
+def run(args: list[str], fetch, now=T1, env=None, **options) -> tuple[int, str]:
     out = io.StringIO()
-    code = main(args, fetch=fetch, now=lambda: now, post=lambda url, body: None, out=out, env=env or {})
+    code = main(
+        args, fetch=fetch, now=lambda: now, post=lambda url, body: None, out=out, env=env or {}, **options
+    )
     return code, out.getvalue()
 
 
@@ -511,3 +519,194 @@ def test_a_config_that_cannot_be_found_parsed_or_validated_exits_2(tmp_path, fix
 
     assert code == 2
     assert output.startswith("sundial: ")
+
+
+SERVE_TOKEN = "s3cret-token"
+INSTALL_HINT = 'sundial: sundial serve needs uvicorn; install it with: pip install "sundial-llm[serve]"'
+
+
+def write_serve_config(tmp_path, db, *, usage_tracking: bool = False) -> str:
+    """A config that never refreshes the registry in the background, so serving stays offline."""
+    config = tmp_path / "serve.yaml"
+    config.write_text(
+        f"db: {db.as_posix()}\nregistry_url: null\nauto_scan_hours: 0\n"
+        f"usage_tracking: {'true' if usage_tracking else 'false'}\n",
+        encoding="utf-8",
+    )
+    return str(config)
+
+
+@pytest.fixture
+def serve_config(tmp_path, db) -> str:
+    return write_serve_config(tmp_path, db)
+
+
+def serve(args: list[str], fetch, env=None) -> tuple[int, str, list]:
+    """Run `sundial serve` with a runner that records what it was asked to serve instead of serving."""
+    served: list = []
+    code, output = run(
+        ["serve", *args], fetch, env=env, run_server=lambda app, host, port: served.append((app, host, port))
+    )
+    return code, output, served
+
+
+async def decide(app, headers=None) -> httpx.Response:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://sundial.test"
+    ) as client:
+        return await client.post("/v1/decide", json={"model": "gpt-4-0613"}, headers=headers)
+
+
+def test_serve_runs_the_decision_service_on_the_default_host_and_port(
+    db, serve_config, fixture_fetch
+) -> None:
+    run(["scan", "--db", str(db)], fixture_fetch)
+    tracked = len(Store(db).load_records())
+
+    code, output, served = serve(["--config", serve_config], fixture_fetch)
+
+    assert code == 0
+    assert [(type(app), host, port) for app, host, port in served] == [(DecisionService, "127.0.0.1", 8765)]
+    assert output == f"Serving lifecycle decisions on http://127.0.0.1:8765 ({tracked} records)\n"
+
+
+def test_serve_on_a_public_address_without_a_token_warns_and_still_serves(
+    serve_config, fixture_fetch
+) -> None:
+    code, output, served = serve(
+        ["--config", serve_config, "--host", "0.0.0.0", "--port", "9000"], fixture_fetch
+    )
+
+    lines = output.splitlines()
+    assert code == 0
+    assert [(host, port) for _, host, port in served] == [("0.0.0.0", 9000)]
+    assert len(lines) == 2
+    assert lines[0].startswith("warning: ") and "SUNDIAL_SERVE_TOKEN" in lines[0]
+    assert lines[1] == "Serving lifecycle decisions on http://0.0.0.0:9000 (0 records)"
+
+
+@pytest.mark.anyio
+async def test_serve_with_a_token_does_not_warn_and_the_service_requires_it(
+    serve_config, fixture_fetch
+) -> None:
+    code, output, served = serve(
+        ["--config", serve_config, "--host", "0.0.0.0"],
+        fixture_fetch,
+        env={"SUNDIAL_SERVE_TOKEN": SERVE_TOKEN},
+    )
+    app = served[0][0]
+
+    anonymous = await decide(app)
+    wrong = await decide(app, {"Authorization": "Bearer not-the-token"})
+    authorized = await decide(app, {"Authorization": f"Bearer {SERVE_TOKEN}"})
+
+    assert code == 0
+    assert "warning" not in output
+    assert (anonymous.status_code, wrong.status_code, authorized.status_code) == (401, 401, 200)
+    assert authorized.json()["action"] == "allow"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("token", ["", "  \t "], ids=["empty", "whitespace"])
+async def test_a_blank_token_means_no_token_so_a_public_address_warns(
+    serve_config, fixture_fetch, token
+) -> None:
+    code, output, served = serve(
+        ["--config", serve_config, "--host", "0.0.0.0"], fixture_fetch, env={"SUNDIAL_SERVE_TOKEN": token}
+    )
+
+    response = await decide(served[0][0])
+
+    assert code == 0
+    assert output.startswith("warning: ") and "SUNDIAL_SERVE_TOKEN" in output.splitlines()[0]
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize(
+    ("host", "url"),
+    [("localhost", "http://localhost:8765"), ("::1", "http://[::1]:8765")],
+    ids=["localhost", "ipv6"],
+)
+def test_serve_on_a_loopback_host_does_not_warn(serve_config, fixture_fetch, host, url) -> None:
+    code, output, served = serve(["--config", serve_config, "--host", host], fixture_fetch)
+
+    assert code == 0
+    assert [served_host for _, served_host, _ in served] == [host]
+    assert output == f"Serving lifecycle decisions on {url} (0 records)\n"
+
+
+def test_serve_runs_uvicorn_when_no_runner_is_given(serve_config, fixture_fetch, monkeypatch) -> None:
+    calls: list = []
+    uvicorn = types.ModuleType("uvicorn")
+    uvicorn.run = lambda app, **options: calls.append((app, options))
+    monkeypatch.setitem(sys.modules, "uvicorn", uvicorn)
+
+    code, _ = run(["serve", "--config", serve_config, "--port", "9001"], fixture_fetch)
+
+    assert code == 0
+    assert [(type(app), options) for app, options in calls] == [
+        (DecisionService, {"host": "127.0.0.1", "port": 9001, "log_level": "info"})
+    ]
+
+
+def test_serve_without_uvicorn_exits_2_with_the_install_hint(
+    serve_config, fixture_fetch, monkeypatch
+) -> None:
+    monkeypatch.setitem(sys.modules, "uvicorn", None)
+
+    code, output = run(["serve", "--config", serve_config], fixture_fetch)
+
+    assert code == 2
+    assert output == INSTALL_HINT + "\n"
+
+
+@pytest.mark.parametrize("port", ["0", "70000"])
+def test_serve_rejects_a_port_outside_1_to_65535(serve_config, fixture_fetch, capsys, port) -> None:
+    with pytest.raises(SystemExit) as exited:
+        serve(["--config", serve_config, "--port", port], fixture_fetch)
+
+    assert exited.value.code == 2
+    assert "65535" in capsys.readouterr().err
+
+
+def test_serve_flushes_its_startup_lines_before_the_server_takes_over(serve_config, fixture_fetch) -> None:
+    class Out(io.StringIO):
+        flushed = ""
+
+        def flush(self) -> None:
+            self.flushed = self.getvalue()
+
+    out = Out()
+    seen: list[str] = []
+
+    main(
+        ["serve", "--config", serve_config, "--host", "0.0.0.0"],
+        fetch=fixture_fetch,
+        now=lambda: T1,
+        post=lambda url, body: None,
+        out=out,
+        env={},
+        run_server=lambda app, host, port: seen.append(out.flushed),
+    )
+
+    assert seen == [out.getvalue()]
+    assert len(out.getvalue().splitlines()) == 2
+
+
+@pytest.mark.anyio
+async def test_serve_counts_usage_with_the_runtime_recorder(tmp_path, db, fixture_fetch, monkeypatch) -> None:
+    runtimes: list = []
+
+    def build(*args, **options):
+        runtimes.append(build_runtime(*args, **options, at_exit=lambda close: None))
+        return runtimes[-1]
+
+    monkeypatch.setattr(cli, "build_runtime", build)
+    config = write_serve_config(tmp_path, db, usage_tracking=True)
+    _, _, served = serve(["--config", config], fixture_fetch)
+
+    await decide(served[0][0])
+    runtimes[0].recorder.close()
+
+    rows = Store(db).usage_rows(T1.date())
+    assert [(row.day, row.public_model, row.calls) for row in rows] == [(T1.date(), "gpt-4-0613", 1)]

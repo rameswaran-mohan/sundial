@@ -1,4 +1,4 @@
-"""Command line: scan, import, export, status, check, events, costmap-patch."""
+"""Command line: scan, import, export, status, check, events, costmap-patch, serve."""
 
 from __future__ import annotations
 
@@ -15,11 +15,14 @@ from sundial_llm import __version__
 from sundial_llm.config import Config, load_config
 from sundial_llm.costmap import LITELLM_COST_MAP_URL, build_patch, render_report
 from sundial_llm.guard import IdentityResolver, LifecycleGuard
+from sundial_llm.integrations.asgi import ASGIApp
+from sundial_llm.integrations.service import DecisionService
 from sundial_llm.matching import UpstreamModel, parse_upstream
 from sundial_llm.models import LifecycleRecord, RecordKey
 from sundial_llm.notify import Post, http_post, notify_events, render_event
 from sundial_llm.policy import Action
 from sundial_llm.registry import build_document, parse_document, write_if_changed
+from sundial_llm.runtime import build_runtime
 from sundial_llm.scan import ScanOutcome, run_import, run_scan
 from sundial_llm.sources import ALL_SOURCES, Fetch, http_fetch
 from sundial_llm.store import Store
@@ -31,9 +34,28 @@ EXIT_MODEL_FLAGGED = 3
 
 _EMPTY_REGISTRY = "sundial: the registry is empty; run sundial scan or sundial import first"
 
+# Serves an ASGI app on a host and port until the server stops; uvicorn when none is injected.
+RunServer = Callable[[ASGIApp, str, int], None]
+
+SERVE_TOKEN_ENV = "SUNDIAL_SERVE_TOKEN"
+_DEFAULT_SERVE_HOST = "127.0.0.1"
+_DEFAULT_SERVE_PORT = 8765
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
+_NO_UVICORN = 'sundial: sundial serve needs uvicorn; install it with: pip install "sundial-llm[serve]"'
+
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _port(value: str) -> int:
+    try:
+        port = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid port: {value!r}") from None
+    if not 1 <= port <= 65535:
+        raise argparse.ArgumentTypeError(f"port must be between 1 and 65535, not {port}")
+    return port
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -83,6 +105,19 @@ def _parser() -> argparse.ArgumentParser:
         default=LITELLM_COST_MAP_URL,
         metavar="URL",
         help="where the cost map came from; only named in the report",
+    )
+
+    serve = commands.add_parser(
+        "serve", parents=[common], help="answer lifecycle decisions over HTTP for gateways that call out"
+    )
+    serve.add_argument(
+        "--host", default=_DEFAULT_SERVE_HOST, help=f"address to listen on (default {_DEFAULT_SERVE_HOST})"
+    )
+    serve.add_argument(
+        "--port",
+        type=_port,
+        default=_DEFAULT_SERVE_PORT,
+        help=f"port to listen on (default {_DEFAULT_SERVE_PORT})",
     )
     return parser
 
@@ -318,6 +353,53 @@ def _costmap(
     return EXIT_OK
 
 
+def _uvicorn_runner() -> RunServer | None:
+    """A runner that serves with uvicorn, imported only here; None when uvicorn is not installed."""
+    try:
+        import uvicorn
+    except ImportError:
+        return None
+
+    def run_with_uvicorn(app: ASGIApp, host: str, port: int) -> None:
+        uvicorn.run(app, host=host, port=port, log_level="info")
+
+    return run_with_uvicorn
+
+
+def _serve(
+    config: Config,
+    host: str,
+    port: int,
+    fetch: Fetch,
+    now: Callable[[], datetime],
+    env: Mapping[str, str],
+    run_server: RunServer | None,
+    out: TextIO,
+) -> int:
+    if run_server is None:
+        run_server = _uvicorn_runner()
+        if run_server is None:
+            print(_NO_UVICORN, file=out)
+            return EXIT_BAD_INPUT
+    # A blank token would protect nothing, so it counts as unset. The service strips the credentials a
+    # client sends, so the token is stripped too, or a trailing newline would make it unmatchable.
+    token = env.get(SERVE_TOKEN_ENV, "").strip() or None
+    if token is None and host not in _LOOPBACK_HOSTS:
+        print(
+            f"warning: serving on {host}, which is not a loopback address, without {SERVE_TOKEN_ENV}; "
+            "any client that can reach it can call the decision routes",
+            file=out,
+        )
+    runtime = build_runtime(config, IdentityResolver(), fetch=fetch, clock=now)
+    app = DecisionService(runtime.guard, runtime.recorder, token=token)
+    url_host = f"[{host}]" if ":" in host else host  # an IPv6 address is bracketed in a URL
+    count = runtime.guard.record_count()
+    print(f"Serving lifecycle decisions on http://{url_host}:{port} ({count} records)", file=out)
+    out.flush()  # the server runs until stopped, and a piped stdout would hold these lines until then
+    run_server(app, host, port)
+    return EXIT_OK
+
+
 def main(
     argv: Sequence[str] | None = None,
     *,
@@ -326,14 +408,17 @@ def main(
     post: Post = http_post,
     out: TextIO | None = None,
     env: Mapping[str, str] | None = None,
+    run_server: RunServer | None = None,
 ) -> int:
     if out is None:
         out = sys.stdout
         if hasattr(out, "reconfigure"):
             out.reconfigure(errors="replace")  # Windows consoles cannot print every provider character
+    if env is None:
+        env = os.environ
     args = _parser().parse_args(argv)
     try:
-        config = _config(args, os.environ if env is None else env)
+        config = _config(args, env)
     except (ValueError, OSError) as error:
         print(f"sundial: {error}", file=out)
         return EXIT_BAD_INPUT
@@ -352,6 +437,8 @@ def main(
         return _check(config, args.model, args.base_model, moment, out)
     if args.command == "events":
         return _events(config, args.limit, out)
+    if args.command == "serve":
+        return _serve(config, args.host, args.port, fetch, now, env, run_server, out)
     return _costmap(config, args.cost_map, args.out, args.report, args.cost_map_url, moment, out)
 
 

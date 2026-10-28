@@ -17,6 +17,7 @@ dependencies = ["httpx>=0.27", "pydantic>=2.6", "pyyaml>=6"]
 
 [project.optional-dependencies]
 litellm = ["litellm>=1.60"]
+serve = ["uvicorn>=0.30"]
 
 [project.scripts]
 sundial = "sundial_llm.cli:main"
