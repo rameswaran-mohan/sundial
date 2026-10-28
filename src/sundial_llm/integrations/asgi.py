@@ -10,10 +10,11 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Awaitable, Callable, MutableMapping
+from collections.abc import Awaitable, Callable, MutableMapping, Sequence
 from typing import TYPE_CHECKING, Any, Protocol
 
 from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
+from sundial_llm.matching import UpstreamModel
 from sundial_llm.models import RecordKey
 from sundial_llm.policy import Action, Decision
 
@@ -32,7 +33,9 @@ INFERENCE_SUFFIXES = ("/chat/completions", "/completions", "/embeddings", "/resp
 
 
 class Decider(Protocol):
-    def decide(self, public_model: str) -> Decision: ...
+    # `upstreams` names the provider models to decide, for callers that know them; the middleware
+    # leaves it out and lets the guard resolve the public model.
+    def decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None = None) -> Decision: ...
 
 
 class Recorder(Protocol):

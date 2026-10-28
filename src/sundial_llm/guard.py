@@ -72,6 +72,10 @@ class LifecycleGuard:
             self._loaded_at = now
         return self._records
 
+    def record_count(self) -> int:
+        """How many records are loaded now, 0 before the first decision. Never triggers a load."""
+        return len(self._records)
+
     def decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None = None) -> Decision:
         """Decide a request for `public_model`. With `upstreams`, the resolver is skipped and exactly
         those provider models are decided, as for a gateway that names the upstream itself. The

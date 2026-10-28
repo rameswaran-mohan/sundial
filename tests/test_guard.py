@@ -195,6 +195,24 @@ def test_the_successor_is_looked_up_by_the_public_model_not_the_upstream() -> No
     assert (decision.action, decision.enforced, decision.target) == (Action.REDIRECT, True, "gpt-next")
 
 
+def test_record_count_reports_loaded_records_without_forcing_a_load() -> None:
+    loads: list[int] = []
+
+    def load() -> dict:
+        loads.append(1)
+        return index(RETIRED, LIVE)
+
+    clock = Clock()
+    subject = LifecycleGuard(load, IdentityResolver(), BLOCK_RETIRED, clock=clock, reload_seconds=300)
+
+    assert subject.record_count() == 0
+    assert loads == []
+    subject.decide("gpt-dead")
+    clock.now = NOW + timedelta(seconds=301)
+    assert subject.record_count() == 2
+    assert len(loads) == 1
+
+
 def test_a_failing_record_load_with_explicit_upstreams_never_breaks_the_request() -> None:
     def load() -> dict:
         raise OSError("db locked")
