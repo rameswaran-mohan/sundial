@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 from datetime import date, datetime, timezone
 
 import httpx
@@ -8,7 +9,7 @@ import pytest
 from sundial_llm.guard import LifecycleGuard
 from sundial_llm.integrations.service import PORTKEY_PROVIDERS, DecisionService
 from sundial_llm.models import LifecycleRecord, LifecycleState
-from sundial_llm.policy import ALLOW, load_policy
+from sundial_llm.policy import ALLOW, Action, Decision, Mode, load_policy
 
 pytestmark = pytest.mark.anyio
 
@@ -28,7 +29,7 @@ POLICY = load_policy(
             },
             {"name": "warn-90", "when": {"days_until_retirement_lte": 90}, "action": "warn"},
         ],
-        "successors": {"gpt-leaving": "gpt-next"},
+        "successors": {"gpt-leaving": "gpt-next", "gpt-4o-mini": "gpt-4.1-mini"},
     }
 )
 
@@ -45,8 +46,23 @@ AZURE_RETIRED = rec("gpt-4o", date(2026, 9, 1), platform="azure", version="2024-
 AZURE_CURRENT = rec(
     "gpt-4o", date(2027, 3, 1), platform="azure", version="2024-11-20", state=LifecycleState.ACTIVE
 )
+# Only one Azure version of each of these, so matching by name alone is exact.
+AZURE_SOLO_RETIRED = rec("gpt-35-turbo", date(2026, 6, 1), platform="azure", version="0613")
+AZURE_SOLO_LEAVING = rec("gpt-4o-mini", date(2026, 9, 22), platform="azure", version="2024-07-18")
 GEMINI_DEAD = rec("gemini-old", date(2026, 6, 1), platform="gemini")
-RECORDS = {r.key: r for r in (DEAD, LEAVING, FADING, AZURE_RETIRED, AZURE_CURRENT, GEMINI_DEAD)}
+RECORDS = {
+    r.key: r
+    for r in (
+        DEAD,
+        LEAVING,
+        FADING,
+        AZURE_RETIRED,
+        AZURE_CURRENT,
+        AZURE_SOLO_RETIRED,
+        AZURE_SOLO_LEAVING,
+        GEMINI_DEAD,
+    )
+}
 
 FADING_MESSAGE = "Model 'gpt-fading' is deprecated and retires on 2026-10-19 (Sundial rule 'warn-90'). Use gpt-next instead."
 DEAD_MESSAGE = (
@@ -92,6 +108,26 @@ class SpyDecider:
     def decide(self, public_model, upstreams=None):
         self.calls.append((public_model, upstreams))
         return ALLOW
+
+
+class BrokenCountDecider(SpyDecider):
+    def record_count(self) -> int:
+        raise RuntimeError("db locked")
+
+
+class Opaque:
+    """A value json cannot encode."""
+
+
+class UnencodableDecider:
+    """Answers an enforced redirect whose rule json cannot encode, so only encoding the answer fails.
+    It stands in for any answer that parses and decides but cannot be serialized, such as a body
+    nested just deep enough that the redirect envelope passes the encoder's recursion limit."""
+
+    def decide(self, public_model, upstreams=None):
+        return Decision(
+            action=Action.REDIRECT, mode=Mode.APPLY, enforced=True, rule=Opaque(), target="gpt-next"
+        )
 
 
 def client_for(app: DecisionService) -> httpx.AsyncClient:
@@ -167,6 +203,17 @@ async def test_healthz_reports_no_records_for_a_decider_that_cannot_count_them()
     assert response.json() == {"status": "ok", "records": 0}
 
 
+async def test_healthz_reports_no_records_and_logs_quietly_when_counting_fails(caplog) -> None:
+    caplog.set_level(logging.DEBUG, logger="sundial")
+
+    async with service(BrokenCountDecider()) as client:
+        response = await client.get("/healthz")
+
+    assert (response.status_code, response.json()) == (200, {"status": "ok", "records": 0})
+    assert caplog.records
+    assert {record.levelno for record in caplog.records} == {logging.DEBUG}
+
+
 # --- generic contract -----------------------------------------------------------------------------
 
 
@@ -235,6 +282,19 @@ async def test_decide_matches_a_versioned_azure_record_exactly_through_base_mode
 
     assert (body["action"], body["enforced"], body["block"]) == ("block", True, True)
     assert (body["approximate"], body["state"], body["retire_on"]) == (False, "retired", "2026-09-01")
+
+
+async def test_decide_keeps_exact_matching_for_a_single_azure_version() -> None:
+    # Only the Portkey route distrusts Azure model names; the generic caller names the upstream.
+    async with service() as client:
+        body = (await client.post(DECIDE, json={"model": "gpt-35-turbo", "provider": "azure"})).json()
+
+    assert (body["action"], body["enforced"], body["block"], body["approximate"]) == (
+        "block",
+        True,
+        True,
+        False,
+    )
 
 
 async def test_decide_reads_a_model_without_a_provider_the_litellm_way() -> None:
@@ -314,6 +374,17 @@ async def test_a_decider_that_raises_answers_200_allow_with_an_error() -> None:
     assert body["error"]
 
 
+async def test_an_answer_that_cannot_be_encoded_still_allows_on_the_generic_route() -> None:
+    async with service(UnencodableDecider()) as client:
+        response = await client.post(DECIDE, json={"model": "gpt-leaving"})
+
+    assert response.status_code == 200
+    assert response.headers["content-length"] == str(len(response.content))
+    body = response.json()
+    assert (body["action"], body["block"], body["redirect_to"]) == ("allow", False, None)
+    assert body["error"]
+
+
 # --- Portkey webhook guardrail --------------------------------------------------------------------
 
 
@@ -364,10 +435,10 @@ async def test_portkey_redirect_replaces_only_the_model_in_the_request_body() ->
     data = answer["data"]
     assert (data["action"], data["enforced"]) == ("redirect", True)
     assert (data["redirected_from"], data["target"]) == ("gpt-leaving", "gpt-next")
-    assert context == original
 
 
-async def test_portkey_redirect_never_mutates_the_parsed_context() -> None:
+def test_portkey_redirect_never_mutates_the_parsed_context() -> None:
+    # Over HTTP the service only ever sees bytes, so the parsed context is checked directly.
     context = portkey_context("gpt-leaving")
     original = copy.deepcopy(context)
 
@@ -375,6 +446,69 @@ async def test_portkey_redirect_never_mutates_the_parsed_context() -> None:
 
     assert answer["transformedData"]["request"]["json"]["model"] == "gpt-next"
     assert context == original
+
+
+@pytest.mark.parametrize(
+    ("slug", "model", "action"),
+    [
+        ("azure-openai", "gpt-35-turbo", "block"),
+        ("azure-openai", "gpt-4o-mini", "redirect"),
+        ("azure-ai", "gpt-35-turbo", "block"),
+        ("azure-ai", "gpt-4o-mini", "redirect"),
+        ("azure-openai", "gpt-4o-2024-05-13", "block"),
+    ],
+    ids=["openai-block", "openai-redirect", "ai-block", "ai-redirect", "versioned-body-model"],
+)
+async def test_portkey_never_enforces_azure_because_it_routes_by_deployment(
+    slug: str, model: str, action: str
+) -> None:
+    async with service() as client:
+        answer = (await client.post(PORTKEY, json=portkey_context(model, slug))).json()
+
+    assert answer["verdict"] is True
+    assert "transformedData" not in answer
+    data = answer["data"]
+    assert (data["action"], data["enforced"], data["approximate"]) == (action, False, True)
+    assert "redirected_from" not in data
+
+
+async def test_portkey_azure_allow_stays_a_bare_verdict() -> None:
+    async with service() as client:
+        answer = (await client.post(PORTKEY, json=portkey_context("gpt-4o", "azure-openai"))).json()
+
+    assert answer == {"verdict": True}
+
+
+async def test_an_answer_that_cannot_be_encoded_still_allows_on_the_portkey_route() -> None:
+    async with service(UnencodableDecider()) as client:
+        response = await client.post(PORTKEY, json=portkey_context("gpt-leaving"))
+
+    assert response.status_code == 200
+    assert response.headers["content-length"] == str(len(response.content))
+    answer = response.json()
+    assert answer["verdict"] is True and answer["data"]["explanation"]
+    assert "transformedData" not in answer
+
+
+@pytest.mark.parametrize(
+    ("model", "provider", "slug"),
+    [
+        ("gpt-dead", "openai", "openai"),
+        ("gpt-leaving", "openai", "openai"),
+        ("gpt-fading", "openai", "openai"),
+        ("gpt-fine", "openai", "openai"),
+        ("gemini-old", "gemini", "google"),
+        ("gemini-old", "vertex_ai", "vertex-ai"),
+    ],
+)
+async def test_the_generic_block_flag_and_the_portkey_verdict_agree(
+    model: str, provider: str, slug: str
+) -> None:
+    async with service() as client:
+        generic = (await client.post(DECIDE, json={"model": model, "provider": provider})).json()
+        portkey = (await client.post(PORTKEY, json=portkey_context(model, slug))).json()
+
+    assert generic["block"] is (portkey["verdict"] is False)
 
 
 async def test_portkey_lets_a_warned_request_through_with_a_summary() -> None:
@@ -405,15 +539,19 @@ async def test_portkey_lets_an_untracked_model_through_with_a_bare_verdict() -> 
 
 
 async def test_portkey_treats_a_provider_it_cannot_map_as_untracked() -> None:
-    async with service() as client:
+    recorder = ListRecorder()
+
+    async with service(recorder=recorder) as client:
         unmapped = (await client.post(PORTKEY, json=portkey_context("gpt-dead", "cohere"))).json()
         missing = (await client.post(PORTKEY, json=portkey_context("gpt-dead", provider=None))).json()
+        unhashable = (await client.post(PORTKEY, json=portkey_context("gpt-dead", ["azure-openai"]))).json()
 
-    for answer in (unmapped, missing):
+    for answer in (unmapped, missing, unhashable):
         assert answer["verdict"] is True
         assert answer["data"]["explanation"]
         assert "transformedData" not in answer
     assert "cohere" in unmapped["data"]["explanation"]
+    assert recorder.calls == [("gpt-dead", "payments", None)] * 3
 
 
 async def test_portkey_does_not_decide_after_the_response() -> None:
@@ -557,6 +695,34 @@ async def test_an_unauthorized_request_is_refused_before_its_body_is_read() -> N
 
 
 # --- transport ------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("path", [DECIDE, PORTKEY], ids=["decide", "portkey"])
+@pytest.mark.parametrize(
+    "messages",
+    [
+        [{"type": "http.disconnect"}],
+        [
+            {"type": "http.request", "body": b'{"model": "gpt-', "more_body": True},
+            {"type": "http.disconnect"},
+        ],
+    ],
+    ids=["before-any-body", "mid-body"],
+)
+async def test_a_client_that_disconnects_before_its_body_ends_gets_no_answer(
+    path: str, messages: list
+) -> None:
+    pending = iter(messages)
+    decider = SpyDecider()
+    recorder = ListRecorder()
+
+    async def receive() -> dict:
+        return next(pending)
+
+    sent = await call(DecisionService(decider, recorder), http_scope("POST", path), receive)
+
+    assert sent == []
+    assert (decider.calls, recorder.calls) == ([], [])
 
 
 async def test_an_oversized_body_is_abandoned_as_soon_as_it_passes_the_limit() -> None:

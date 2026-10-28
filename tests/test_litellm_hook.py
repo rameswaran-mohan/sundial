@@ -13,7 +13,7 @@ from sundial_llm.integrations import litellm_hook  # noqa: E402
 from sundial_llm.integrations.litellm_hook import LitellmRouterResolver, SundialHook  # noqa: E402
 from sundial_llm.matching import UpstreamModel  # noqa: E402
 from sundial_llm.models import LifecycleRecord, LifecycleState  # noqa: E402
-from sundial_llm.policy import load_policy  # noqa: E402
+from sundial_llm.policy import ALLOW, load_policy  # noqa: E402
 from sundial_llm.store import Store  # noqa: E402
 from sundial_llm.usage import UsageRecorder, UsageRow  # noqa: E402
 
@@ -297,3 +297,16 @@ async def test_a_recorder_that_raises_never_breaks_the_request_or_the_decision()
     assert data["model"] == "next"
     with pytest.raises(fastapi.HTTPException):
         await hook.async_pre_call_hook(None, None, {"model": "dead"}, "acompletion")
+
+
+def test_the_hook_shares_the_asgi_protocols() -> None:
+    from sundial_llm.integrations import asgi
+
+    assert (litellm_hook.Decider, litellm_hook.Recorder) == (asgi.Decider, asgi.Recorder)
+
+
+def test_the_fallback_decider_takes_explicit_upstreams() -> None:
+    fallback = litellm_hook._AllowAll()
+
+    assert fallback.decide("dead") is ALLOW
+    assert fallback.decide("dead", upstreams=(UpstreamModel("openai", "dead"),)) is ALLOW

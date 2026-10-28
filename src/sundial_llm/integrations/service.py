@@ -17,6 +17,7 @@ from __future__ import annotations
 import hmac
 import json
 import logging
+from dataclasses import replace
 from typing import Any
 
 from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
@@ -43,6 +44,8 @@ PORTKEY_PROVIDERS: dict[str, str] = {
     "google": "gemini",
     "vertex-ai": "vertex_ai",
 }
+# Portkey's Azure slugs, whose decisions are never enforced (see _portkey_verdict).
+_PORTKEY_AZURE_SLUGS = frozenset({"azure-openai", "azure-ai"})
 
 _INVALID = object()  # a body that is not JSON
 
@@ -99,7 +102,13 @@ class DecisionService:
                 answer = _explain(f"The body is larger than {limit} bytes, so it was not checked.")
             else:
                 answer = self._portkey(_parse(body))
-        await _respond(send, status, answer)
+        try:
+            encoded = _encode(answer)
+        except Exception:  # noqa: BLE001 - Sundial never blocks through its own failure
+            # A body can parse and still not re-encode, for one inside the redirect envelope.
+            logger.exception("sundial: could not encode the answer for %s; allowing the request", path)
+            status, encoded = 200, _encode(_generic_failed() if path == _GENERIC else _portkey_failed())
+        await _send(send, status, encoded)
 
     def _authorized(self, scope: Scope) -> bool:
         if self._token is None:
@@ -117,7 +126,8 @@ class DecisionService:
         try:
             return int(count())
         except Exception:  # noqa: BLE001 - a health check must answer
-            logger.exception("sundial: could not count the loaded lifecycle records")
+            # Probes are frequent, so this stays at debug level, as in the guard's own count.
+            logger.debug("sundial: could not count the loaded lifecycle records", exc_info=True)
             return 0
 
     def _record(self, model: str, team: str | None, decision: Decision) -> None:
@@ -148,7 +158,7 @@ class DecisionService:
             return 200, _generic_answer(decision, model)
         except Exception:  # noqa: BLE001 - Sundial never blocks through its own failure
             logger.exception("sundial: lifecycle check failed for %s; allowing the request", model)
-            return 200, {**_generic_allow(), "error": "lifecycle check failed; the request is allowed"}
+            return 200, _generic_failed()
 
     def _portkey(self, context: object) -> Payload:
         """Portkey's webhook guardrail. Always a verdict, and only an enforced block is false."""
@@ -156,7 +166,7 @@ class DecisionService:
             return self._portkey_verdict(context)
         except Exception:  # noqa: BLE001 - Sundial never blocks through its own failure
             logger.exception("sundial: lifecycle check failed for a Portkey request; allowing it")
-            return _explain("Sundial could not check this request, so it is allowed.")
+            return _portkey_failed()
 
     def _portkey_verdict(self, context: object) -> Payload:
         if context is _INVALID:
@@ -173,14 +183,19 @@ class DecisionService:
         if not isinstance(model, str) or not model:
             return _explain("The request names no model, so it was not checked.")
         slug = context.get("provider")
-        prefix = PORTKEY_PROVIDERS.get(slug) if isinstance(slug, str) else None
+        slug = slug if isinstance(slug, str) else None
+        prefix = PORTKEY_PROVIDERS.get(slug) if slug is not None else None
         upstreams = (parse_upstream(f"{prefix}/{model}"),) if prefix else ()
         decision = self._guard.decide(model, upstreams=upstreams)
+        if slug in _PORTKEY_AZURE_SLUGS and decision.action is not Action.ALLOW:
+            # Portkey routes Azure by deployment id, and the body model need not name the deployment,
+            # so even a match that looks exact cannot be trusted enough to block or rewrite.
+            decision = replace(decision, enforced=False, approximate=True)
         metadata = context.get("metadata")
         team = metadata.get("team") if isinstance(metadata, dict) else None
         self._record(model, team if isinstance(team, str) else None, decision)
         if prefix is None:
-            reason = f"provider '{slug}'" if isinstance(slug, str) else "no provider"
+            reason = f"provider '{slug}'" if slug is not None else "no provider"
             return _explain(f"Sundial does not track models for {reason} in Portkey.")
         return _portkey_answer(decision, model, payload)
 
@@ -199,6 +214,11 @@ def _details(decision: Decision, model: str) -> Payload:
         "approximate": decision.approximate,
         "message": block_message(decision, model),
     }
+
+
+def _enforced_block(decision: Decision) -> bool:
+    """The generic `block` flag and a false Portkey verdict, so the two routes cannot disagree."""
+    return decision.enforced and decision.action is Action.BLOCK
 
 
 def _redirect_target(decision: Decision) -> str | None:
@@ -222,6 +242,10 @@ def _generic_allow() -> Payload:
     }
 
 
+def _generic_failed() -> Payload:
+    return {**_generic_allow(), "error": "lifecycle check failed; the request is allowed"}
+
+
 def _generic_answer(decision: Decision, model: str) -> Payload:
     if decision.action is Action.ALLOW:
         return _generic_allow()
@@ -234,7 +258,7 @@ def _generic_answer(decision: Decision, model: str) -> Payload:
         "action": details.pop("action"),
         "enforced": details.pop("enforced"),
         # One boolean a gateway can key on: true only when Sundial enforces a block.
-        "block": decision.enforced and decision.action is Action.BLOCK,
+        "block": _enforced_block(decision),
         "redirect_to": target,
         **details,
         "headers": headers,
@@ -245,7 +269,7 @@ def _portkey_answer(decision: Decision, model: str, payload: Payload) -> Payload
     if decision.action is Action.ALLOW:
         return {"verdict": True}
     data = _details(decision, model)
-    if decision.enforced and decision.action is Action.BLOCK:
+    if _enforced_block(decision):
         return {"verdict": False, "data": data}
     target = _redirect_target(decision)
     if target:
@@ -258,6 +282,10 @@ def _portkey_answer(decision: Decision, model: str, payload: Payload) -> Payload
 
 def _explain(explanation: str) -> Payload:
     return {"verdict": True, "data": {"explanation": explanation}}
+
+
+def _portkey_failed() -> Payload:
+    return _explain("Sundial could not check this request, so it is allowed.")
 
 
 def _parse(body: bytes) -> object:
@@ -280,8 +308,16 @@ async def _read_body(receive: Receive, limit: int) -> bytes | None:
             return bytes(body)
 
 
+def _encode(payload: Payload) -> bytes:
+    return json.dumps(payload).encode("utf-8")
+
+
 async def _respond(send: Send, status: int, payload: Payload, *, allow: str | None = None) -> None:
-    body = json.dumps(payload).encode("utf-8")
+    """Send one of the service's own small answers, which always encode."""
+    await _send(send, status, _encode(payload), allow=allow)
+
+
+async def _send(send: Send, status: int, body: bytes, *, allow: str | None = None) -> None:
     headers = [(b"content-type", b"application/json"), (b"content-length", str(len(body)).encode("ascii"))]
     if allow is not None:
         headers.append((b"allow", allow.encode("ascii")))

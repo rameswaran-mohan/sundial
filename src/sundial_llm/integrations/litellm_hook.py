@@ -12,13 +12,13 @@ from __future__ import annotations
 import logging
 import sys
 from collections.abc import Callable, Sequence
-from typing import Any, Protocol
+from typing import Any
 
 from litellm.integrations.custom_logger import CustomLogger
 
 from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
+from sundial_llm.integrations.asgi import Decider, Recorder
 from sundial_llm.matching import UpstreamModel, parse_upstream
-from sundial_llm.models import RecordKey
 from sundial_llm.policy import ALLOW, Action, Decision
 
 logger = logging.getLogger("sundial")
@@ -26,20 +26,12 @@ logger = logging.getLogger("sundial")
 _STASH = "sundial_headers"
 
 
-class Decider(Protocol):
-    def decide(self, public_model: str) -> Decision: ...
-
-
-class Recorder(Protocol):
-    def record(self, public_model: str, team: str | None, key: RecordKey | None) -> None: ...
-
-
 class ModelBlocked(Exception):
     """Raised instead of an HTTP error when FastAPI is not installed."""
 
 
 class _AllowAll:
-    def decide(self, public_model: str) -> Decision:
+    def decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None = None) -> Decision:
         return ALLOW
 
 
