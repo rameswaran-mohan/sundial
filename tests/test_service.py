@@ -143,13 +143,13 @@ def http_scope(method: str, path: str, headers: list | None = None) -> dict:
 # --- health ---------------------------------------------------------------------------------------
 
 
-async def test_healthz_reports_the_records_the_guard_has_loaded() -> None:
+async def test_healthz_on_a_fresh_service_reports_the_real_record_count() -> None:
     async with service() as client:
-        before = await client.get("/healthz")
+        first = await client.get("/healthz")
         await client.post(DECIDE, json={"model": "gpt-fading"})
         after = await client.get("/healthz")
 
-    assert (before.status_code, before.json()) == (200, {"status": "ok", "records": 0})
+    assert (first.status_code, first.json()) == (200, {"status": "ok", "records": len(RECORDS)})
     assert (after.status_code, after.json()) == (200, {"status": "ok", "records": len(RECORDS)})
 
 
@@ -157,7 +157,7 @@ async def test_healthz_stays_open_when_a_token_is_configured() -> None:
     async with service(token="s3cret") as client:
         response = await client.get("/healthz")
 
-    assert (response.status_code, response.json()) == (200, {"status": "ok", "records": 0})
+    assert (response.status_code, response.json()) == (200, {"status": "ok", "records": len(RECORDS)})
 
 
 async def test_healthz_reports_no_records_for_a_decider_that_cannot_count_them() -> None:

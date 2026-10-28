@@ -73,8 +73,14 @@ class LifecycleGuard:
         return self._records
 
     def record_count(self) -> int:
-        """How many records are loaded now, 0 before the first decision. Never triggers a load."""
-        return len(self._records)
+        """How many records the guard decides with. Loads them first exactly when `decide` would: on
+        the first call, or once the reload TTL has passed. Never raises; a failed load reports the
+        records already held, 0 if none."""
+        try:
+            return len(self._current_records(self._clock()))
+        except Exception:  # noqa: BLE001 - a health probe must never fail
+            logger.debug("sundial: could not load lifecycle records to count them", exc_info=True)
+            return len(self._records)
 
     def decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None = None) -> Decision:
         """Decide a request for `public_model`. With `upstreams`, the resolver is skipped and exactly
