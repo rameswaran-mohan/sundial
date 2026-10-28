@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 from sundial_llm.guard import IdentityResolver, LifecycleGuard
 from sundial_llm.matching import UpstreamModel
 from sundial_llm.models import LifecycleRecord, LifecycleState
-from sundial_llm.policy import Action, load_policy
+from sundial_llm.policy import ALLOW, Action, load_policy
 
 NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
 
@@ -139,3 +139,66 @@ def test_a_failing_record_load_never_breaks_the_request() -> None:
     subject = LifecycleGuard(load, IdentityResolver(), BLOCK_RETIRED, clock=Clock())
 
     assert subject.decide("gpt-dead").action is Action.ALLOW
+
+
+class RaisingResolver:
+    def resolve(self, public_model: str) -> list[UpstreamModel]:
+        raise AssertionError("the resolver must not be called when upstreams are given")
+
+
+def test_explicit_upstreams_are_decided_without_calling_the_resolver() -> None:
+    subject = guard(index(RETIRED, LIVE), RaisingResolver())
+
+    decision = subject.decide("whatever-the-client-sent", upstreams=(UpstreamModel("openai", "gpt-dead"),))
+
+    assert (decision.action, decision.enforced, decision.key) == (Action.BLOCK, True, RETIRED.key)
+
+
+def test_explicit_upstreams_follow_the_group_rule() -> None:
+    subject = guard(index(RETIRED, LIVE), RaisingResolver())
+
+    decision = subject.decide(
+        "mixed", upstreams=(UpstreamModel("openai", "gpt-dead"), UpstreamModel("openai", "gpt-live"))
+    )
+
+    assert (decision.action, decision.enforced) == (Action.BLOCK, False)
+
+
+def test_an_empty_upstream_sequence_allows_without_resolving() -> None:
+    # The identity resolver would read "gpt-dead" as the retired OpenAI model and block it.
+    decision = guard(index(RETIRED)).decide("gpt-dead", upstreams=())
+
+    assert decision == ALLOW
+
+
+LEAVING = rec("gpt-leaving", retire_on=date(2026, 9, 22))
+REDIRECT_WEEK = load_policy(
+    {
+        "rules": [
+            {
+                "name": "redirect-week",
+                "when": {"days_until_retirement_lte": 7},
+                "action": "redirect",
+                "mode": "apply",
+            }
+        ],
+        "successors": {"public-chat": "gpt-next", "gpt-leaving": "gpt-wrong"},
+    }
+)
+
+
+def test_the_successor_is_looked_up_by_the_public_model_not_the_upstream() -> None:
+    subject = LifecycleGuard(lambda: index(LEAVING), RaisingResolver(), REDIRECT_WEEK, clock=Clock())
+
+    decision = subject.decide("public-chat", upstreams=(UpstreamModel("openai", "gpt-leaving"),))
+
+    assert (decision.action, decision.enforced, decision.target) == (Action.REDIRECT, True, "gpt-next")
+
+
+def test_a_failing_record_load_with_explicit_upstreams_never_breaks_the_request() -> None:
+    def load() -> dict:
+        raise OSError("db locked")
+
+    subject = LifecycleGuard(load, RaisingResolver(), BLOCK_RETIRED, clock=Clock())
+
+    assert subject.decide("gpt-dead", upstreams=(UpstreamModel("openai", "gpt-dead"),)) == ALLOW

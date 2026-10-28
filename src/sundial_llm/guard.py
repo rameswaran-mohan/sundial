@@ -72,20 +72,25 @@ class LifecycleGuard:
             self._loaded_at = now
         return self._records
 
-    def decide(self, public_model: str) -> Decision:
+    def decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None = None) -> Decision:
+        """Decide a request for `public_model`. With `upstreams`, the resolver is skipped and exactly
+        those provider models are decided, as for a gateway that names the upstream itself. The
+        successor for a redirect is always looked up by `public_model`."""
         try:
-            return self._decide(public_model)
+            return self._decide(public_model, upstreams)
         except Exception:  # noqa: BLE001 - lifecycle checks must never take a request down
             logger.exception("sundial: lifecycle check failed for %s; allowing the request", public_model)
             return ALLOW
 
-    def _decide(self, public_model: str) -> Decision:
+    def _decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None) -> Decision:
         now = self._clock()
         today = now.date()
         records = self._current_records(now)
+        if upstreams is None:
+            upstreams = self._resolver.resolve(public_model)
         decisions = [
             self._policy.decide(find_record(records, upstream, today), today, public_model)
-            for upstream in self._resolver.resolve(public_model)
+            for upstream in upstreams
         ]
         if not decisions:
             return ALLOW
