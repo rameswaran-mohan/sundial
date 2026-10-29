@@ -9,6 +9,8 @@ open-source Portkey gateway 1.15.2 on 2026-10-30. Portkey's hosted gateway was n
 
 ```bash
 pip install "sundial-llm[serve]"
+sundial import --config sundial.yaml \
+    https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json
 export SUNDIAL_SERVE_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 sundial serve --config sundial.yaml --host 127.0.0.1 --port 8765
 ```
@@ -16,6 +18,10 @@ sundial serve --config sundial.yaml --host 127.0.0.1 --port 8765
 ```
 Serving lifecycle decisions on http://127.0.0.1:8765 (544 records)
 ```
+
+Import the registry before the first start: on an empty database the service starts with 0 records
+and allows every model until its first background refresh has landed and the guard next reloads
+its records, which it does every `reload_seconds` (300 by default).
 
 The service reads the same config file as the other integrations: the policy, the `successors`
 and the database. Run it where the gateway can reach it. On an address that is not loopback, set
@@ -25,8 +31,13 @@ and the database. Run it where the gateway can reach it. On an address that is n
 ## Add the guardrail
 
 Put a `before_request_hooks` entry in the Portkey config your requests use. With the open-source
-gateway, send the config in the `x-portkey-config` request header. This is the config from the live
-run, without its mock upstream and with the secrets replaced:
+gateway, send the config in the `x-portkey-config` request header. A config sent that way applies
+only to the requests that carry it, and every client that sends it holds Sundial's token. A config
+or guardrail saved in Portkey avoids both, because requests then refer to it instead of carrying
+it. Saved configs live in Portkey's platform, not in the open-source gateway: 1.15.2 on its own
+reads `x-portkey-config` as inline JSON. The live run did not try a saved config.
+
+This is the config from the live run, without its mock upstream and with the secrets replaced:
 
 ```json
 {
@@ -64,12 +75,12 @@ run, without its mock upstream and with the secrets replaced:
 
 ### Self-hosted gateways
 
-On a self-hosted gateway, `TRUSTED_CUSTOM_HOSTS` lists the local and private hosts the gateway
-accepts as a `custom_host` upstream. Setting it replaces the default list (`localhost`,
-`127.0.0.1`, `::1` and `host.docker.internal`). The live run started the gateway with
-`TRUSTED_CUSTOM_HOSTS=127.0.0.1,localhost`, the host of both `sundial serve` and the mock upstream.
-Allow the host that runs `sundial serve` there too. Gateway 1.15.2 does not check `webhookURL`
-against the list, but the live run did not try a Sundial host outside it.
+Gateway 1.15.2 does not check `webhookURL` against `TRUSTED_CUSTOM_HOSTS`. That list only governs
+`custom_host` upstreams: it names the local and private hosts the gateway accepts as one, and
+setting it replaces the default list (`localhost`, `127.0.0.1`, `::1` and `host.docker.internal`).
+So the host that runs `sundial serve` need not be listed. The live run did use a listed host: it
+started the gateway with `TRUSTED_CUSTOM_HOSTS=127.0.0.1,localhost` for its local mock upstream,
+and `sundial serve` ran on `127.0.0.1`.
 
 ## What the client sees
 
@@ -94,7 +105,12 @@ The route answers 200 every time, except 401 for a missing or wrong token.
 | warn, or a block or redirect in propose mode or on an approximate match | `{"verdict": true, "data": {...}}` |
 | enforced block | `{"verdict": false, "data": {...}}` |
 | enforced redirect | `{"verdict": true, "transformedData": {"request": {"json": ...}}, "data": {...}}` |
-| `afterRequestHook`, no model, a provider Sundial does not map, bad JSON, a body over 8 MiB, an internal error | `{"verdict": true, "data": {"explanation": "..."}}` |
+| `afterRequestHook`, no model, a provider Sundial does not map, bad JSON, a body over 8 MiB, a failure while building or encoding the answer | `{"verdict": true, "data": {"explanation": "..."}}` |
+
+Any failure inside Sundial answers `"verdict": true`, and is logged. Most failures, such as a
+database that cannot be read or a lookup that fails, give a plain `{"verdict": true}`, the same as
+a healthy model. Only a failure while building or encoding the answer gives an explanation. To
+detect failures, watch the `sundial` log, not the hook results.
 
 Portkey shows Sundial's `data` in its hook results as `responseData`. For an enforced block,
 Sundial answers:

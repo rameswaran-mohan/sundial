@@ -15,13 +15,13 @@ decisions over HTTP.
 
 ```
 $ sundial status --within 30
-28 models retire within 30 days (485 tracked).
-    3d  2026-09-21  azure      gpt-realtime-mini (2025-10-06)
-   10d  2026-09-28  openai     gpt-3.5-turbo-1106  -> gpt-5.6-terra
-   12d  2026-09-30  bedrock    amazon.nova-canvas-v1:0
-   13d  2026-10-01  azure      gpt-4o (2024-05-13)  -> gpt-5.1
-   14d  2026-10-02  gemini     gemini-2.5-flash-image  -> gemini-3.1-flash-image-preview
-   26d  2026-10-14  bedrock    anthropic.claude-sonnet-4-20250514-v1:0
+26 models retire within 30 days (544 tracked).
+   14d  2026-11-13  bedrock    anthropic.claude-3-5-sonnet-20241022-v2:0
+   16d  2026-11-15  azure      codex-mini (2025-05-16)
+   18d  2026-11-17  gemini     gemini-3.1-flash-live-preview  -> gemini-3.8-live
+   20d  2026-11-19  azure      o3 (2025-04-16)  -> gpt-5.6-sol
+   20d  2026-11-19  azure      o4-mini (2025-04-16)  -> gpt-5.6-terra
+   27d  2026-11-26  bedrock    ai21.jamba-1-5-large-v1:0
 ```
 
 ## Install
@@ -40,7 +40,7 @@ pip install "sundial-llm[serve]"   # plus sundial serve, the decision service
 | any ASGI app | `SundialMiddleware` wraps the app | tests |
 | vLLM | `--middleware sundial_llm.integrations.asgi.SundialMiddleware` | vLLM's middleware loader reproduced in tests. Not run on a GPU |
 | Portkey | a webhook guardrail that calls `sundial serve` | live against the open-source Portkey gateway 1.15.2. See [docs/portkey.md](https://github.com/rameswaran-mohan/sundial/blob/main/docs/portkey.md) |
-| Kong | the AI Custom Guardrail plugin pointed at `/v1/decide`, keyed on `block` | a configuration sketch only, not run. The plugin is Kong Enterprise |
+| Kong | the AI Custom Guardrail plugin pointed at `/v1/decide`, keyed on `block` | described, not run. The plugin is Kong Enterprise |
 | Bifrost | not supported | it needs a compiled Go plugin |
 
 The litellm plugin, the middleware and `sundial serve` read the same config file and the same
@@ -113,6 +113,8 @@ same usage counts.
 
 ```bash
 pip install "sundial-llm[serve]"
+sundial import --config sundial.yaml \
+    https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json
 export SUNDIAL_SERVE_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 sundial serve --config sundial.yaml
 ```
@@ -120,6 +122,10 @@ sundial serve --config sundial.yaml
 ```
 Serving lifecycle decisions on http://127.0.0.1:8765 (544 records)
 ```
+
+Import the registry before the first start: on an empty database the service starts with 0 records
+and allows every model until its first background refresh has landed and the guard next reloads
+its records, which it does every `reload_seconds` (300 by default).
 
 `--host` (default `127.0.0.1`) and `--port` (default `8765`) set where it listens. `--config` and
 `--db` work as for every other command. `sundial serve` exits with 2 and prints the install command
@@ -132,7 +138,7 @@ warning, and the service still starts.
 
 | Route | What it is for |
 |---|---|
-| `GET /healthz` | `{"status": "ok", "records": 544}` |
+| `GET /healthz` | a liveness probe, open without the token. It answers `{"status": "ok", "records": 544}` |
 | `POST /v1/decide` | the generic contract, for any gateway with a pre-request callout |
 | `POST /portkey/before-request` | Portkey's webhook guardrail |
 
@@ -154,8 +160,9 @@ Other paths get 404 and a wrong method gets 405.
              "X-Sundial-Days-Left": "40"}}
 ```
 
-`model` is required. `provider` is one of the prefixes Sundial matches on: `openai`, `anthropic`,
-`azure`, `azure_ai`, `bedrock`, `gemini` or `vertex_ai`. With it, the upstream is `provider/model`.
+`model` is required. `provider` is one of the prefixes Sundial matches on: `openai`,
+`text-completion-openai`, `anthropic`, `azure`, `azure_ai`, `bedrock`, `bedrock_converse`,
+`gemini`, `vertex_ai` or `vertex_ai_beta`. With it, the upstream is `provider/model`.
 Without it, `model` is read the litellm way: `azure/x` is Azure, and a bare name is OpenAI, except
 that `claude-*` is Anthropic and `gemini-*` is Gemini. Any other provider means the model is
 untracked, and the answer is an allow. `base_model` names the underlying model of a deployment
@@ -173,8 +180,11 @@ responses. An enforced redirect also adds `X-Sundial-Redirected-From`.
   as a block would block on its own misconfiguration, so make sure it sends a well-formed body.
 - A body over 8 MiB gets 413. It is never buffered past that.
 - A missing or wrong token gets 401.
-- Any failure inside Sundial gets 200 with `"action": "allow"` and an `error` field. Sundial never
-  blocks a request through its own failure.
+- Any failure inside Sundial answers 200 with an allow, and is logged. Sundial never blocks a
+  request through its own failure. Most failures, such as a database that cannot be read or a
+  lookup that fails, give a plain allow that looks like a healthy model. Only a failure while
+  building or encoding the answer adds an `error` field. `GET /healthz` keeps answering ok, with the
+  count of the records last loaded. To detect failures, watch the `sundial` log, not the response.
 - When the service cannot be reached, the gateway decides. Configure its callout to let the request
   through when the call fails.
 
@@ -294,10 +304,10 @@ turns those counts into the retirements your traffic actually touches:
 
 ```
 $ sundial status --in-use
-3 models in use retire within 90 days (5 models in use, 485 tracked).
- -213d  2026-02-17  openai     chatgpt-4o-latest  calls=412  teams=support
-   13d  2026-10-01  azure      prod-chat [gpt-4o (2024-05-13)]  calls=18230  teams=-
-   35d  2026-10-23  openai     gpt-4-0613  calls=2741  teams=payments,search
+3 models in use retire within 90 days (5 models in use, 544 tracked).
+ -255d  2026-02-17  openai     chatgpt-4o-latest  calls=412  teams=support
+   -7d  2026-10-23  openai     gpt-4-0613  calls=2741  teams=payments,search
+   40d  2026-12-09  azure      prod-chat [gpt-4o (2024-05-13)]  calls=18230  teams=-
 Models in use with no lifecycle record:
   my-finetune  calls=96
 ```
@@ -401,8 +411,8 @@ when it scans directly. Otherwise it imports `registry/lifecycle.json`.
 - Dates on a provider's own platform can differ from the same model on a partner platform. Sundial
   keeps them separate: `anthropic`, `bedrock` and `azure` each have their own record for a Claude
   model.
-- Kong is a configuration sketch that has not been run, because AI Custom Guardrail is a Kong
-  Enterprise plugin. Bifrost is not supported, because it needs a compiled Go plugin.
+- Kong is described, not run, because AI Custom Guardrail is a Kong Enterprise plugin. Bifrost is
+  not supported, because it needs a compiled Go plugin.
 - `sundial serve` is one more process to run and keep up. While it is down, requests pass only if
   the gateway lets a failed check through, as Portkey does with `failOnError` unset.
 - Azure through Portkey matches approximately, so it can warn but never block or redirect. Portkey
