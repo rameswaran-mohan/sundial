@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import sys
@@ -40,7 +41,6 @@ RunServer = Callable[[ASGIApp, str, int], None]
 SERVE_TOKEN_ENV = "SUNDIAL_SERVE_TOKEN"
 _DEFAULT_SERVE_HOST = "127.0.0.1"
 _DEFAULT_SERVE_PORT = 8765
-_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 _NO_UVICORN = 'sundial: sundial serve needs uvicorn; install it with: pip install "sundial-llm[serve]"'
 
 
@@ -353,6 +353,16 @@ def _costmap(
     return EXIT_OK
 
 
+def _is_loopback(host: str) -> bool:
+    """Whether a bare host (no brackets) only accepts connections from this machine."""
+    if host.lower() == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:  # a hostname other than localhost may resolve to anything
+        return False
+
+
 def _uvicorn_runner() -> RunServer | None:
     """A runner that serves with uvicorn, imported only here; None when uvicorn is not installed."""
     try:
@@ -381,10 +391,13 @@ def _serve(
         if run_server is None:
             print(_NO_UVICORN, file=out)
             return EXIT_BAD_INPUT
+    # Brackets only mark an IPv6 address inside a URL; the server binds the bare address.
+    if host.startswith("[") and host.endswith("]"):
+        host = host[1:-1]
     # A blank token would protect nothing, so it counts as unset. The service strips the credentials a
     # client sends, so the token is stripped too, or a trailing newline would make it unmatchable.
     token = env.get(SERVE_TOKEN_ENV, "").strip() or None
-    if token is None and host not in _LOOPBACK_HOSTS:
+    if token is None and not _is_loopback(host):
         print(
             f"warning: serving on {host}, which is not a loopback address, without {SERVE_TOKEN_ENV}; "
             "any client that can reach it can call the decision routes",

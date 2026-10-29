@@ -764,3 +764,58 @@ async def test_lifespan_startup_and_shutdown_complete_so_uvicorn_starts_cleanly(
     )
 
     assert sent == [{"type": "lifespan.startup.complete"}, {"type": "lifespan.shutdown.complete"}]
+
+
+class ClosingRecorder(ListRecorder):
+    """A recorder whose close() is logged into `events`, next to the lifespan messages sent."""
+
+    def __init__(self, events: list, error: Exception | None = None) -> None:
+        super().__init__()
+        self.events = events
+        self.error = error
+
+    def close(self) -> None:
+        self.events.append("close")
+        if self.error is not None:
+            raise self.error
+
+
+async def run_lifespan(app: DecisionService, events: list) -> None:
+    """Drive lifespan startup then shutdown, logging each message the app sends into `events`."""
+    messages = iter([{"type": "lifespan.startup"}, {"type": "lifespan.shutdown"}])
+
+    async def receive() -> dict:
+        return next(messages)
+
+    async def send(message: dict) -> None:
+        events.append(message["type"])
+
+    await app({"type": "lifespan", "asgi": {"version": "3.0"}}, receive, send)
+
+
+async def test_lifespan_shutdown_flushes_the_recorder_once_before_completing() -> None:
+    # uvicorn re-raises SIGTERM after a graceful stop, so atexit never runs; shutdown must flush.
+    events: list = []
+
+    await run_lifespan(DecisionService(make_guard(), ClosingRecorder(events)), events)
+
+    assert events == ["lifespan.startup.complete", "close", "lifespan.shutdown.complete"]
+
+
+async def test_lifespan_shutdown_completes_when_the_recorder_cannot_close(caplog) -> None:
+    events: list = []
+    recorder = ClosingRecorder(events, error=RuntimeError("disk full"))
+
+    with caplog.at_level(logging.ERROR, logger="sundial"):
+        await run_lifespan(DecisionService(make_guard(), recorder), events)
+
+    assert events == ["lifespan.startup.complete", "close", "lifespan.shutdown.complete"]
+    assert "could not flush usage counts" in caplog.text
+
+
+async def test_lifespan_shutdown_completes_for_a_recorder_without_close() -> None:
+    events: list = []
+
+    await run_lifespan(DecisionService(make_guard(), ListRecorder()), events)
+
+    assert events == ["lifespan.startup.complete", "lifespan.shutdown.complete"]

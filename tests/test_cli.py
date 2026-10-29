@@ -2,6 +2,7 @@ import io
 import json
 import re
 import sys
+import threading
 import types
 from datetime import datetime, timedelta, timezone
 
@@ -570,19 +571,26 @@ def test_serve_runs_the_decision_service_on_the_default_host_and_port(
     assert output == f"Serving lifecycle decisions on http://127.0.0.1:8765 ({tracked} records)\n"
 
 
+@pytest.mark.parametrize(
+    ("host", "url"),
+    [
+        ("0.0.0.0", "http://0.0.0.0:9000"),
+        ("::", "http://[::]:9000"),
+        ("sundial.internal", "http://sundial.internal:9000"),
+    ],
+    ids=["ipv4-any", "ipv6-any", "hostname"],
+)
 def test_serve_on_a_public_address_without_a_token_warns_and_still_serves(
-    serve_config, fixture_fetch
+    serve_config, fixture_fetch, host, url
 ) -> None:
-    code, output, served = serve(
-        ["--config", serve_config, "--host", "0.0.0.0", "--port", "9000"], fixture_fetch
-    )
+    code, output, served = serve(["--config", serve_config, "--host", host, "--port", "9000"], fixture_fetch)
 
     lines = output.splitlines()
     assert code == 0
-    assert [(host, port) for _, host, port in served] == [("0.0.0.0", 9000)]
+    assert [(served_host, port) for _, served_host, port in served] == [(host, 9000)]
     assert len(lines) == 2
     assert lines[0].startswith("warning: ") and "SUNDIAL_SERVE_TOKEN" in lines[0]
-    assert lines[1] == "Serving lifecycle decisions on http://0.0.0.0:9000 (0 records)"
+    assert lines[1] == f"Serving lifecycle decisions on {url} (0 records)"
 
 
 @pytest.mark.anyio
@@ -623,16 +631,50 @@ async def test_a_blank_token_means_no_token_so_a_public_address_warns(
 
 
 @pytest.mark.parametrize(
-    ("host", "url"),
-    [("localhost", "http://localhost:8765"), ("::1", "http://[::1]:8765")],
-    ids=["localhost", "ipv6"],
+    ("host", "bound", "url"),
+    [
+        ("localhost", "localhost", "http://localhost:8765"),
+        ("LOCALHOST", "LOCALHOST", "http://LOCALHOST:8765"),
+        ("127.0.0.2", "127.0.0.2", "http://127.0.0.2:8765"),
+        ("::1", "::1", "http://[::1]:8765"),
+        # The brackets belong to the URL, not the address, so the server binds the bare address.
+        ("[::1]", "::1", "http://[::1]:8765"),
+    ],
+    ids=["localhost", "localhost-upper", "ipv4-loopback-range", "ipv6", "ipv6-bracketed"],
 )
-def test_serve_on_a_loopback_host_does_not_warn(serve_config, fixture_fetch, host, url) -> None:
+def test_serve_on_a_loopback_host_does_not_warn(serve_config, fixture_fetch, host, bound, url) -> None:
     code, output, served = serve(["--config", serve_config, "--host", host], fixture_fetch)
 
     assert code == 0
-    assert [served_host for _, served_host, _ in served] == [host]
+    assert [served_host for _, served_host, _ in served] == [bound]
     assert output == f"Serving lifecycle decisions on {url} (0 records)\n"
+
+
+def test_serve_refreshes_the_registry_through_the_fetch_main_was_given(tmp_path, db) -> None:
+    registry = "https://registry.sundial.test/lifecycle.json"
+    config = tmp_path / "refresh.yaml"
+    config.write_text(
+        f"db: {db.as_posix()}\nregistry_url: {registry}\nauto_scan_hours: 24\nusage_tracking: false\n",
+        encoding="utf-8",
+    )
+    requested: list[str] = []
+    asked = threading.Event()
+
+    def offline(url: str) -> str:
+        requested.append(url)
+        asked.set()
+        raise OSError("offline")
+
+    code, _, _ = serve(["--config", str(config)], offline)
+    # The empty store is stale, so counting records at startup starts a background refresh.
+    refreshed = asked.wait(10)
+    for thread in threading.enumerate():
+        if thread.name == "sundial-background":
+            thread.join(10)
+
+    assert code == 0
+    assert refreshed
+    assert requested[0] == registry
 
 
 def test_serve_runs_uvicorn_when_no_runner_is_given(serve_config, fixture_fetch, monkeypatch) -> None:

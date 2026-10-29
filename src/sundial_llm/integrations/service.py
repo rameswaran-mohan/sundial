@@ -17,6 +17,7 @@ from __future__ import annotations
 import hmac
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import replace
 from typing import Any
 
@@ -67,7 +68,7 @@ class DecisionService:
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         kind = scope.get("type")
         if kind == "lifespan":
-            await _lifespan(receive, send)
+            await _lifespan(receive, send, self._close_recorder)
         elif kind == "http":
             await self._http(scope, receive, send)
 
@@ -129,6 +130,17 @@ class DecisionService:
             # Probes are frequent, so this stays at debug level, as in the guard's own count.
             logger.debug("sundial: could not count the loaded lifecycle records", exc_info=True)
             return 0
+
+    def _close_recorder(self) -> None:
+        """Write the recorder's buffered counts at shutdown. uvicorn stops gracefully on SIGTERM and
+        then re-raises it, so the process dies without running atexit; this is the last chance."""
+        close = getattr(self._recorder, "close", None)
+        if not callable(close):
+            return
+        try:
+            close()
+        except Exception:  # noqa: BLE001 - shutdown must always complete
+            logger.exception("sundial: could not flush usage counts at shutdown")
 
     def _record(self, model: str, team: str | None, decision: Decision) -> None:
         if self._recorder is None:
@@ -325,12 +337,14 @@ async def _send(send: Send, status: int, body: bytes, *, allow: str | None = Non
     await send({"type": "http.response.body", "body": body})
 
 
-async def _lifespan(receive: Receive, send: Send) -> None:
-    """Nothing to start or stop, but answering lets uvicorn start without a lifespan warning."""
+async def _lifespan(receive: Receive, send: Send, on_shutdown: Callable[[], None]) -> None:
+    """Nothing to start, but answering lets uvicorn start without a lifespan warning. At shutdown,
+    `on_shutdown` runs (and must never raise) before the shutdown is reported complete."""
     while True:
         message = await receive()
         if message.get("type") == "lifespan.startup":
             await send({"type": "lifespan.startup.complete"})
         elif message.get("type") == "lifespan.shutdown":
+            on_shutdown()
             await send({"type": "lifespan.shutdown.complete"})
             return
