@@ -3,7 +3,8 @@
     app = SundialMiddleware(app)            # FastAPI, Starlette, or any ASGI app
 
 It inspects POST bodies on inference routes, reads `model`, and then blocks, rewrites or adds
-lifecycle headers. Anything it does not understand is forwarded untouched.
+lifecycle headers. Anything it does not understand is forwarded untouched. When the server shuts
+down, the usage counts it buffered are written before the wrapped app hears of the shutdown.
 """
 
 from __future__ import annotations
@@ -96,7 +97,32 @@ class SundialMiddleware:
         except Exception:  # noqa: BLE001 - never let usage counting break a request
             logger.exception("sundial: could not record usage for %s", model)
 
+    def _close_recorder(self) -> None:
+        """Write the recorder's buffered counts. uvicorn stops gracefully on SIGTERM and then re-raises
+        it, so the process dies without running atexit; server shutdown is the last chance."""
+        try:
+            close = getattr(self._recorder, "close", None)
+            if callable(close):
+                close()
+        except Exception:  # noqa: BLE001 - shutdown must always complete
+            logger.exception("sundial: could not flush usage counts at shutdown")
+
+    def _closing_on_shutdown(self, receive: Receive) -> Receive:
+        """`receive` for a lifespan scope: on the server's shutdown message, close the recorder (if one
+        was built or given; none is built here), then hand the message on unchanged."""
+
+        async def watched() -> Message:
+            message = await receive()
+            if message.get("type") == "lifespan.shutdown":
+                self._close_recorder()
+            return message
+
+        return watched
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope.get("type") == "lifespan":
+            await self.app(scope, self._closing_on_shutdown(receive), send)
+            return
         if not self._inspectable(scope):
             await self.app(scope, receive, send)
             return
