@@ -1,4 +1,8 @@
+import logging
+import sqlite3
 from datetime import date, datetime, timedelta, timezone
+
+import pytest
 
 from sundial_llm.guard import IdentityResolver, LifecycleGuard
 from sundial_llm.matching import UpstreamModel
@@ -241,6 +245,71 @@ def test_record_count_keeps_the_records_it_holds_when_a_reload_fails() -> None:
     current["load"] = broken
     clock.now = NOW + timedelta(seconds=301)
     assert subject.record_count() == 2
+
+
+class FlakyLoader:
+    """Loads `records`, or raises while `failing` is set, and counts every call."""
+
+    def __init__(self, records: dict, failing: bool = False) -> None:
+        self.records = records
+        self.failing = failing
+        self.calls = 0
+
+    def __call__(self) -> dict:
+        self.calls += 1
+        if self.failing:
+            raise sqlite3.OperationalError("database is locked")
+        return self.records
+
+
+LOAD_FAILED = "sundial: could not load lifecycle records"
+
+
+def test_held_records_keep_enforcing_after_a_failed_reload(caplog: pytest.LogCaptureFixture) -> None:
+    load = FlakyLoader(index(RETIRED))
+    clock = Clock()
+    subject = LifecycleGuard(load, IdentityResolver(), BLOCK_RETIRED, clock=clock, reload_seconds=300)
+    assert subject.decide("openai/gpt-dead").action is Action.BLOCK
+
+    load.failing = True
+    clock.now = NOW + timedelta(seconds=301)
+    decision = subject.decide("openai/gpt-dead")
+
+    assert (decision.action, decision.enforced) == (Action.BLOCK, True)
+    assert subject.record_count() == 1
+    assert load.calls == 2
+    failures = [r for r in caplog.records if r.getMessage().startswith(LOAD_FAILED)]
+    assert [(r.levelno, r.exc_info is not None) for r in failures] == [(logging.WARNING, True)]
+
+
+@pytest.mark.parametrize(("reload_seconds", "backoff"), [(300, 30), (10, 10)], ids=["capped", "short-ttl"])
+def test_a_failed_load_is_not_retried_inside_the_backoff(reload_seconds: float, backoff: int) -> None:
+    load = FlakyLoader(index(RETIRED), failing=True)
+    clock = Clock()
+    subject = LifecycleGuard(
+        load, IdentityResolver(), BLOCK_RETIRED, clock=clock, reload_seconds=reload_seconds
+    )
+
+    assert subject.decide("openai/gpt-dead") == ALLOW  # nothing is held yet, so it still allows
+    clock.now = NOW + timedelta(seconds=backoff - 1)
+    assert subject.decide("openai/gpt-dead") == ALLOW
+    assert subject.record_count() == 0
+    assert load.calls == 1
+
+    clock.now = NOW + timedelta(seconds=backoff)
+    assert subject.decide("openai/gpt-dead") == ALLOW  # retried, and it fails again
+    assert load.calls == 2
+    clock.now = NOW + timedelta(seconds=2 * backoff - 1)
+    subject.decide("openai/gpt-dead")
+    assert load.calls == 2
+
+    load.failing = False
+    clock.now = NOW + timedelta(seconds=2 * backoff)
+    assert subject.decide("openai/gpt-dead").action is Action.BLOCK
+    assert load.calls == 3
+    clock.now = NOW + timedelta(seconds=2 * backoff + reload_seconds)
+    assert subject.record_count() == 1
+    assert load.calls == 3  # back on the reload TTL once a load succeeds
 
 
 def test_a_failing_record_load_with_explicit_upstreams_never_breaks_the_request() -> None:
