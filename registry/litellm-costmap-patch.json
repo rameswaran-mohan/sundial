@@ -11,6 +11,21 @@
   "anthropic.claude-3-7-sonnet-20250219-v1:0": {
     "deprecation_date": "2026-11-13"
   },
+  "azure/gpt-4o-2024-05-13": {
+    "deprecation_date": "2027-01-14"
+  },
+  "azure/gpt-5.1-2025-11-13": {
+    "deprecation_date": "2027-07-13"
+  },
+  "azure/gpt-5-mini": {
+    "deprecation_date": "2027-07-13"
+  },
+  "azure/gpt-5-mini-2025-08-07": {
+    "deprecation_date": "2027-07-13"
+  },
+  "azure/gpt-5.1": {
+    "deprecation_date": "2027-07-13"
+  },
   "azure_ai/claude-opus-5-5-fast": {
     "deprecation_date": "2027-01-15"
   }
