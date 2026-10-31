@@ -10,6 +10,8 @@ from sundial_llm.guard import LifecycleGuard
 from sundial_llm.integrations.service import PORTKEY_PROVIDERS, DecisionService
 from sundial_llm.models import LifecycleRecord, LifecycleState
 from sundial_llm.policy import ALLOW, Action, Decision, Mode, load_policy
+from sundial_llm.store import Store
+from sundial_llm.usage import UsageRecorder
 
 pytestmark = pytest.mark.anyio
 
@@ -641,6 +643,56 @@ async def test_both_routes_record_usage_under_the_model_the_caller_sent() -> Non
         ("gpt-fine", None, None),
         ("gpt-dead", None, None),
     ]
+
+
+def inline(job) -> None:
+    job()
+
+
+@pytest.fixture
+def usage_store(tmp_path) -> Store:
+    return Store(tmp_path / "usage.db")
+
+
+@pytest.mark.parametrize("path", [DECIDE, PORTKEY], ids=["decide", "portkey"])
+async def test_a_4_mib_team_is_stored_as_no_team(usage_store: Store, path: str) -> None:
+    recorder = UsageRecorder(usage_store, clock=lambda: NOW, spawn=inline)
+    team = "t" * (4 * 1024 * 1024)
+    payload = (
+        {"model": "gpt-fading", "team": team}
+        if path == DECIDE
+        else portkey_context("gpt-fading", metadata={"team": team})
+    )
+
+    async with service(recorder=recorder) as client:
+        response = await client.post(path, json=payload)
+    recorder.close()
+
+    assert response.status_code == 200
+    rows = usage_store.usage_rows(NOW.date())
+    assert [(r.public_model, r.team, r.calls) for r in rows] == [("gpt-fading", "", 1)]
+    assert usage_store.path.stat().st_size < 1024 * 1024
+
+
+async def test_aliases_of_a_tracked_model_beyond_the_daily_cap_are_counted_under_other(
+    usage_store: Store,
+) -> None:
+    recorder = UsageRecorder(usage_store, clock=lambda: NOW, spawn=inline, max_tracked_names=2)
+
+    async with service(recorder=recorder) as client:
+        for number in range(5):
+            await client.post(
+                DECIDE,
+                json={"model": f"alias-{number}", "provider": "azure", "base_model": "gpt-4o-2024-05-13"},
+            )
+    recorder.close()
+
+    rows = usage_store.usage_rows(NOW.date())
+    assert {(r.public_model, (r.platform, r.model_id, r.version), r.calls) for r in rows} == {
+        ("alias-0", AZURE_RETIRED.key, 1),
+        ("alias-1", AZURE_RETIRED.key, 1),
+        ("(other)", AZURE_RETIRED.key, 3),
+    }
 
 
 async def test_a_recorder_that_raises_changes_no_response() -> None:

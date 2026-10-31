@@ -428,6 +428,13 @@ when it scans directly. Otherwise it imports `registry/lifecycle.json`.
   changes when a lifecycle fact changes.
 - Model names longer than 256 characters are not counted. At most 10,000 distinct entries wait in
   memory between writes. Calls that would add another are dropped, and a warning is logged.
+- A team longer than 256 characters, or one with control characters, is counted as no team. Each
+  process keeps at most 100 distinct teams apart per day. Calls from further teams are counted under
+  the team `(other)`.
+- Each process keeps at most 5,000 distinct model names with a lifecycle record apart per day. A
+  name counts once for each record it is counted against. Calls for further names are counted under
+  `(other)` with their record, so `status --in-use` still lists the retirement. This bounds callers
+  that put many names on one record through `base_model`.
 - Counts still in memory when a process is killed without a clean exit are lost.
 - The decision service, and the middleware around an app that takes part in ASGI lifespan (FastAPI,
   Starlette and vLLM do), write buffered counts at lifespan shutdown, so a SIGTERM stop under

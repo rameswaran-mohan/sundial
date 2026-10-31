@@ -7,11 +7,12 @@ from datetime import date, datetime, timedelta, timezone
 import pytest
 
 from sundial_llm.store import Store
-from sundial_llm.usage import MAX_MODEL_NAME_LENGTH, UsageRecorder, UsageRow
+from sundial_llm.usage import MAX_MODEL_NAME_LENGTH, MAX_TEAM_LENGTH, UsageRecorder, UsageRow
 
 NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
 TODAY = NOW.date()
 GPT4 = ("openai", "gpt-4-0613", "")
+GPT35 = ("openai", "gpt-3.5-turbo-0613", "")
 
 
 class Clock:
@@ -178,15 +179,108 @@ def test_a_model_name_that_is_not_printable_is_not_recorded(store: Store, name: 
     assert [row.public_model for row in store.usage_rows(TODAY)] == ["modèle-été"]
 
 
-def test_a_team_that_is_not_printable_is_not_recorded(store: Store) -> None:
+@pytest.mark.parametrize(
+    "team",
+    ["pay\nments", "\udcff", "pay\x1b[31m", "t" * (MAX_TEAM_LENGTH + 1), "t" * 4 * 1024 * 1024, 7],
+    ids=["newline", "surrogate", "escape", "one-too-long", "4-MiB", "not-a-string"],
+)
+def test_a_team_that_is_too_long_or_not_printable_is_counted_as_no_team(store: Store, team: object) -> None:
     recorder = UsageRecorder(store, clock=Clock())
 
-    recorder.record("gpt-4", "pay\nments", GPT4)
-    recorder.record("gpt-4", "\udcff", GPT4)
+    recorder.record("gpt-4", team, GPT4)  # type: ignore[arg-type]
+    recorder.record("gpt-4", "t" * MAX_TEAM_LENGTH, GPT4)
     recorder.record("gpt-4", "équipe", GPT4)
     recorder.flush()
 
-    assert store.usage_rows(TODAY) == [row(TODAY, 1, team="équipe")]
+    assert {(r.team, r.calls) for r in store.usage_rows(TODAY)} == {
+        ("", 1),
+        ("t" * MAX_TEAM_LENGTH, 1),
+        ("équipe", 1),
+    }
+
+
+def test_teams_beyond_the_daily_cap_are_counted_under_other(
+    store: Store, caplog: pytest.LogCaptureFixture
+) -> None:
+    clock = Clock()
+    recorder = UsageRecorder(store, clock=clock, max_teams=2, spawn=inline)
+
+    for team in ("payments", "search", "ads", "payments", "growth", None, "", "ads"):
+        recorder.record("gpt-4", team, GPT4)
+    recorder.record("gpt-mystery", "growth", None)
+    recorder.flush()
+
+    assert {(r.public_model, r.team, r.calls) for r in store.usage_rows(TODAY)} == {
+        ("gpt-4", "payments", 2),
+        ("gpt-4", "search", 1),
+        ("gpt-4", "(other)", 3),
+        ("gpt-4", "", 2),
+        ("gpt-mystery", "(other)", 1),
+    }
+    assert warnings_in(caplog) == [
+        "sundial: 2 distinct teams seen today; further ones are counted as (other)"
+    ]
+    clock.now = NOW + timedelta(days=1)
+    recorder.record("gpt-4", "ads", GPT4)
+    recorder.flush()
+    assert store.usage_rows(TODAY + timedelta(days=1)) == [row(TODAY + timedelta(days=1), 1, team="ads")]
+
+
+def test_by_default_a_hundred_teams_a_day_are_kept_apart(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock(), spawn=inline)
+
+    for number in range(101):
+        recorder.record("gpt-4", f"team-{number}", GPT4)
+    recorder.flush()
+
+    teams = [r.team for r in store.usage_rows(TODAY)]
+    assert len(teams) == 101
+    assert [team for team in teams if not team.startswith("team-")] == ["(other)"]
+
+
+def test_tracked_names_beyond_the_daily_cap_are_counted_under_other_with_their_record(
+    store: Store, caplog: pytest.LogCaptureFixture
+) -> None:
+    clock = Clock()
+    recorder = UsageRecorder(store, clock=clock, max_tracked_names=2, spawn=inline)
+
+    for name in ("gpt-4", "alias-a", "alias-b", "gpt-4", "alias-a", "alias-c"):
+        recorder.record(name, None, GPT4)
+    recorder.record("alias-a", None, GPT35)  # a known name with another record is another entry
+    recorder.record("junk-a", None, None)  # names with no record have their own cap
+    recorder.flush()
+
+    assert {(r.public_model, r.model_id, r.calls) for r in store.usage_rows(TODAY)} == {
+        ("gpt-4", "gpt-4-0613", 2),
+        ("alias-a", "gpt-4-0613", 2),
+        ("(other)", "gpt-4-0613", 2),
+        ("(other)", "gpt-3.5-turbo-0613", 1),
+        ("junk-a", "", 1),
+    }
+    assert warnings_in(caplog) == [
+        "sundial: 2 distinct model names with a lifecycle record seen today; "
+        "further ones are counted as (other)"
+    ]
+    clock.now = NOW + timedelta(days=1)
+    recorder.record("alias-b", None, GPT4)
+    recorder.flush()
+    assert [(r.public_model, r.calls) for r in store.usage_rows(TODAY + timedelta(days=1))] == [
+        ("alias-b", 1)
+    ]
+
+
+def test_by_default_five_thousand_tracked_names_a_day_are_kept_apart(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock(), spawn=inline, flush_calls=10_000)
+
+    for number in range(5001):
+        recorder.record(f"alias-{number}", None, GPT4)
+    recorder.flush()
+
+    rows = store.usage_rows(TODAY)
+    assert len(rows) == 5001
+    assert [
+        (r.public_model, r.model_id, r.calls) for r in rows if not r.public_model.startswith("alias-")
+    ] == [("(other)", "gpt-4-0613", 1)]
 
 
 UNWRITABLE = [

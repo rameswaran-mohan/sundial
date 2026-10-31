@@ -27,9 +27,20 @@ MAX_MODEL_NAME_LENGTH = 256
 MAX_PENDING_BUCKETS = 10_000
 # Names that match no lifecycle record are unbounded too, and each is a row per day in the store. Past
 # this many distinct ones in a UTC day, a process counts further ones under OTHER_MODEL, so every
-# request is still counted. Names with a record are bounded by the registry and never capped.
+# request is still counted.
 MAX_UNTRACKED_NAMES_PER_DAY = 1_000
 OTHER_MODEL = "(other)"
+# A name with a record is not bounded by the registry either: a caller that names the upstream (the
+# decision service's base_model) can put any name on any record. Each distinct name and record pair
+# counts once; past this many in a UTC day, further ones are counted as OTHER_MODEL with their record,
+# so status --in-use still reports the retirement.
+MAX_TRACKED_NAMES_PER_DAY = 5_000
+# Teams come from clients too (Portkey fills metadata.team from a request header). A team longer than
+# this, or one that is not printable, is counted as no team. Past MAX_TEAMS_PER_DAY distinct teams in a
+# UTC day, further ones are counted as OTHER_TEAM.
+MAX_TEAM_LENGTH = 256
+MAX_TEAMS_PER_DAY = 100
+OTHER_TEAM = "(other)"
 
 # A write that fails with one of these may succeed later, so its counts stay buffered. Any other failure
 # means some row can never be written: the batch is retried row by row and those rows are dropped.
@@ -71,6 +82,35 @@ def _bucket(row: UsageRow) -> _Bucket:
     return (row.day, row.public_model, row.team, row.platform, row.model_id, row.version)
 
 
+def _team(team: object) -> str:
+    """The team to count a call under: "" for none, and for one too long or not printable."""
+    if isinstance(team, str) and team.isprintable() and len(team) <= MAX_TEAM_LENGTH:
+        return team
+    return ""
+
+
+class _DailyCap:
+    """At most `limit` distinct values per UTC day. Not locked; the recorder calls it under its lock."""
+
+    def __init__(self, limit: int) -> None:
+        self._limit = limit
+        self._day: date | None = None
+        self._seen: set[object] = set()
+        self._capped = False  # whether a value was refused on _day
+
+    def admit(self, day: date, value: object) -> tuple[bool, bool]:
+        """Whether `value` is kept apart on `day`, and whether it is the first value refused that day."""
+        if day != self._day:
+            self._day, self._seen, self._capped = day, set(), False
+        if value in self._seen:
+            return True, False
+        if len(self._seen) < self._limit:
+            self._seen.add(value)
+            return True, False
+        first, self._capped = not self._capped, True
+        return False, first
+
+
 class UsageRecorder:
     def __init__(
         self,
@@ -82,6 +122,8 @@ class UsageRecorder:
         retention_days: int = 90,
         max_pending: int = MAX_PENDING_BUCKETS,
         max_untracked_names: int = MAX_UNTRACKED_NAMES_PER_DAY,
+        max_tracked_names: int = MAX_TRACKED_NAMES_PER_DAY,
+        max_teams: int = MAX_TEAMS_PER_DAY,
         spawn: Spawn = _daemon_spawn,
     ) -> None:
         self._store = store
@@ -100,16 +142,20 @@ class UsageRecorder:
         self._idle.set()
         self._pruned_day: date | None = None  # old rows are pruned once per UTC day
         self._max_untracked_names = max_untracked_names
-        self._untracked_day: date | None = None
-        self._untracked_names: set[str] = set()  # distinct untracked names seen on _untracked_day
-        self._capped_today = False  # whether _untracked_day has reached the cap
+        self._max_tracked_names = max_tracked_names
+        self._max_teams = max_teams
+        self._untracked = _DailyCap(max_untracked_names)  # names with no record
+        self._tracked = _DailyCap(max_tracked_names)  # (name, record) pairs
+        self._teams = _DailyCap(max_teams)
 
     def record(self, public_model: str, team: str | None, key: RecordKey | None) -> None:
         """Count one request. `key` is the matched lifecycle record, None when nothing matched.
-        Names that are not printable or longer than MAX_MODEL_NAME_LENGTH, and teams that are not
-        printable, are ignored. Untracked names past `max_untracked_names` distinct ones in a UTC day
-        are counted as OTHER_MODEL. While MAX_PENDING_BUCKETS distinct entries wait to be written, calls
-        that would add another are dropped.
+        Names that are not printable or longer than MAX_MODEL_NAME_LENGTH are ignored. A team that is
+        not printable or longer than MAX_TEAM_LENGTH is counted as no team. In a UTC day, untracked
+        names past `max_untracked_names` distinct ones and name and record pairs past
+        `max_tracked_names` are counted as OTHER_MODEL, the latter with their record, and teams past
+        `max_teams` are counted as OTHER_TEAM. While MAX_PENDING_BUCKETS distinct entries wait to be
+        written, calls that would add another are dropped.
 
         When a flush is due, the buffered counts go to a background flush through `spawn`. Only one is
         in flight at a time; while it runs, new counts stay buffered until the next call that finds a
@@ -117,18 +163,22 @@ class UsageRecorder:
         try:
             if not _printable(public_model) or len(public_model) > MAX_MODEL_NAME_LENGTH:
                 return
-            if team is not None and not _printable(team):
-                return
+            team = _team(team)
             now = self._clock()
             day = now.date()
             platform, model_id, version = key or ("", "", "")
-            warn_full = warn_capped = False
+            warn_full = False
+            capped: list[tuple[str, str]] = []  # (what, counted as) for each cap this call first reached
             batch: list[UsageRow] | None = None
             with self._lock:
-                name = public_model
-                if key is None:
-                    name, warn_capped = self._untracked_name(day, public_model)
-                bucket = (day, name, team or "", platform, model_id, version)
+                name = self._name(day, public_model, key, capped)
+                if team:
+                    kept, first = self._teams.admit(day, team)
+                    if not kept:
+                        team = OTHER_TEAM
+                    if first:
+                        capped.append((f"{self._max_teams} distinct teams", OTHER_TEAM))
+                bucket = (day, name, team, platform, model_id, version)
                 if bucket in self._pending or len(self._pending) < self._max_pending:
                     self._pending[bucket] = self._pending.get(bucket, 0) + 1
                     self._buffered += 1
@@ -146,12 +196,8 @@ class UsageRecorder:
                     "sundial: usage buffer is full (%d entries); new models are not counted until it flushes",
                     self._max_pending,
                 )
-            if warn_capped:
-                logger.warning(
-                    "sundial: %d distinct untracked model names seen today; further ones are counted as %s",
-                    self._max_untracked_names,
-                    OTHER_MODEL,
-                )
+            for what, other in capped:
+                logger.warning("sundial: %s seen today; further ones are counted as %s", what, other)
             if batch is not None:
                 self._flush_in_background(batch, day)
         except Exception:  # noqa: BLE001 - counting usage must never take a request down
@@ -178,20 +224,22 @@ class UsageRecorder:
             logger.exception("sundial: could not wait for the usage flush in flight")
         self.flush()
 
-    def _untracked_name(self, day: date, public_model: str) -> tuple[str, bool]:
-        """The name to count an untracked call under, and whether this call is the first one today to
-        be capped. Call with the lock held."""
-        if day != self._untracked_day:
-            self._untracked_day = day
-            self._untracked_names = set()
-            self._capped_today = False
-        if public_model in self._untracked_names:
-            return public_model, False
-        if len(self._untracked_names) < self._max_untracked_names:
-            self._untracked_names.add(public_model)
-            return public_model, False
-        first, self._capped_today = not self._capped_today, True
-        return OTHER_MODEL, first
+    def _name(
+        self, day: date, public_model: str, key: RecordKey | None, capped: list[tuple[str, str]]
+    ) -> str:
+        """The name to count a call under. When this call is the first one today that a cap refuses,
+        the cap is added to `capped`. Call with the lock held."""
+        if key is None:
+            kept, first = self._untracked.admit(day, public_model)
+        else:
+            kept, first = self._tracked.admit(day, (public_model, key))
+        if first:
+            if key is None:
+                what = f"{self._max_untracked_names} distinct untracked model names"
+            else:
+                what = f"{self._max_tracked_names} distinct model names with a lifecycle record"
+            capped.append((what, OTHER_MODEL))
+        return public_model if kept else OTHER_MODEL
 
     def _flush_in_background(self, batch: list[UsageRow], today: date) -> None:
         """Hand a batch to `spawn`. If no flush can be started, the counts go back into the buffer."""
