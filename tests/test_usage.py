@@ -154,8 +154,13 @@ def test_a_bad_record_call_is_logged_and_never_raises(store: Store, caplog: pyte
     recorder = UsageRecorder(store, clock=Clock())
 
     recorder.record("gpt-4", None, ("not", "a key"))  # type: ignore[arg-type]
+    recorder.record("m" * MAX_MODEL_NAME_LENGTH, None, ("not", "a key"))  # type: ignore[arg-type]
 
-    assert "sundial: could not record usage for gpt-4" in caplog.messages
+    # The client's model is quoted with repr and cut to 200 characters.
+    assert caplog.messages == [
+        "sundial: could not record usage for 'gpt-4'",
+        "sundial: could not record usage for '" + "m" * 199,
+    ]
 
 
 def test_a_model_name_longer_than_the_limit_is_not_recorded(store: Store) -> None:

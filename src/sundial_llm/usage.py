@@ -201,7 +201,8 @@ class UsageRecorder:
             if batch is not None:
                 self._flush_in_background(batch, day)
         except Exception:  # noqa: BLE001 - counting usage must never take a request down
-            logger.exception("sundial: could not record usage for %s", public_model)
+            # %.200r: the client's model is quoted, so it cannot forge a log line, and cut short.
+            logger.exception("sundial: could not record usage for %.200r", public_model)
 
     def flush(self) -> None:
         """Write the buffered counts on the calling thread, and prune rows older than the retention once

@@ -311,6 +311,18 @@ async def test_a_recorder_that_raises_never_breaks_the_request_or_the_decision(a
     assert passed.status_code == 200
 
 
+async def test_a_recorder_failure_logs_the_client_model_quoted_and_cut_to_200_characters(app, caplog) -> None:
+    class Exploding:
+        def record(self, public_model, team, key) -> None:
+            raise RuntimeError("boom")
+
+    model = "gpt-x\nERROR sundial: forged line " + "m" * 300
+    async with gateway(app, recorder=Exploding()) as client:
+        await client.post("/v1/chat/completions", json={"model": model})
+
+    assert caplog.messages == [f"sundial: could not record usage for {repr(model)[:200]}"]
+
+
 class LifespanApp(EchoApp):
     """An echo gateway that also runs the lifespan protocol, logging each lifespan message it gets."""
 

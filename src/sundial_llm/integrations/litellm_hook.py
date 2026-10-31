@@ -21,6 +21,7 @@ from sundial_llm.integrations.asgi import Decider, Recorder
 from sundial_llm.matching import UpstreamModel, parse_upstream
 from sundial_llm.policy import ALLOW, Action, Decision
 
+# A client's model is logged as %.200r: quoted, so it cannot forge a line, and cut to 200 characters.
 logger = logging.getLogger("sundial")
 
 _STASH = "sundial_headers"
@@ -104,7 +105,7 @@ class SundialHook(CustomLogger):
             decision = self._decider().decide(model)
             return decision, decision_headers(decision)
         except Exception:  # noqa: BLE001 - never let a lifecycle check break a request
-            logger.exception("sundial: lifecycle check failed for %s", model)
+            logger.exception("sundial: lifecycle check failed for %.200r", model)
             return ALLOW, {}
 
     def _record(self, model: str, user_api_key_dict: Any, decision: Decision) -> None:
@@ -113,7 +114,7 @@ class SundialHook(CustomLogger):
         try:
             self._recorder.record(model, getattr(user_api_key_dict, "team_id", None), decision.key)
         except Exception:  # noqa: BLE001 - never let usage counting break a request
-            logger.exception("sundial: could not record usage for %s", model)
+            logger.exception("sundial: could not record usage for %.200r", model)
 
     async def async_pre_call_hook(
         self, user_api_key_dict: Any, cache: Any, data: dict, call_type: Any
@@ -129,7 +130,9 @@ class SundialHook(CustomLogger):
         if decision.enforced and decision.action is Action.BLOCK:
             raise _refusal(block_message(decision, model))
         if decision.enforced and decision.action is Action.REDIRECT and decision.target:
-            logger.warning("sundial: redirecting %s to %s (rule %s)", model, decision.target, decision.rule)
+            logger.warning(
+                "sundial: redirecting %.200r to %r (rule %r)", model, decision.target, decision.rule
+            )
             data["model"] = decision.target
             headers[REDIRECTED_FROM] = model
         metadata = data.setdefault("metadata", {})

@@ -136,6 +136,21 @@ def test_a_failing_resolver_never_breaks_the_request() -> None:
     assert guard(index(RETIRED), Broken()).decide("gpt-dead").action is Action.ALLOW
 
 
+def test_a_failed_check_logs_the_client_model_quoted_and_cut_to_200_characters(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    class Broken:
+        def resolve(self, public_model: str) -> list[UpstreamModel]:
+            raise RuntimeError("router not ready")
+
+    model = "gpt-x\nERROR sundial: forged line " + "m" * 300
+
+    assert guard(index(RETIRED), Broken()).decide(model) == ALLOW
+    assert caplog.messages == [
+        f"sundial: lifecycle check failed for {repr(model)[:200]}; allowing the request"
+    ]
+
+
 def test_a_failing_record_load_never_breaks_the_request() -> None:
     def load() -> dict:
         raise OSError("db locked")

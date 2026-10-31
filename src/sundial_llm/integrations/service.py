@@ -25,7 +25,9 @@ from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
 from sundial_llm.integrations.asgi import Decider, Receive, Recorder, Scope, Send
 from sundial_llm.matching import parse_upstream
 from sundial_llm.policy import Action, Decision
+from sundial_llm.usage import MAX_MODEL_NAME_LENGTH
 
+# A client's model is logged as %.200r: quoted, so it cannot forge a line, and cut to 200 characters.
 logger = logging.getLogger("sundial")
 
 Payload = dict[str, Any]
@@ -148,7 +150,7 @@ class DecisionService:
         try:
             self._recorder.record(model, team, decision.key)
         except Exception:  # noqa: BLE001 - never let usage counting change a decision
-            logger.exception("sundial: could not record usage for %s", model)
+            logger.exception("sundial: could not record usage for %.200r", model)
 
     def _generic(self, request: object) -> tuple[int, Payload]:
         """The generic contract: 400 for a malformed request, otherwise 200 with the decision."""
@@ -159,6 +161,8 @@ class DecisionService:
         model = request.get("model")
         if not isinstance(model, str) or not model:
             return 400, {"error": "model must be a non-empty string"}
+        if len(model) > MAX_MODEL_NAME_LENGTH:
+            return 400, {"error": "model is too long"}
         for field in ("provider", "base_model", "team"):
             if not isinstance(request.get(field), (str, type(None))):
                 return 400, {"error": f"{field} must be a string or null"}
@@ -169,7 +173,7 @@ class DecisionService:
             self._record(model, request.get("team"), decision)
             return 200, _generic_answer(decision, model)
         except Exception:  # noqa: BLE001 - Sundial never blocks through its own failure
-            logger.exception("sundial: lifecycle check failed for %s; allowing the request", model)
+            logger.exception("sundial: lifecycle check failed for %.200r; allowing the request", model)
             return 200, _generic_failed()
 
     def _portkey(self, context: object) -> Payload:
@@ -194,6 +198,10 @@ class DecisionService:
         model = payload.get("model") if isinstance(payload, dict) else None
         if not isinstance(model, str) or not model:
             return _explain("The request names no model, so it was not checked.")
+        if len(model) > MAX_MODEL_NAME_LENGTH:
+            return _explain(
+                f"The model name is longer than {MAX_MODEL_NAME_LENGTH} characters, so it was not checked."
+            )
         slug = context.get("provider")
         slug = slug if isinstance(slug, str) else None
         prefix = PORTKEY_PROVIDERS.get(slug) if slug is not None else None

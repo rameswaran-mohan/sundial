@@ -112,7 +112,8 @@ class LifecycleGuard:
         try:
             return self._decide(public_model, upstreams)
         except Exception:  # noqa: BLE001 - lifecycle checks must never take a request down
-            logger.exception("sundial: lifecycle check failed for %s; allowing the request", public_model)
+            # %.200r: the client's model is quoted, so it cannot forge a log line, and cut short.
+            logger.exception("sundial: lifecycle check failed for %.200r; allowing the request", public_model)
             return ALLOW
 
     def _decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None) -> Decision:

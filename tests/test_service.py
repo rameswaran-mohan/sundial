@@ -358,6 +358,46 @@ async def test_decide_rejects_a_malformed_request_with_400(content: bytes, reaso
     assert recorder.calls == []
 
 
+async def test_decide_refuses_a_model_name_longer_than_256_characters() -> None:
+    decider = SpyDecider()
+    recorder = ListRecorder()
+
+    async with service(decider, recorder) as client:
+        too_long = await client.post(DECIDE, json={"model": "m" * 257, "team": "payments"})
+        longest = await client.post(DECIDE, json={"model": "m" * 256})
+
+    assert (too_long.status_code, too_long.json()) == (400, {"error": "model is too long"})
+    assert longest.status_code == 200
+    assert [model for model, _ in decider.calls] == ["m" * 256]
+    assert [model for model, _, _ in recorder.calls] == ["m" * 256]
+
+
+# A client model meant to forge a log line. It is under the length limit, so it is decided and logged.
+FORGING_MODEL = "gpt-x\nERROR sundial: forged line " + "m" * 200
+
+
+def logged(model: str) -> str:
+    """How a client model appears in a log line: quoted with repr, cut to 200 characters."""
+    return repr(model)[:200]
+
+
+async def test_log_lines_quote_the_client_model_and_cut_it_to_200_characters(caplog) -> None:
+    async with (
+        service(ExplodingDecider()) as failing_decide,
+        service(recorder=ExplodingRecorder()) as failing,
+    ):
+        await failing_decide.post(DECIDE, json={"model": FORGING_MODEL})
+        await failing.post(DECIDE, json={"model": FORGING_MODEL})
+        await failing.post(PORTKEY, json=portkey_context(FORGING_MODEL))
+
+    assert [r.getMessage() for r in caplog.records if r.levelno == logging.ERROR] == [
+        f"sundial: lifecycle check failed for {logged(FORGING_MODEL)}; allowing the request",
+        f"sundial: could not record usage for {logged(FORGING_MODEL)}",
+        f"sundial: could not record usage for {logged(FORGING_MODEL)}",
+    ]
+    assert all("\n" not in r.getMessage() for r in caplog.records)
+
+
 async def test_decide_refuses_an_oversized_body_with_413() -> None:
     async with service(max_body_bytes=64) as client:
         response = await client.post(DECIDE, json={"model": "gpt-dead", "padding": "x" * 100})
@@ -554,6 +594,21 @@ async def test_portkey_treats_a_provider_it_cannot_map_as_untracked() -> None:
         assert "transformedData" not in answer
     assert "cohere" in unmapped["data"]["explanation"]
     assert recorder.calls == [("gpt-dead", "payments", None)] * 3
+
+
+async def test_portkey_lets_a_model_name_longer_than_256_characters_through_unchecked() -> None:
+    decider = SpyDecider()
+    recorder = ListRecorder()
+
+    async with service(decider, recorder) as client:
+        response = await client.post(PORTKEY, json=portkey_context("m" * 257))
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "verdict": True,
+        "data": {"explanation": "The model name is longer than 256 characters, so it was not checked."},
+    }
+    assert (decider.calls, recorder.calls) == ([], [])
 
 
 async def test_portkey_does_not_decide_after_the_response() -> None:

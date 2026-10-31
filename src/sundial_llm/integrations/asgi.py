@@ -95,7 +95,8 @@ class SundialMiddleware:
         try:
             self._recorder.record(model, None, decision.key)
         except Exception:  # noqa: BLE001 - never let usage counting break a request
-            logger.exception("sundial: could not record usage for %s", model)
+            # %.200r: the client's model is quoted, so it cannot forge a log line, and cut short.
+            logger.exception("sundial: could not record usage for %.200r", model)
 
     def _close_recorder(self) -> None:
         """Write the recorder's buffered counts. uvicorn stops gracefully on SIGTERM and then re-raises
