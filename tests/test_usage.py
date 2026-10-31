@@ -7,7 +7,13 @@ from datetime import date, datetime, timedelta, timezone
 import pytest
 
 from sundial_llm.store import Store
-from sundial_llm.usage import MAX_MODEL_NAME_LENGTH, MAX_TEAM_LENGTH, UsageRecorder, UsageRow
+from sundial_llm.usage import (
+    MAX_MODEL_NAME_LENGTH,
+    MAX_TEAM_LENGTH,
+    UsageRecorder,
+    UsageRow,
+    close_quietly,
+)
 
 NOW = datetime(2026, 9, 19, 12, 0, tzinfo=timezone.utc)
 TODAY = NOW.date()
@@ -578,6 +584,29 @@ def test_close_waits_for_a_flush_in_flight_then_writes_the_rest(store: Store) ->
     recorder.close()
 
     assert {(r.public_model, r.calls) for r in store.usage_rows(TODAY)} == {("model-a", 1), ("model-b", 1)}
+
+
+def test_close_quietly_closes_what_can_be_closed_and_never_raises(caplog: pytest.LogCaptureFixture) -> None:
+    closed: list[str] = []
+
+    class Closing:
+        def close(self) -> None:
+            closed.append("closed")
+
+    class FailsToClose:
+        def close(self) -> None:
+            raise RuntimeError("disk full")
+
+    class CloseCannotBeRead:
+        @property
+        def close(self):
+            raise RuntimeError("proxy gone")
+
+    for recorder in (Closing(), FailsToClose(), CloseCannotBeRead(), None, object()):
+        close_quietly(recorder)
+
+    assert closed == ["closed"]
+    assert caplog.messages == ["sundial: could not flush usage counts at shutdown"] * 2
 
 
 def test_the_store_uses_write_ahead_logging(store: Store) -> None:

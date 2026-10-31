@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import ipaddress
 import json
+import logging
 import os
 import sys
 from collections.abc import Callable, Mapping, Sequence
@@ -42,6 +43,10 @@ SERVE_TOKEN_ENV = "SUNDIAL_SERVE_TOKEN"
 _DEFAULT_SERVE_HOST = "127.0.0.1"
 _DEFAULT_SERVE_PORT = 8765
 _NO_UVICORN = 'sundial: sundial serve needs uvicorn; install it with: pip install "sundial-llm[serve]"'
+_EMPTY_SERVE = (
+    "warning: the registry is empty, so every model is allowed until it loads; run sundial import to load it"
+)
+_SERVE_LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
 
 
 def _utcnow() -> datetime:
@@ -376,6 +381,18 @@ def _uvicorn_runner() -> RunServer | None:
     return run_with_uvicorn
 
 
+def _log_to_stderr() -> None:
+    """Give the `sundial` logger a stderr handler at INFO unless the host already gave it one. uvicorn
+    only configures its own loggers, so without this a served process drops Sundial's own lines."""
+    logger = logging.getLogger("sundial")
+    if logger.handlers:
+        return
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(_SERVE_LOG_FORMAT))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+
 def _serve(
     config: Config,
     host: str,
@@ -391,6 +408,7 @@ def _serve(
         if run_server is None:
             print(_NO_UVICORN, file=out)
             return EXIT_BAD_INPUT
+    _log_to_stderr()
     # Brackets only mark an IPv6 address inside a URL; the server binds the bare address.
     if host.startswith("[") and host.endswith("]"):
         host = host[1:-1]
@@ -407,6 +425,8 @@ def _serve(
     app = DecisionService(runtime.guard, runtime.recorder, token=token)
     url_host = f"[{host}]" if ":" in host else host  # an IPv6 address is bracketed in a URL
     count = runtime.guard.record_count()
+    if not count:
+        print(_EMPTY_SERVE, file=out)
     print(f"Serving lifecycle decisions on http://{url_host}:{port} ({count} records)", file=out)
     out.flush()  # the server runs until stopped, and a piped stdout would hold these lines until then
     run_server(app, host, port)

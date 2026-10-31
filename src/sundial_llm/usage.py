@@ -78,6 +78,18 @@ def _printable(value: object) -> bool:
     return isinstance(value, str) and value.isprintable()
 
 
+def close_quietly(recorder: object) -> None:
+    """Write a recorder's buffered counts at server shutdown, if it has close(). Logs instead of
+    raising, so shutdown always completes. uvicorn stops gracefully on SIGTERM and then re-raises it,
+    so the process dies without running atexit; lifespan shutdown is the last chance."""
+    try:
+        close = getattr(recorder, "close", None)
+        if callable(close):
+            close()
+    except Exception:  # noqa: BLE001 - shutdown must always complete
+        logger.exception("sundial: could not flush usage counts at shutdown")
+
+
 def _bucket(row: UsageRow) -> _Bucket:
     return (row.day, row.public_model, row.team, row.platform, row.model_id, row.version)
 

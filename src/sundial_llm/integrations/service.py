@@ -25,7 +25,7 @@ from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
 from sundial_llm.integrations.asgi import Decider, Receive, Recorder, Scope, Send
 from sundial_llm.matching import parse_upstream
 from sundial_llm.policy import Action, Decision
-from sundial_llm.usage import MAX_MODEL_NAME_LENGTH
+from sundial_llm.usage import MAX_MODEL_NAME_LENGTH, close_quietly
 
 # A client's model is logged as %.200r: quoted, so it cannot forge a line, and cut to 200 characters.
 logger = logging.getLogger("sundial")
@@ -64,7 +64,10 @@ class DecisionService:
     ) -> None:
         self._guard = guard
         self._recorder = recorder
-        self._token = token.encode("utf-8") if token is not None else None
+        # As in `sundial serve`: a blank token protects nothing, so it means no token. Credentials a
+        # client sends are stripped, so the token is too, or a trailing newline would never match.
+        token = token.strip() if token is not None else None
+        self._token = token.encode("utf-8") if token else None
         self._max_body_bytes = max_body_bytes
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -134,15 +137,7 @@ class DecisionService:
             return 0
 
     def _close_recorder(self) -> None:
-        """Write the recorder's buffered counts at shutdown. uvicorn stops gracefully on SIGTERM and
-        then re-raises it, so the process dies without running atexit; this is the last chance."""
-        close = getattr(self._recorder, "close", None)
-        if not callable(close):
-            return
-        try:
-            close()
-        except Exception:  # noqa: BLE001 - shutdown must always complete
-            logger.exception("sundial: could not flush usage counts at shutdown")
+        close_quietly(self._recorder)
 
     def _record(self, model: str, team: str | None, decision: Decision) -> None:
         if self._recorder is None:

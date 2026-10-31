@@ -1,6 +1,8 @@
 import io
 import json
+import logging
 import re
+import subprocess
 import sys
 import threading
 import types
@@ -524,6 +526,21 @@ def test_a_config_that_cannot_be_found_parsed_or_validated_exits_2(tmp_path, fix
 
 SERVE_TOKEN = "s3cret-token"
 INSTALL_HINT = 'sundial: sundial serve needs uvicorn; install it with: pip install "sundial-llm[serve]"'
+EMPTY_WARNING = (
+    "warning: the registry is empty, so every model is allowed until it loads; run sundial import to load it"
+)
+LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+
+
+@pytest.fixture(autouse=True)
+def sundial_logger():
+    """The `sundial` logger, with its handlers and level put back after each test, since serve sets
+    them up for the whole process."""
+    logger = logging.getLogger("sundial")
+    handlers, level = logger.handlers[:], logger.level
+    yield logger
+    logger.handlers[:] = handlers
+    logger.setLevel(level)
 
 
 def write_serve_config(tmp_path, db, *, usage_tracking: bool = False) -> str:
@@ -588,9 +605,9 @@ def test_serve_on_a_public_address_without_a_token_warns_and_still_serves(
     lines = output.splitlines()
     assert code == 0
     assert [(served_host, port) for _, served_host, port in served] == [(host, 9000)]
-    assert len(lines) == 2
+    assert len(lines) == 3
     assert lines[0].startswith("warning: ") and "SUNDIAL_SERVE_TOKEN" in lines[0]
-    assert lines[1] == f"Serving lifecycle decisions on {url} (0 records)"
+    assert lines[1:] == [EMPTY_WARNING, f"Serving lifecycle decisions on {url} (0 records)"]
 
 
 @pytest.mark.anyio
@@ -609,7 +626,7 @@ async def test_serve_with_a_token_does_not_warn_and_the_service_requires_it(
     authorized = await decide(app, {"Authorization": f"Bearer {SERVE_TOKEN}"})
 
     assert code == 0
-    assert "warning" not in output
+    assert "SUNDIAL_SERVE_TOKEN" not in output
     assert (anonymous.status_code, wrong.status_code, authorized.status_code) == (401, 401, 200)
     assert authorized.json()["action"] == "allow"
 
@@ -647,7 +664,7 @@ def test_serve_on_a_loopback_host_does_not_warn(serve_config, fixture_fetch, hos
 
     assert code == 0
     assert [served_host for _, served_host, _ in served] == [bound]
-    assert output == f"Serving lifecycle decisions on {url} (0 records)\n"
+    assert output == f"{EMPTY_WARNING}\nServing lifecycle decisions on {url} (0 records)\n"
 
 
 def test_serve_refreshes_the_registry_through_the_fetch_main_was_given(tmp_path, db) -> None:
@@ -732,7 +749,65 @@ def test_serve_flushes_its_startup_lines_before_the_server_takes_over(serve_conf
     )
 
     assert seen == [out.getvalue()]
-    assert len(out.getvalue().splitlines()) == 2
+    assert len(out.getvalue().splitlines()) == 3
+
+
+def test_serve_on_an_empty_registry_warns_that_every_model_is_allowed(serve_config, fixture_fetch) -> None:
+    code, output, served = serve(["--config", serve_config], fixture_fetch)
+
+    assert code == 0
+    assert len(served) == 1
+    assert output.splitlines() == [
+        EMPTY_WARNING,
+        "Serving lifecycle decisions on http://127.0.0.1:8765 (0 records)",
+    ]
+
+
+def test_serve_logs_the_sundial_logger_to_stderr_at_info(
+    serve_config, fixture_fetch, sundial_logger, capsys
+) -> None:
+    assert sundial_logger.handlers == []
+
+    serve(["--config", serve_config], fixture_fetch)
+    sundial_logger.info("hello from serve")
+
+    [handler] = sundial_logger.handlers
+    assert type(handler) is logging.StreamHandler
+    assert handler.formatter is not None and handler.formatter._fmt == LOG_FORMAT
+    assert sundial_logger.getEffectiveLevel() == logging.INFO
+    assert re.search(r"^\S+ \S+ INFO sundial: hello from serve$", capsys.readouterr().err, re.MULTILINE)
+
+
+def test_serve_keeps_a_handler_the_host_already_gave_the_sundial_logger(
+    serve_config, fixture_fetch, sundial_logger
+) -> None:
+    mine = logging.NullHandler()
+    sundial_logger.addHandler(mine)
+
+    serve(["--config", serve_config], fixture_fetch)
+
+    assert sundial_logger.handlers == [mine]
+
+
+def test_other_commands_leave_the_sundial_logger_alone(db, fixture_fetch, sundial_logger) -> None:
+    run(["status", "--db", str(db)], fixture_fetch)
+    run(["check", "gpt-4-0613", "--db", str(db)], fixture_fetch)
+
+    assert (sundial_logger.handlers, sundial_logger.level) == ([], logging.NOTSET)
+
+
+def test_importing_the_package_configures_no_logging() -> None:
+    program = (
+        "import logging\n"
+        "import sundial_llm, sundial_llm.cli, sundial_llm.runtime\n"
+        "import sundial_llm.integrations.asgi, sundial_llm.integrations.service\n"
+        "logger = logging.getLogger('sundial')\n"
+        "print(len(logger.handlers), logger.level, len(logging.getLogger().handlers))\n"
+    )
+
+    result = subprocess.run([sys.executable, "-c", program], capture_output=True, text=True, check=True)
+
+    assert result.stdout.split() == ["0", "0", "0"]
 
 
 @pytest.mark.anyio

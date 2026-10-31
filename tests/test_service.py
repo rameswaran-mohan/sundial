@@ -499,7 +499,13 @@ def test_portkey_redirect_never_mutates_the_parsed_context() -> None:
         ("azure-ai", "gpt-4o-mini", "redirect"),
         ("azure-openai", "gpt-4o-2024-05-13", "block"),
     ],
-    ids=["openai-block", "openai-redirect", "ai-block", "ai-redirect", "versioned-body-model"],
+    ids=[
+        "azure-openai-block",
+        "azure-openai-redirect",
+        "azure-ai-block",
+        "azure-ai-redirect",
+        "azure-openai-versioned-body-model",
+    ],
 )
 async def test_portkey_never_enforces_azure_because_it_routes_by_deployment(
     slug: str, model: str, action: str
@@ -792,6 +798,25 @@ async def test_without_a_token_no_authorization_header_is_needed(path: str, payl
     assert response.status_code == 200
 
 
+@pytest.mark.parametrize(("path", "payload"), POST_ROUTES, ids=["decide", "portkey"])
+@pytest.mark.parametrize("token", ["", "  \t "], ids=["empty", "whitespace"])
+async def test_a_blank_token_means_no_token_as_in_the_cli(path: str, payload: dict, token: str) -> None:
+    async with service(token=token) as client:
+        response = await client.post(path, json=payload)
+
+    assert response.status_code == 200
+
+
+async def test_the_token_is_stripped_as_the_cli_strips_it() -> None:
+    async with service(token=" s3cret\n") as client:
+        right = await client.post(
+            DECIDE, json={"model": "gpt-fading"}, headers={"authorization": "Bearer s3cret"}
+        )
+        missing = await client.post(DECIDE, json={"model": "gpt-fading"})
+
+    assert (right.status_code, missing.status_code) == (200, 401)
+
+
 async def test_an_unauthorized_request_is_refused_before_its_body_is_read() -> None:
     async def receive() -> dict:
         raise AssertionError("the body was read before the token was checked")
@@ -926,3 +951,18 @@ async def test_lifespan_shutdown_completes_for_a_recorder_without_close() -> Non
     await run_lifespan(DecisionService(make_guard(), ListRecorder()), events)
 
     assert events == ["lifespan.startup.complete", "lifespan.shutdown.complete"]
+
+
+async def test_lifespan_shutdown_completes_when_reading_close_raises(caplog) -> None:
+    class Odd(ListRecorder):
+        @property
+        def close(self):
+            raise RuntimeError("proxy gone")
+
+    events: list = []
+
+    with caplog.at_level(logging.ERROR, logger="sundial"):
+        await run_lifespan(DecisionService(make_guard(), Odd()), events)
+
+    assert events == ["lifespan.startup.complete", "lifespan.shutdown.complete"]
+    assert "could not flush usage counts" in caplog.text

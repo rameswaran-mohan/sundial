@@ -18,6 +18,7 @@ from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
 from sundial_llm.matching import UpstreamModel
 from sundial_llm.models import RecordKey
 from sundial_llm.policy import Action, Decision
+from sundial_llm.usage import close_quietly
 
 if TYPE_CHECKING:
     from sundial_llm.runtime import Runtime
@@ -98,16 +99,6 @@ class SundialMiddleware:
             # %.200r: the client's model is quoted, so it cannot forge a log line, and cut short.
             logger.exception("sundial: could not record usage for %.200r", model)
 
-    def _close_recorder(self) -> None:
-        """Write the recorder's buffered counts. uvicorn stops gracefully on SIGTERM and then re-raises
-        it, so the process dies without running atexit; server shutdown is the last chance."""
-        try:
-            close = getattr(self._recorder, "close", None)
-            if callable(close):
-                close()
-        except Exception:  # noqa: BLE001 - shutdown must always complete
-            logger.exception("sundial: could not flush usage counts at shutdown")
-
     def _closing_on_shutdown(self, receive: Receive) -> Receive:
         """`receive` for a lifespan scope: on the server's shutdown message, close the recorder (if one
         was built or given; none is built here), then hand the message on unchanged."""
@@ -115,7 +106,7 @@ class SundialMiddleware:
         async def watched() -> Message:
             message = await receive()
             if message.get("type") == "lifespan.shutdown":
-                self._close_recorder()
+                close_quietly(self._recorder)
             return message
 
         return watched

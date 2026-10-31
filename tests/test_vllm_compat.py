@@ -3,10 +3,11 @@ does, after its own CORS and API-key middleware. These tests run that load on a 
 
 import importlib
 import inspect
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
+import anyio
 import httpx
 import pytest
 
@@ -94,15 +95,17 @@ def record(model_id: str, state: LifecycleState, retire_on) -> LifecycleRecord:
     )
 
 
-@pytest.fixture
-def server(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> VllmLikeServer:
+def vllm_like_server(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, usage_tracking: bool = False
+) -> tuple[VllmLikeServer, Path]:
+    """A vLLM-like server whose Sundial reads a registry of two records; also returns its database."""
     db = tmp_path / "vllm.db"
     config = tmp_path / "sundial.yaml"
     config.write_text(
         f"db: {db.as_posix()}\n"
         "registry_url: null\n"
         "auto_scan_hours: 0\n"
-        "usage_tracking: false\n"
+        f"usage_tracking: {'true' if usage_tracking else 'false'}\n"
         "rules:\n"
         "  - {name: block-retired, when: {state: retired}, action: block, mode: apply}\n"
         "  - {name: warn-90, when: {days_until_retirement_lte: 90}, action: warn}\n",
@@ -115,7 +118,12 @@ def server(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> VllmLikeServer:
         record("gpt-leaving", LifecycleState.DEPRECATED, RETIRING_ON),
     )
     Store(db).save_scan({r.key: r for r in records}, [], datetime.now(timezone.utc))
-    return VllmLikeServer()
+    return VllmLikeServer(), db
+
+
+@pytest.fixture
+def server(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> VllmLikeServer:
+    return vllm_like_server(tmp_path, monkeypatch)[0]
 
 
 def test_the_middleware_path_resolves_to_a_class_as_vllm_requires(server: VllmLikeServer) -> None:
@@ -149,6 +157,45 @@ async def test_a_warned_model_with_the_api_key_reaches_the_route_with_lifecycle_
     assert response.headers["x-sundial-state"] == "deprecated"
     assert response.headers["x-sundial-rule"] == "warn-90"
     assert server.calls == 1
+
+
+async def test_lifespan_shutdown_through_the_stack_writes_the_counts_of_earlier_requests(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Containers stop vLLM with SIGTERM, and uvicorn then skips atexit; lifespan shutdown must flush.
+    server, db = vllm_like_server(tmp_path, monkeypatch, usage_tracking=True)
+    started, stop = anyio.Event(), anyio.Event()
+    messages = [{"type": "lifespan.startup"}, {"type": "lifespan.shutdown"}]
+    sent: list[str] = []
+
+    async def receive() -> dict:
+        if len(messages) == 1:
+            await stop.wait()  # the server stays up until the request below is done
+        return messages.pop(0)
+
+    async def send(message: dict) -> None:
+        sent.append(message["type"])
+        if message["type"] == "lifespan.startup.complete":
+            started.set()
+
+    async with anyio.create_task_group() as group:
+        group.start_soon(
+            server.app, {"type": "lifespan", "asgi": {"version": "3.0"}, "state": {}}, receive, send
+        )
+        await started.wait()
+        async with server.client() as client:
+            response = await client.post(
+                "/v1/chat/completions", json={"model": "gpt-leaving"}, headers=AUTHORIZED
+            )
+        buffered = Store(db).usage_rows(date.min)
+        stop.set()
+
+    assert response.status_code == 200
+    assert buffered == []  # one call is below the flush threshold, so only shutdown writes it
+    assert sent == ["lifespan.startup.complete", "lifespan.shutdown.complete"]
+    assert [
+        (row.public_model, row.platform, row.model_id, row.calls) for row in Store(db).usage_rows(date.min)
+    ] == [("gpt-leaving", "openai", "gpt-leaving", 1)]
 
 
 async def test_a_healthy_model_passes_untouched(server: VllmLikeServer) -> None:
