@@ -3,19 +3,22 @@
     app = SundialMiddleware(app)            # FastAPI, Starlette, or any ASGI app
 
 It inspects POST bodies on inference routes, reads `model`, and then blocks, rewrites or adds
-lifecycle headers. Anything it does not understand is forwarded untouched.
+lifecycle headers. Anything it does not understand is forwarded untouched. When the server shuts
+down, the usage counts it buffered are written before the wrapped app hears of the shutdown.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Awaitable, Callable, MutableMapping
+from collections.abc import Awaitable, Callable, MutableMapping, Sequence
 from typing import TYPE_CHECKING, Any, Protocol
 
 from sundial_llm.headers import REDIRECTED_FROM, block_message, decision_headers
+from sundial_llm.matching import UpstreamModel
 from sundial_llm.models import RecordKey
 from sundial_llm.policy import Action, Decision
+from sundial_llm.usage import close_quietly
 
 if TYPE_CHECKING:
     from sundial_llm.runtime import Runtime
@@ -32,7 +35,9 @@ INFERENCE_SUFFIXES = ("/chat/completions", "/completions", "/embeddings", "/resp
 
 
 class Decider(Protocol):
-    def decide(self, public_model: str) -> Decision: ...
+    # `upstreams` names the provider models to decide, for callers that know them; the middleware
+    # leaves it out and lets the guard resolve the public model.
+    def decide(self, public_model: str, upstreams: Sequence[UpstreamModel] | None = None) -> Decision: ...
 
 
 class Recorder(Protocol):
@@ -91,9 +96,25 @@ class SundialMiddleware:
         try:
             self._recorder.record(model, None, decision.key)
         except Exception:  # noqa: BLE001 - never let usage counting break a request
-            logger.exception("sundial: could not record usage for %s", model)
+            # %.200r: the client's model is quoted, so it cannot forge a log line, and cut short.
+            logger.exception("sundial: could not record usage for %.200r", model)
+
+    def _closing_on_shutdown(self, receive: Receive) -> Receive:
+        """`receive` for a lifespan scope: on the server's shutdown message, close the recorder (if one
+        was built or given; none is built here), then hand the message on unchanged."""
+
+        async def watched() -> Message:
+            message = await receive()
+            if message.get("type") == "lifespan.shutdown":
+                close_quietly(self._recorder)
+            return message
+
+        return watched
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope.get("type") == "lifespan":
+            await self.app(scope, self._closing_on_shutdown(receive), send)
+            return
         if not self._inspectable(scope):
             await self.app(scope, receive, send)
             return

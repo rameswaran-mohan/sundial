@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -308,3 +309,139 @@ async def test_a_recorder_that_raises_never_breaks_the_request_or_the_decision(a
 
     assert refused.status_code == 410
     assert passed.status_code == 200
+
+
+async def test_a_recorder_failure_logs_the_client_model_quoted_and_cut_to_200_characters(app, caplog) -> None:
+    class Exploding:
+        def record(self, public_model, team, key) -> None:
+            raise RuntimeError("boom")
+
+    model = "gpt-x\nERROR sundial: forged line " + "m" * 300
+    async with gateway(app, recorder=Exploding()) as client:
+        await client.post("/v1/chat/completions", json={"model": model})
+
+    assert caplog.messages == [f"sundial: could not record usage for {repr(model)[:200]}"]
+
+
+class LifespanApp(EchoApp):
+    """An echo gateway that also runs the lifespan protocol, logging each lifespan message it gets."""
+
+    def __init__(self, events: list) -> None:
+        super().__init__()
+        self.events = events
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] != "lifespan":
+            await super().__call__(scope, receive, send)
+            return
+        while True:
+            message = await receive()
+            self.events.append(f"app: {message['type']}")
+            if message["type"] == "lifespan.startup":
+                await send({"type": "lifespan.startup.complete"})
+            elif message["type"] == "lifespan.shutdown":
+                await send({"type": "lifespan.shutdown.complete"})
+                return
+
+
+class ClosingRecorder(ListRecorder):
+    """A recorder whose close() is logged into `events`, next to the lifespan messages."""
+
+    def __init__(self, events: list, error: Exception | None = None) -> None:
+        super().__init__()
+        self.events = events
+        self.error = error
+
+    def close(self) -> None:
+        self.events.append("close")
+        if self.error is not None:
+            raise self.error
+
+
+async def serve_lifespan(middleware: SundialMiddleware, events: list) -> None:
+    """Play the server's side of startup then shutdown, logging each message that reaches the server."""
+    messages = iter([{"type": "lifespan.startup"}, {"type": "lifespan.shutdown"}])
+
+    async def receive() -> dict:
+        return next(messages)
+
+    async def send(message: dict) -> None:
+        events.append(f"server: {message['type']}")
+
+    await middleware({"type": "lifespan", "asgi": {"version": "3.0"}, "state": {}}, receive, send)
+
+
+UNTOUCHED_LIFESPAN = [
+    "app: lifespan.startup",
+    "server: lifespan.startup.complete",
+    "app: lifespan.shutdown",
+    "server: lifespan.shutdown.complete",
+]
+
+
+async def test_server_shutdown_closes_the_recorder_once_before_the_gateway_sees_it() -> None:
+    # uvicorn re-raises SIGTERM after a graceful stop, so atexit never runs; shutdown must flush.
+    events: list = []
+    middleware = SundialMiddleware(LifespanApp(events), identity_guard(), recorder=ClosingRecorder(events))
+
+    await serve_lifespan(middleware, events)
+
+    assert events == [
+        "app: lifespan.startup",
+        "server: lifespan.startup.complete",
+        "close",
+        "app: lifespan.shutdown",
+        "server: lifespan.shutdown.complete",
+    ]
+
+
+async def test_shutdown_completes_when_the_recorder_cannot_close(caplog) -> None:
+    events: list = []
+    recorder = ClosingRecorder(events, error=RuntimeError("disk full"))
+    middleware = SundialMiddleware(LifespanApp(events), identity_guard(), recorder=recorder)
+
+    with caplog.at_level(logging.ERROR, logger="sundial"):
+        await serve_lifespan(middleware, events)
+
+    assert events == [*UNTOUCHED_LIFESPAN[:2], "close", *UNTOUCHED_LIFESPAN[2:]]
+    assert "could not flush usage counts" in caplog.text
+
+
+async def test_shutdown_with_no_recorder_builds_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
+    built: list = []
+    monkeypatch.setattr("sundial_llm.integrations.asgi._default_runtime", lambda: built.append("runtime"))
+    events: list = []
+
+    await serve_lifespan(SundialMiddleware(LifespanApp(events)), events)
+
+    assert built == []
+    assert events == UNTOUCHED_LIFESPAN
+
+
+async def test_shutdown_leaves_a_recorder_without_close_alone() -> None:
+    events: list = []
+    middleware = SundialMiddleware(LifespanApp(events), identity_guard(), recorder=ListRecorder())
+
+    await serve_lifespan(middleware, events)
+
+    assert events == UNTOUCHED_LIFESPAN
+
+
+async def test_a_middleware_with_no_arguments_writes_its_counts_when_the_server_shuts_down(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db = offline_config(tmp_path, monkeypatch)
+    events: list = []
+    middleware = SundialMiddleware(LifespanApp(events))
+
+    transport = httpx.ASGITransport(app=middleware)
+    async with httpx.AsyncClient(transport=transport, base_url="http://gateway.test") as client:
+        await client.post("/v1/chat/completions", json={"model": "gpt-wired"})
+    buffered = Store(db).usage_rows(date.min)
+    await serve_lifespan(middleware, events)
+
+    assert buffered == []  # the count was only buffered until shutdown
+    assert [(row.public_model, row.team, row.calls) for row in Store(db).usage_rows(date.min)] == [
+        ("gpt-wired", "", 1)
+    ]
+    assert events == UNTOUCHED_LIFESPAN

@@ -9,17 +9,19 @@ different shape. Sundial reads the official pages, keeps a registry of every mod
 runs inside your gateway to warn, block or redirect requests to models that are going away. It also
 tells you when a new model launches.
 
-It is a library, not a service. There is nothing extra to deploy.
+It is a library first. Inside the litellm proxy or an ASGI app there is nothing extra to deploy.
+Gateways that cannot load Python can call an optional small service, `sundial serve`, for the same
+decisions over HTTP.
 
 ```
 $ sundial status --within 30
-28 models retire within 30 days (485 tracked).
-    3d  2026-09-21  azure      gpt-realtime-mini (2025-10-06)
-   10d  2026-09-28  openai     gpt-3.5-turbo-1106  -> gpt-5.6-terra
-   12d  2026-09-30  bedrock    amazon.nova-canvas-v1:0
-   13d  2026-10-01  azure      gpt-4o (2024-05-13)  -> gpt-5.1
-   14d  2026-10-02  gemini     gemini-2.5-flash-image  -> gemini-3.1-flash-image-preview
-   26d  2026-10-14  bedrock    anthropic.claude-sonnet-4-20250514-v1:0
+26 models retire within 30 days (544 tracked).
+   14d  2026-11-13  bedrock    anthropic.claude-3-5-sonnet-20241022-v2:0
+   16d  2026-11-15  azure      codex-mini (2025-05-16)
+   18d  2026-11-17  gemini     gemini-3.1-flash-live-preview  -> gemini-3.8-live
+   20d  2026-11-19  azure      o3 (2025-04-16)  -> gpt-5.6-sol
+   20d  2026-11-19  azure      o4-mini (2025-04-16)  -> gpt-5.6-terra
+   27d  2026-11-26  bedrock    ai21.jamba-1-5-large-v1:0
 ```
 
 ## Install
@@ -27,7 +29,22 @@ $ sundial status --within 30
 ```bash
 pip install sundial-llm            # core, CLI and ASGI middleware
 pip install "sundial-llm[litellm]" # plus the litellm proxy plugin
+pip install "sundial-llm[serve]"   # plus sundial serve, the decision service
 ```
+
+## Integrations
+
+| Integration | How it plugs in | What was verified |
+|---|---|---|
+| litellm proxy | a callback in the proxy config | a live proxy run |
+| any ASGI app | `SundialMiddleware` wraps the app | tests |
+| vLLM | `--middleware sundial_llm.integrations.asgi.SundialMiddleware` | vLLM's middleware loader reproduced in tests. Not run on a GPU |
+| Portkey | a webhook guardrail that calls `sundial serve` | live against the open-source Portkey gateway 1.15.2. See [docs/portkey.md](https://github.com/rameswaran-mohan/sundial/blob/main/docs/portkey.md) |
+| Kong | the AI Custom Guardrail plugin pointed at `/v1/decide`, keyed on `block` | described, not run. The plugin is Kong Enterprise |
+| Bifrost | not supported | it needs a compiled Go plugin |
+
+The litellm plugin, the middleware and `sundial serve` read the same config file and the same
+registry database.
 
 ## Use it with the litellm proxy
 
@@ -65,6 +82,130 @@ app = SundialMiddleware(app)  # FastAPI, Starlette or any ASGI app
 
 The middleware inspects JSON bodies on `/chat/completions`, `/completions`, `/embeddings`,
 `/responses` and `/messages`. Everything else passes through untouched.
+
+## Use it with vLLM
+
+vLLM loads ASGI middleware by import path. Install Sundial in vLLM's Python environment and pass the
+class:
+
+```bash
+SUNDIAL_CONFIG=/etc/sundial/sundial.yaml vllm serve <model> \
+    --middleware sundial_llm.integrations.asgi.SundialMiddleware
+```
+
+vLLM creates the middleware with no arguments, so it reads its config from `SUNDIAL_CONFIG`. vLLM
+adds its own CORS and API-key middleware first and yours last, and the last one added runs first.
+So Sundial sees each request before vLLM checks the API key. It counts unauthenticated requests too,
+and a block rule in apply mode refuses a retired model with 410 even when the key is missing.
+Sundial also sits outside vLLM's CORS middleware. A browser client sees a CORS error instead of
+Sundial's 410, and browsers do not see `Sunset` or `X-Sundial-*` headers unless CORS exposes them.
+
+vLLM usually serves open-weight models, and those are usually not in the registry, so Sundial
+rarely flags anything there. The middleware does more in Python servers that forward to provider
+models.
+
+## Decision service
+
+`sundial serve` is for gateways that cannot load Python but can call an HTTP check before each
+request. It runs a small ASGI app under uvicorn. It uses the same config file and database as the
+other integrations: the same policy and successors, the same background registry refresh, and the
+same usage counts.
+
+```bash
+pip install "sundial-llm[serve]"
+sundial import --config sundial.yaml \
+    https://raw.githubusercontent.com/rameswaran-mohan/sundial/main/registry/lifecycle.json
+export SUNDIAL_SERVE_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+sundial serve --config sundial.yaml
+```
+
+```
+Serving lifecycle decisions on http://127.0.0.1:8765 (544 records)
+```
+
+Import the registry before the first start: on an empty database the service starts with 0 records
+and allows every model until its first background refresh has landed and the guard next reloads
+its records, which it does every `reload_seconds` (300 by default). It prints a warning when it
+starts with 0 records.
+
+`--host` (default `127.0.0.1`) and `--port` (default `8765`) set where it listens. `--config` and
+`--db` work as for every other command. `sundial serve` exits with 2 and prints the install command
+when uvicorn is missing, and with 2 when `--port` is not a number from 1 to 65535. It writes
+Sundial's log lines to stderr at INFO, unless the `sundial` logger already has a handler.
+
+When `SUNDIAL_SERVE_TOKEN` is set, both POST routes require `Authorization: Bearer <token>` and
+answer 401 otherwise. A blank value counts as unset. `GET /healthz` stays open and shows only a
+status and a record count. Listening on an address that is not loopback without a token prints a
+warning, and the service still starts. The service speaks plain HTTP and receives the request
+bodies a gateway sends, which can hold full prompts, and the bearer token. Keep it on loopback or a
+private network, or put it behind TLS.
+
+| Route | What it is for |
+|---|---|
+| `GET /healthz` | a liveness probe, open without the token. It answers `{"status": "ok", "records": 544}` |
+| `POST /v1/decide` | the generic contract, for any gateway with a pre-request callout |
+| `POST /portkey/before-request` | Portkey's webhook guardrail |
+
+Other paths get 404 and a wrong method gets 405.
+
+### POST /v1/decide
+
+```json
+{"model": "gpt-4o-2024-05-13", "provider": "azure", "team": "payments"}
+```
+
+```json
+{"action": "warn", "enforced": false, "block": false, "redirect_to": null,
+ "state": "deprecated", "retire_on": "2026-12-09", "days_left": 40,
+ "replacements": ["gpt-5.6-sol"], "rule": "warn-90", "approximate": false,
+ "message": "Model 'gpt-4o-2024-05-13' is deprecated and retires on 2026-12-09 (Sundial rule 'warn-90'). Use gpt-5.6-sol instead.",
+ "headers": {"Sunset": "Wed, 09 Dec 2026 00:00:00 GMT", "X-Sundial-State": "deprecated",
+             "X-Sundial-Successor": "gpt-5.6-sol", "X-Sundial-Rule": "warn-90",
+             "X-Sundial-Days-Left": "40"}}
+```
+
+`model` is required. `provider` is one of the prefixes Sundial matches on: `openai`,
+`text-completion-openai`, `anthropic`, `azure`, `azure_ai`, `bedrock`, `bedrock_converse`,
+`gemini`, `vertex_ai` or `vertex_ai_beta`. With it, the upstream is `provider/model`.
+Without it, `model` is read the litellm way: `azure/x` is Azure, and a bare name is OpenAI, except
+that `claude-*` is Anthropic and `gemini-*` is Gemini. Any other provider means the model is
+untracked, and the answer is an allow. `base_model` names the underlying model of a deployment
+with an arbitrary name, as `--base-model` does for `sundial check`. `team` is stored with the usage
+count. A redirect looks up `successors` by `model`, the name the caller sent.
+
+The answer is 200 for every well-formed request. `block` is true only for an enforced block, so a
+gateway can key on one boolean. `redirect_to` names the successor only for an enforced redirect.
+`message` is the text the litellm plugin returns when it refuses a request, and it is set whenever
+`action` is not `allow`. `headers` holds the lifecycle headers the other integrations add to
+responses. An enforced redirect also adds `X-Sundial-Redirected-From`.
+
+- Malformed JSON, a body that is not an object, a missing or empty `model`, a `model` longer than
+  256 characters, or a `provider`, `base_model` or `team` that is not a string or null gets 400. A
+  gateway configured to treat a 400 as a block would block on its own misconfiguration, so make sure
+  it sends a well-formed body.
+- A body over 8 MiB gets 413. It is never buffered past that.
+- A missing or wrong token gets 401.
+- Any failure in the lifecycle check answers 200 with an allow, and is logged. A failure to count
+  usage is logged too, and the answer still carries the real decision. Sundial never blocks a
+  request through its own failure. Most failures, such as a lookup that fails, give a plain allow
+  that looks like a healthy model. Only a failure while building or encoding the answer adds an
+  `error` field. When the database cannot be read, decisions use the records already loaded, and
+  the load is tried again within 30 seconds. With no records loaded yet, every model is allowed.
+  `GET /healthz` keeps answering ok, with the count of the records last loaded. To detect failures,
+  watch the `sundial` log, not the response.
+- When the service cannot be reached, the gateway decides. Configure its callout to let the request
+  through when the call fails.
+
+Any gateway that can call out before a request can use this route. Send `model`, and `provider`,
+`base_model` and `team` when you know them. Refuse the request when `block` is true, and replace the
+model with `redirect_to` when it is set. For Kong, that is the AI Custom Guardrail plugin pointed at
+`/v1/decide` and keyed on `block`. That setup has not been run.
+
+### POST /portkey/before-request
+
+Portkey's webhook guardrail posts its plugin context here. The answer is always 200, except 401
+for a missing or wrong token. The setup, every answer and the results of the live run are in
+[docs/portkey.md](https://github.com/rameswaran-mohan/sundial/blob/main/docs/portkey.md).
 
 ## Where the data comes from
 
@@ -157,23 +298,26 @@ x-sundial-successor: current
 - A model group is blocked or redirected only when every deployment behind it agrees. One retired
   deployment in a healthy group produces a warning.
 - Redirect needs an explicit entry in `successors`. Sundial never guesses a replacement for you.
-- Sundial never raises into your gateway. If the registry is empty, the config is broken or a
-  lookup fails, the request is allowed and the problem is logged.
+- Sundial never raises into your gateway. If the config is broken or a lookup fails, the request is
+  allowed and the problem is logged. An empty registry allows every request and logs nothing.
+  `sundial serve` prints a warning when it starts with 0 records. If the registry cannot be
+  reloaded, the records already loaded stay in use and the failure is logged.
 
 ## What is in use
 
-The litellm plugin and the ASGI middleware count the requests they inspect, per day and public
-model name, in the same SQLite file as the registry. A request is counted under the name the client
-sent, before any block or redirect. The litellm plugin also records the key's team id. The
-middleware records no team. `sundial status --in-use` turns those counts into the retirements your
-traffic actually touches:
+The litellm plugin, the ASGI middleware and the decision service count the requests they inspect,
+per day and public model name, in the same SQLite file as the registry. A request is counted under
+the name the client sent, before any block or redirect. The litellm plugin also records the key's
+team id. The decision service records the `team` from a `/v1/decide` body, or Portkey's
+`metadata.team` when it is a string. The middleware records no team. `sundial status --in-use`
+turns those counts into the retirements your traffic actually touches:
 
 ```
 $ sundial status --in-use
-3 models in use retire within 90 days (5 models in use, 485 tracked).
- -213d  2026-02-17  openai     chatgpt-4o-latest  calls=412  teams=support
-   13d  2026-10-01  azure      prod-chat [gpt-4o (2024-05-13)]  calls=18230  teams=-
-   35d  2026-10-23  openai     gpt-4-0613  calls=2741  teams=payments,search
+3 models in use retire within 90 days (5 models in use, 544 tracked).
+ -255d  2026-02-17  openai     chatgpt-4o-latest  calls=412  teams=support
+   -7d  2026-10-23  openai     gpt-4-0613  calls=2741  teams=payments,search
+   40d  2026-12-09  azure      prod-chat [gpt-4o (2024-05-13)]  calls=18230  teams=-
 Models in use with no lifecycle record:
   my-finetune  calls=96
 ```
@@ -224,6 +368,7 @@ sundial check azure/prod-chat --base-model azure/gpt-4o-2024-05-13
 sundial events --limit 20
 sundial costmap-patch --cost-map model_prices_and_context_window.json \
     --out patch.json --report drift.md
+sundial serve --host 127.0.0.1 --port 8765     # answer lifecycle decisions over HTTP
 ```
 
 Every command takes `--config` and `--db`. An import reports changes and sends notifications like a
@@ -276,7 +421,12 @@ when it scans directly. Otherwise it imports `registry/lifecycle.json`.
 - Dates on a provider's own platform can differ from the same model on a partner platform. Sundial
   keeps them separate: `anthropic`, `bedrock` and `azure` each have their own record for a Claude
   model.
-- Gateways other than litellm and generic ASGI are not integrated yet.
+- Kong is described, not run, because AI Custom Guardrail is a Kong Enterprise plugin. Bifrost is
+  not supported, because it needs a compiled Go plugin.
+- `sundial serve` is one more process to run and keep up. While it is down, requests pass only if
+  the gateway lets a failed check through, as Portkey does with `failOnError` unset.
+- Azure through Portkey matches approximately, so it can warn but never block or redirect. Portkey
+  routes Azure by deployment, and the model in the request body need not name the deployment.
 - With the defaults, a change on a provider page can take up to about two days to reach a gateway:
   up to a day for the nightly run, then up to `auto_scan_hours` for the next refresh.
 - The published registry file is not signed. An install trusts whatever `registry_url` serves. Set
@@ -288,7 +438,17 @@ when it scans directly. Otherwise it imports `registry/lifecycle.json`.
   changes when a lifecycle fact changes.
 - Model names longer than 256 characters are not counted. At most 10,000 distinct entries wait in
   memory between writes. Calls that would add another are dropped, and a warning is logged.
+- A team longer than 256 characters, or one with control characters, is counted as no team. Each
+  process keeps at most 100 distinct teams apart per day. Calls from further teams are counted under
+  the team `(other)`.
+- Each process keeps at most 5,000 distinct model names with a lifecycle record apart per day. A
+  name counts once for each record it is counted against. Calls for further names are counted under
+  `(other)` with their record, so `status --in-use` still lists the retirement. This bounds callers
+  that put many names on one record through `base_model`.
 - Counts still in memory when a process is killed without a clean exit are lost.
+- The decision service, and the middleware around an app that takes part in ASGI lifespan (FastAPI,
+  Starlette and vLLM do), write buffered counts at lifespan shutdown, so a SIGTERM stop under
+  uvicorn keeps them.
 
 ## Development
 
