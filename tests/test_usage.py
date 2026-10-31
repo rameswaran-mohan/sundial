@@ -87,6 +87,15 @@ def test_a_call_after_flush_seconds_flushes_everything_buffered(store: Store) ->
     assert store.usage_rows(TODAY) == [row(TODAY, 2)]
 
 
+def test_a_record_key_given_as_a_list_is_still_counted(store: Store) -> None:
+    recorder = UsageRecorder(store, clock=Clock())
+
+    recorder.record("gpt-4", None, list(GPT4))  # type: ignore[arg-type]
+    recorder.close()
+
+    assert store.usage_rows(TODAY) == [row(TODAY, 1)]
+
+
 def test_untracked_models_and_unknown_teams_are_stored_as_empty_strings(store: Store) -> None:
     recorder = UsageRecorder(store, clock=Clock())
 

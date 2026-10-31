@@ -245,7 +245,7 @@ class UsageRecorder:
         if key is None:
             kept, first = self._untracked.admit(day, public_model)
         else:
-            kept, first = self._tracked.admit(day, (public_model, key))
+            kept, first = self._tracked.admit(day, (public_model, *key))  # hashable even for a list
         if first:
             if key is None:
                 what = f"{self._max_untracked_names} distinct untracked model names"
