@@ -21,12 +21,15 @@ Serving lifecycle decisions on http://127.0.0.1:8765 (544 records)
 
 Import the registry before the first start: on an empty database the service starts with 0 records
 and allows every model until its first background refresh has landed and the guard next reloads
-its records, which it does every `reload_seconds` (300 by default).
+its records, which it does every `reload_seconds` (300 by default). It prints a warning when it
+starts with 0 records.
 
 The service reads the same config file as the other integrations: the policy, the `successors`
 and the database. Run it where the gateway can reach it. On an address that is not loopback, set
-`SUNDIAL_SERVE_TOKEN`, or anything that can reach the port can call it. `GET /healthz` answers
-`{"status": "ok", "records": N}` without the token, for a liveness probe.
+`SUNDIAL_SERVE_TOKEN`, or anything that can reach the port can call it. The service speaks plain
+HTTP and receives each full prompt and the bearer token, so keep it on loopback or a private
+network, or put it behind TLS. `GET /healthz` answers `{"status": "ok", "records": N}` without the
+token, for a liveness probe.
 
 ## Add the guardrail
 
@@ -105,11 +108,15 @@ The route answers 200 every time, except 401 for a missing or wrong token.
 | warn, or a block or redirect in propose mode or on an approximate match | `{"verdict": true, "data": {...}}` |
 | enforced block | `{"verdict": false, "data": {...}}` |
 | enforced redirect | `{"verdict": true, "transformedData": {"request": {"json": ...}}, "data": {...}}` |
-| `afterRequestHook`, no model, a provider Sundial does not map, bad JSON, a body over 8 MiB, a failure while building or encoding the answer | `{"verdict": true, "data": {"explanation": "..."}}` |
+| `afterRequestHook`, no model, a model name longer than 256 characters, a provider Sundial does not map, bad JSON, a body over 8 MiB, a failure while building or encoding the answer | `{"verdict": true, "data": {"explanation": "..."}}` |
 
-Any failure inside Sundial answers `"verdict": true`, and is logged. Most failures, such as a
-database that cannot be read or a lookup that fails, give a plain `{"verdict": true}`, the same as
-a healthy model. Only a failure while building or encoding the answer gives an explanation. To
+Portkey posts the prompt twice, as `request.json` and as `request.text`, so a prompt larger than
+roughly half of the 8 MiB limit passes unchecked with an explanation.
+
+Any failure in the lifecycle check answers `"verdict": true`, and is logged. Most failures, such as
+a lookup that fails, give a plain `{"verdict": true}`, the same as a healthy model. Only a failure
+while building or encoding the answer gives an explanation. When the database cannot be read,
+decisions use the records already loaded, and with none loaded yet every model is allowed. To
 detect failures, watch the `sundial` log, not the hook results.
 
 Portkey shows Sundial's `data` in its hook results as `responseData`. For an enforced block,
@@ -153,6 +160,8 @@ Gemini API page, so it is approximate too.
 
 Every call that names a model is counted under the model in the request body, except
 `afterRequestHook` calls. `team` is taken from Portkey's `metadata.team` when it is a string.
+Clients can set it through the `x-portkey-metadata` header, so a team longer than 256 characters is
+counted as no team, and each process keeps at most 100 teams apart per day.
 `sundial status --in-use` reads those counts when it uses the same database as `sundial serve`.
 
 ## Catalog listing text

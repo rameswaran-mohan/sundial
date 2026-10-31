@@ -1,7 +1,7 @@
 [project]
 name = "sundial-llm"
 version = "0.1.0"
-description = "Model lifecycle guard for LLM gateways: tracks provider deprecations and new models, then warns, blocks or redirects in-process."
+description = "A model lifecycle guard for LLM gateways that runs in-process or as a small decision service."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"

@@ -125,16 +125,20 @@ Serving lifecycle decisions on http://127.0.0.1:8765 (544 records)
 
 Import the registry before the first start: on an empty database the service starts with 0 records
 and allows every model until its first background refresh has landed and the guard next reloads
-its records, which it does every `reload_seconds` (300 by default).
+its records, which it does every `reload_seconds` (300 by default). It prints a warning when it
+starts with 0 records.
 
 `--host` (default `127.0.0.1`) and `--port` (default `8765`) set where it listens. `--config` and
 `--db` work as for every other command. `sundial serve` exits with 2 and prints the install command
-when uvicorn is missing, and with 2 when `--port` is not a number from 1 to 65535.
+when uvicorn is missing, and with 2 when `--port` is not a number from 1 to 65535. It writes
+Sundial's log lines to stderr at INFO, unless the `sundial` logger already has a handler.
 
 When `SUNDIAL_SERVE_TOKEN` is set, both POST routes require `Authorization: Bearer <token>` and
 answer 401 otherwise. A blank value counts as unset. `GET /healthz` stays open and shows only a
 status and a record count. Listening on an address that is not loopback without a token prints a
-warning, and the service still starts.
+warning, and the service still starts. The service speaks plain HTTP and receives the request
+bodies a gateway sends, which can hold full prompts, and the bearer token. Keep it on loopback or a
+private network, or put it behind TLS.
 
 | Route | What it is for |
 |---|---|
@@ -175,16 +179,20 @@ gateway can key on one boolean. `redirect_to` names the successor only for an en
 `action` is not `allow`. `headers` holds the lifecycle headers the other integrations add to
 responses. An enforced redirect also adds `X-Sundial-Redirected-From`.
 
-- Malformed JSON, a body that is not an object, a missing or empty `model`, or a `provider`,
-  `base_model` or `team` that is not a string or null gets 400. A gateway configured to treat a 400
-  as a block would block on its own misconfiguration, so make sure it sends a well-formed body.
+- Malformed JSON, a body that is not an object, a missing or empty `model`, a `model` longer than
+  256 characters, or a `provider`, `base_model` or `team` that is not a string or null gets 400. A
+  gateway configured to treat a 400 as a block would block on its own misconfiguration, so make sure
+  it sends a well-formed body.
 - A body over 8 MiB gets 413. It is never buffered past that.
 - A missing or wrong token gets 401.
-- Any failure inside Sundial answers 200 with an allow, and is logged. Sundial never blocks a
-  request through its own failure. Most failures, such as a database that cannot be read or a
-  lookup that fails, give a plain allow that looks like a healthy model. Only a failure while
-  building or encoding the answer adds an `error` field. `GET /healthz` keeps answering ok, with the
-  count of the records last loaded. To detect failures, watch the `sundial` log, not the response.
+- Any failure in the lifecycle check answers 200 with an allow, and is logged. A failure to count
+  usage is logged too, and the answer still carries the real decision. Sundial never blocks a
+  request through its own failure. Most failures, such as a lookup that fails, give a plain allow
+  that looks like a healthy model. Only a failure while building or encoding the answer adds an
+  `error` field. When the database cannot be read, decisions use the records already loaded, and
+  the load is tried again within 30 seconds. With no records loaded yet, every model is allowed.
+  `GET /healthz` keeps answering ok, with the count of the records last loaded. To detect failures,
+  watch the `sundial` log, not the response.
 - When the service cannot be reached, the gateway decides. Configure its callout to let the request
   through when the call fails.
 
@@ -290,8 +298,10 @@ x-sundial-successor: current
 - A model group is blocked or redirected only when every deployment behind it agrees. One retired
   deployment in a healthy group produces a warning.
 - Redirect needs an explicit entry in `successors`. Sundial never guesses a replacement for you.
-- Sundial never raises into your gateway. If the registry is empty, the config is broken or a
-  lookup fails, the request is allowed and the problem is logged.
+- Sundial never raises into your gateway. If the config is broken or a lookup fails, the request is
+  allowed and the problem is logged. An empty registry allows every request and logs nothing.
+  `sundial serve` prints a warning when it starts with 0 records. If the registry cannot be
+  reloaded, the records already loaded stay in use and the failure is logged.
 
 ## What is in use
 
