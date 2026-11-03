@@ -1,4 +1,10 @@
 {
+  "azure/gpt-realtime-2.1-2026-07-07": {
+    "deprecation_date": "2027-06-25"
+  },
+  "azure/gpt-realtime-2.1-mini-2026-07-07": {
+    "deprecation_date": "2027-06-25"
+  },
   "twelvelabs.marengo-embed-3-0-v1:0": {
     "deprecation_date": "2027-03-22"
   },
