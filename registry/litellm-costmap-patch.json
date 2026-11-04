@@ -17,6 +17,9 @@
   "anthropic.claude-3-7-sonnet-20250219-v1:0": {
     "deprecation_date": "2026-11-13"
   },
+  "azure_ai/claude-mythos-5-1": {
+    "deprecation_date": "2027-09-01"
+  },
   "azure/gpt-4o-2024-05-13": {
     "deprecation_date": "2027-01-14"
   },
