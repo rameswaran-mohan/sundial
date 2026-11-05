@@ -1,10 +1,4 @@
 {
-  "azure/gpt-realtime-2.1-2026-07-07": {
-    "deprecation_date": "2027-06-25"
-  },
-  "azure/gpt-realtime-2.1-mini-2026-07-07": {
-    "deprecation_date": "2027-06-25"
-  },
   "twelvelabs.marengo-embed-3-0-v1:0": {
     "deprecation_date": "2027-03-22"
   },
@@ -19,21 +13,6 @@
   },
   "azure_ai/claude-mythos-5-1": {
     "deprecation_date": "2027-09-01"
-  },
-  "azure/gpt-4o-2024-05-13": {
-    "deprecation_date": "2027-01-14"
-  },
-  "azure/gpt-5.1-2025-11-13": {
-    "deprecation_date": "2027-07-13"
-  },
-  "azure/gpt-5-mini": {
-    "deprecation_date": "2027-07-13"
-  },
-  "azure/gpt-5-mini-2025-08-07": {
-    "deprecation_date": "2027-07-13"
-  },
-  "azure/gpt-5.1": {
-    "deprecation_date": "2027-07-13"
   },
   "azure_ai/claude-opus-5-5-fast": {
     "deprecation_date": "2027-01-15"
