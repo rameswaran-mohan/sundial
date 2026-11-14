@@ -2,16 +2,31 @@
   "twelvelabs.marengo-embed-3-0-v1:0": {
     "deprecation_date": "2027-03-22"
   },
-  "anthropic.claude-3-5-sonnet-20240620-v1:0": {
-    "deprecation_date": "2026-11-13"
+  "azure_ai/claude-opus-4-5": {
+    "deprecation_date": "2027-02-22"
   },
-  "anthropic.claude-3-5-sonnet-20241022-v2:0": {
-    "deprecation_date": "2026-11-13"
+  "gemini/gemini-2.5-flash-preview-tts": {
+    "deprecation_date": "2026-11-17"
   },
-  "anthropic.claude-3-7-sonnet-20250219-v1:0": {
-    "deprecation_date": "2026-11-13"
+  "gemini/gemini-2.5-pro-preview-tts": {
+    "deprecation_date": "2026-11-17"
   },
-  "azure/whisper": {
-    "deprecation_date": "2026-12-15"
+  "gemini-2.5-flash-native-audio-preview-12-2025": {
+    "deprecation_date": "2026-11-17"
+  },
+  "gemini-3.1-flash-live-preview": {
+    "deprecation_date": "2026-11-17"
+  },
+  "gemini/gemini-2.5-flash-native-audio-preview-12-2025": {
+    "deprecation_date": "2026-11-17"
+  },
+  "gemini/gemini-3.1-flash-live-preview": {
+    "deprecation_date": "2026-11-17"
+  },
+  "gemini/gemini-3.1-flash-tts-preview": {
+    "deprecation_date": "2026-11-17"
+  },
+  "gemini-2.5-flash-preview-tts": {
+    "deprecation_date": "2026-11-17"
   }
 }
