@@ -13,5 +13,14 @@ parsers read. Refresh them with `curl` and the same trim when a provider changes
 | `gemini_deprecations.md` | https://ai.google.dev/gemini-api/docs/deprecations.md.txt |
 | `bedrock_lifecycle_legacy.md` | https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.md |
 
+Since 2026-11-04 the Gemini page serves Markdoc `{% table %}` blocks instead of pipe tables.
+`gemini_deprecations.md` keeps the old pipe shape as a regression fixture. The current shape was
+captured on 2026-11-16 and trimmed to headings and the `{% table %}` blocks, kept verbatim (prose,
+callouts and the agent-context blockquote removed):
+
+| File | Source |
+|---|---|
+| `gemini_deprecations_markdoc.md` | https://ai.google.dev/gemini-api/docs/deprecations.md.txt (redirects to https://aistudio.google.com/docs/deprecations.md) |
+
 The Bedrock capture contains a block whose labels are shifted by one field on the live page
 (`cohere.command-r-v1:0`). It is kept on purpose: the parser must skip it with a warning.

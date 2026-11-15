@@ -25,7 +25,7 @@ FIXTURE_BY_SOURCE = {
     "openai-changelog": "openai_changelog.md",
     "anthropic": "anthropic_deprecations.md",
     "azure": "azure_retirement_schedule.md",
-    "gemini": "gemini_deprecations.md",
+    "gemini": "gemini_deprecations_markdoc.md",
     "bedrock": "bedrock_lifecycle_legacy.md",
 }
 
