@@ -1,7 +1,8 @@
 """Read tables out of markdown, keeping the heading path each table sits under.
 
 Two table shapes are read: GitHub pipe tables and Markdoc `{% table %}` blocks, where each row is a
-list of `*` items and rows are separated by `---` lines. The first Markdoc row is the header.
+list of `*`, `-` or `+` items and rows are separated by `---` lines. The first Markdoc row is the
+header.
 """
 
 from __future__ import annotations
@@ -22,8 +23,9 @@ _BACKTICKED = re.compile(r"`([^`]+)`")
 _MARKDOC_OPEN = re.compile(r"^\s*\{%\s*table\b.*%\}\s*$")
 _MARKDOC_CLOSE = re.compile(r"^\s*\{%\s*/table\s*%\}\s*$")
 _MARKDOC_TAG = re.compile(r"^\s*\{%")
-_MARKDOC_ROW_BREAK = re.compile(r"^(\s*)-{3,}\s*$")
-_MARKDOC_ITEM = re.compile(r"^(\s*)\*(?:\s+(.*?))?\s*$")
+# `---` or `- - -` breaks a row. It is matched before items, so it never reads as a `-` item.
+_MARKDOC_ROW_BREAK = re.compile(r"^(\s*)-(?:[ \t]*-){2,}\s*$")
+_MARKDOC_ITEM = re.compile(r"^(\s*)[*+-](?:\s+(.*?))?\s*$")
 
 
 @dataclass(frozen=True)

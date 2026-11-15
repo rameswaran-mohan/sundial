@@ -189,6 +189,24 @@ def test_markdoc_table_tag_attributes_may_contain_a_percent_sign() -> None:
     assert [t.rows for t in tables] == [(("`m-1`",),)]
 
 
+def test_markdoc_items_may_use_dash_or_plus_markers() -> None:
+    page = "{% table %}\n- Model\n- Recommended replacement\n---\n- `m-1`\n- `m-2`\n---\n+ `m-3`\n+\n{% /table %}\n"
+
+    tables = list(iter_tables(page))
+
+    assert [(t.header, t.rows) for t in tables] == [
+        (("Model", "Recommended replacement"), (("`m-1`", "`m-2`"), ("`m-3`", "")))
+    ]
+
+
+def test_markdoc_spaced_dash_rule_breaks_the_row_and_is_not_an_item() -> None:
+    page = "{% table %}\n- Model\n- - -\n- `m-1`\n{% /table %}\n"
+
+    tables = list(iter_tables(page))
+
+    assert [(t.header, t.rows) for t in tables] == [(("Model",), (("`m-1`",),))]
+
+
 def test_closed_markdoc_table_keeps_unindented_lines_up_to_its_close_tag() -> None:
     page = "{% table %}\n* Model\n* Note\n---\n* `m-1`\n* routed to\n`m-2` today\n{% /table %}\n"
 
