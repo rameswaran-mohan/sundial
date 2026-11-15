@@ -1,7 +1,8 @@
 """Read tables out of markdown, keeping the heading path each table sits under.
 
 Two table shapes are read: GitHub pipe tables and Markdoc `{% table %}` blocks, where each row is a
-list of `*` items and rows are separated by `---` lines. The first Markdoc row is the header.
+list of `*`, `-` or `+` items and rows are separated by `---` lines. The first Markdoc row is the
+header.
 """
 
 from __future__ import annotations
@@ -19,10 +20,12 @@ _SEPARATOR_CELL = re.compile(r"^:?-+:?$")
 _CELL_SPLIT = re.compile(r"(?<!\\)\|")
 _BOLD = re.compile(r"\*\*(.*?)\*\*")
 _BACKTICKED = re.compile(r"`([^`]+)`")
-_MARKDOC_OPEN = re.compile(r"^\s*\{%\s*table\b[^%]*%\}\s*$")
+_MARKDOC_OPEN = re.compile(r"^\s*\{%\s*table\b.*%\}\s*$")
 _MARKDOC_CLOSE = re.compile(r"^\s*\{%\s*/table\s*%\}\s*$")
-_MARKDOC_ROW_BREAK = re.compile(r"^\s*-{3,}\s*$")
-_MARKDOC_ITEM = re.compile(r"^(\s*)\*(?:\s+(.*?))?\s*$")
+_MARKDOC_TAG = re.compile(r"^\s*\{%")
+# `---` or `- - -` breaks a row. It is matched before items, so it never reads as a `-` item.
+_MARKDOC_ROW_BREAK = re.compile(r"^(\s*)-(?:[ \t]*-){2,}\s*$")
+_MARKDOC_ITEM = re.compile(r"^(\s*)[*+-](?:\s+(.*?))?\s*$")
 
 
 @dataclass(frozen=True)
@@ -45,28 +48,51 @@ def _is_separator(line: str) -> bool:
     return bool(cells) and all(_SEPARATOR_CELL.match(cell) for cell in cells)
 
 
+def _is_closed(lines: list[str], index: int) -> bool:
+    """Whether the Markdoc table opening at `index` has its closing tag before the next table or heading."""
+    for line in lines[index + 1 :]:
+        if _MARKDOC_CLOSE.match(line):
+            return True
+        if _MARKDOC_OPEN.match(line) or _HEADING.match(line):
+            return False
+    return False
+
+
+def _ends_unclosed_table(line: str, indent: int) -> bool:
+    """Whether `line` lies past an unclosed table whose items sit at `indent`: a tag, or prose no deeper."""
+    if _MARKDOC_TAG.match(line):
+        return True
+    is_prose = bool(line.strip()) and not (_MARKDOC_ITEM.match(line) or _MARKDOC_ROW_BREAK.match(line))
+    return is_prose and len(line) - len(line.lstrip()) <= indent
+
+
 def _markdoc_rows(lines: list[str], index: int) -> tuple[list[tuple[str, ...]], int]:
     """Rows of the Markdoc table opening at `index`, and the index of the first line after it.
 
     An item at the indent of the table's first item starts a cell; deeper or unmarked lines continue
-    the current cell. A missing closing tag ends the table at the next heading.
+    the current cell. Without a closing tag, the table ends at the next heading, any other tag line,
+    or prose no deeper than its items, so text after it is not folded into the last cell.
     """
     rows: list[tuple[str, ...]] = []
     cells: list[str] = []
     indent: int | None = None
+    closed = _is_closed(lines, index)
     index += 1
     while index < len(lines):
         line = lines[index]
         if _MARKDOC_CLOSE.match(line):
             index += 1
             break
-        if _HEADING.match(line):
+        if _HEADING.match(line) or (not closed and _ends_unclosed_table(line, indent or 0)):
             break
         index += 1
-        if _MARKDOC_ROW_BREAK.match(line):
-            if cells:
-                rows.append(tuple(cells))
-            cells = []
+        rule = _MARKDOC_ROW_BREAK.match(line)
+        if rule:
+            # A rule deeper than the items sits inside a cell and adds no text to it.
+            if indent is None or len(rule.group(1)) <= indent:
+                if cells:
+                    rows.append(tuple(cells))
+                cells = []
             continue
         item = _MARKDOC_ITEM.match(line)
         if item and (indent is None or len(item.group(1)) <= indent):
