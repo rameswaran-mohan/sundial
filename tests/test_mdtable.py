@@ -149,6 +149,35 @@ def test_unclosed_markdoc_table_ends_at_the_next_heading() -> None:
     assert [(t.headings, t.rows) for t in tables] == [(("A",), (("`m-1`",),)), (("B",), (("`m-2`",),))]
 
 
+def test_unclosed_markdoc_table_ends_at_prose_after_it() -> None:
+    page = "{% table %}\n  * Model\n  * Recommended replacement\n  ---\n  * `m-1`\n  * `m-2`\n\nSee `other-model` too.\n"
+
+    table = next(iter_tables(page))
+
+    assert table.rows == (("`m-1`", "`m-2`"),)
+    assert not any("other-model" in cell for row in table.rows for cell in row)
+
+
+def test_unclosed_markdoc_table_ends_at_any_other_tag() -> None:
+    page = (
+        "{% table %}\n  * Model\n  * Recommended replacement\n  ---\n  * `m-1`\n  * `m-2`\n"
+        "{% callout %}\n  `zzz-9` is coming.\n{% /callout %}\n"
+        "{% table %}\n  * Model\n  ---\n  * `m-3`\n{% /table %}\n"
+    )
+
+    tables = list(iter_tables(page))
+
+    assert [t.rows for t in tables] == [(("`m-1`", "`m-2`"),), (("`m-3`",),)]
+
+
+def test_closed_markdoc_table_keeps_unindented_lines_up_to_its_close_tag() -> None:
+    page = "{% table %}\n* Model\n* Note\n---\n* `m-1`\n* routed to\n`m-2` today\n{% /table %}\n"
+
+    table = next(iter_tables(page))
+
+    assert table.rows == (("`m-1`", "routed to `m-2` today"),)
+
+
 def test_backticked_keeps_only_tokens_that_look_like_model_ids() -> None:
     cell = "`gpt-4-0613` \\| `gpt-4`, `b` (`reasoning.mode: pro`) and `/v1/assistants`"
 
