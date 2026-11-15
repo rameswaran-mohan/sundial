@@ -22,7 +22,7 @@ _BACKTICKED = re.compile(r"`([^`]+)`")
 _MARKDOC_OPEN = re.compile(r"^\s*\{%\s*table\b[^%]*%\}\s*$")
 _MARKDOC_CLOSE = re.compile(r"^\s*\{%\s*/table\s*%\}\s*$")
 _MARKDOC_TAG = re.compile(r"^\s*\{%")
-_MARKDOC_ROW_BREAK = re.compile(r"^\s*-{3,}\s*$")
+_MARKDOC_ROW_BREAK = re.compile(r"^(\s*)-{3,}\s*$")
 _MARKDOC_ITEM = re.compile(r"^(\s*)\*(?:\s+(.*?))?\s*$")
 
 
@@ -84,10 +84,13 @@ def _markdoc_rows(lines: list[str], index: int) -> tuple[list[tuple[str, ...]], 
         if _HEADING.match(line) or (not closed and _ends_unclosed_table(line, indent or 0)):
             break
         index += 1
-        if _MARKDOC_ROW_BREAK.match(line):
-            if cells:
-                rows.append(tuple(cells))
-            cells = []
+        rule = _MARKDOC_ROW_BREAK.match(line)
+        if rule:
+            # A rule deeper than the items sits inside a cell and adds no text to it.
+            if indent is None or len(rule.group(1)) <= indent:
+                if cells:
+                    rows.append(tuple(cells))
+                cells = []
             continue
         item = _MARKDOC_ITEM.match(line)
         if item and (indent is None or len(item.group(1)) <= indent):
