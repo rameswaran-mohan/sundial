@@ -118,6 +118,14 @@ def test_markdoc_agent_tables_are_skipped_like_before(markdoc_records) -> None:
     assert not any(model_id.startswith(("antigravity", "deep-research")) for model_id, _ in markdoc_records)
 
 
+def test_markdoc_replacement_note_naming_the_model_itself_is_not_a_replacement(markdoc_records) -> None:
+    # The cell reads: `gemini-3.8-flash` (`gemini-2.5-pro` is no longer available ...; API requests
+    # to `gemini-2.5-pro` will automatically route to `gemini-3.8-flash`)
+    assert markdoc_records[("gemini-2.5-pro", "")].replacements == ("gemini-3.8-flash",)
+    assert markdoc_records[("gemini-3.5-flash", "")].replacements == ("gemini-3.6-flash",)
+    assert not any(model_id in rec.replacements for (model_id, _), rec in markdoc_records.items())
+
+
 def test_markdoc_page_with_no_tables_raises() -> None:
     page = (
         '# Gemini deprecations\n\n## Gemini 3 models  {% id="gemini-3-models" %}\n\n'

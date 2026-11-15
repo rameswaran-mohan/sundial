@@ -62,6 +62,9 @@ def parse(text: str) -> ParseResult:
             else:
                 state = LifecycleState.PREVIEW if preview else LifecycleState.ACTIVE
             has_replacement = replacement_col is not None and len(row) > replacement_col
+            # Routing notes in the cell name the model itself; it is never its own replacement.
+            replacements = backticked(row[replacement_col]) if has_replacement else ()
+            replacements = tuple(r for r in replacements if r != model_ids[0])
             record = LifecycleRecord(
                 platform=PLATFORM,
                 model_id=model_ids[0],
@@ -73,7 +76,7 @@ def parse(text: str) -> ParseResult:
                     else None
                 ),
                 retire_on=retire_on,
-                replacements=backticked(row[replacement_col]) if has_replacement else (),
+                replacements=replacements,
                 source_url=SOURCE_URL,
                 evidence=raw,
             )
