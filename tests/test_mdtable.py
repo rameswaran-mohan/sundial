@@ -54,6 +54,101 @@ def test_raw_rows_keep_the_original_line_as_evidence() -> None:
     assert first.raw_rows[0] == "| `m-1` | 2026-01-01 |"
 
 
+# Markdoc table blocks as the Gemini page serves them since 2026-11-04. `\x20` keeps the trailing
+# space of a bare `  * ` empty cell visible in the source.
+MARKDOC = """# Title
+
+## Family  {% id="family" %}
+
+{% table %}
+  * **Model**
+  * Shutdown date
+  * Recommended replacement
+
+  ---
+
+  * `m-1`
+  * June 1, 2026
+  * `m-2` or `m-3`
+
+  ---
+
+  * `m-4`
+  *
+  *\x20
+{% /table %}
+
+### Preview models  {% id="family-preview-models" %}
+
+{% table %}
+  * Model
+  * Shutdown date
+  * Recommended replacement
+
+  ---
+
+  * `p-1`
+  * No shutdown date announced
+  * `p-2` (Effective December 3, 2026, the endpoint is
+    automatically routing API requests to
+    `p-3`)
+{% /table %}
+"""
+
+
+def test_markdoc_table_yields_header_and_rows_like_a_pipe_table() -> None:
+    first = next(iter_tables(MARKDOC))
+
+    assert first.header == ("Model", "Shutdown date", "Recommended replacement")
+    assert first.rows[0] == ("`m-1`", "June 1, 2026", "`m-2` or `m-3`")
+    assert len(first.rows) == 2
+
+
+def test_markdoc_empty_cells_are_empty_strings() -> None:
+    first = next(iter_tables(MARKDOC))
+
+    assert first.rows[1] == ("`m-4`", "", "")
+
+
+def test_heading_markdoc_id_suffix_is_stripped() -> None:
+    tables = list(iter_tables(MARKDOC))
+
+    assert [t.headings for t in tables] == [("Title", "Family"), ("Title", "Family", "Preview models")]
+
+
+def test_markdoc_cell_continuation_lines_join_the_cell() -> None:
+    second = list(iter_tables(MARKDOC))[1]
+
+    assert second.rows == (
+        (
+            "`p-1`",
+            "No shutdown date announced",
+            "`p-2` (Effective December 3, 2026, the endpoint is automatically routing API requests to `p-3`)",
+        ),
+    )
+
+
+def test_markdoc_raw_rows_are_one_readable_line_built_from_the_cells() -> None:
+    first = next(iter_tables(MARKDOC))
+
+    assert first.raw_rows == ("| `m-1` | June 1, 2026 | `m-2` or `m-3` |", "| `m-4` |  |  |")
+
+
+def test_pipe_and_markdoc_tables_are_yielded_in_page_order() -> None:
+    tables = list(iter_tables(DOC + "\n" + MARKDOC))
+
+    assert [t.header[0] for t in tables] == ["Model", "Shutdown date", "Model", "Model"]
+    assert tables[2].headings == ("Title", "Family")
+
+
+def test_unclosed_markdoc_table_ends_at_the_next_heading() -> None:
+    page = "## A\n\n{% table %}\n  * Model\n  ---\n  * `m-1`\n\n## B\n\n{% table %}\n  * Model\n  ---\n  * `m-2`\n{% /table %}\n"
+
+    tables = list(iter_tables(page))
+
+    assert [(t.headings, t.rows) for t in tables] == [(("A",), (("`m-1`",),)), (("B",), (("`m-2`",),))]
+
+
 def test_backticked_keeps_only_tokens_that_look_like_model_ids() -> None:
     cell = "`gpt-4-0613` \\| `gpt-4`, `b` (`reasoning.mode: pro`) and `/v1/assistants`"
 

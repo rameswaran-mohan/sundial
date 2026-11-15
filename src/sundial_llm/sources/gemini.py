@@ -1,4 +1,9 @@
-"""Gemini API deprecations page: one table per model family.
+"""Gemini API deprecations page: tables grouped by model family.
+
+The page has been served in two shapes. Until 2026-11-04 it had one pipe table per family, with a
+`Preview models` divider row before the preview rows. Since then it has Markdoc tables, with preview
+and deprecated rows in their own tables under `### Preview models` / `### Deprecated models`
+subheadings of the family heading. Both shapes are read.
 
 Google labels shutdown dates as the earliest possible date. They are announced retirements, so they
 are recorded as firm dates: warning early is the safe reading.
@@ -15,8 +20,22 @@ SOURCE_URL = "https://ai.google.dev/gemini-api/docs/deprecations.md.txt"
 PLATFORM = "gemini"
 
 
+# Subheadings that group a family's rows by status rather than name a family.
+_STATUS_SUBHEADINGS = ("preview", "deprecated")
+
+
 def _column(header: tuple[str, ...], name: str) -> int | None:
     return header.index(name) if name in header else None
+
+
+def _family_and_status(headings: tuple[str, ...]) -> tuple[str | None, str]:
+    """The family heading a table sits under, and its status subheading ("" when it has none)."""
+    if not headings:
+        return None, ""
+    last = headings[-1]
+    if len(headings) > 1 and last.lower().startswith(_STATUS_SUBHEADINGS):
+        return headings[-2], last
+    return last, ""
 
 
 def parse(text: str) -> ParseResult:
@@ -28,8 +47,8 @@ def parse(text: str) -> ParseResult:
             continue
         release_col = _column(header, "release date")
         replacement_col = _column(header, "recommended replacement")
-        vendor = table.headings[-1] if table.headings else None
-        preview = False
+        vendor, status = _family_and_status(table.headings)
+        preview = status.lower().startswith("preview")
         for row, raw in zip(table.rows, table.raw_rows, strict=True):
             if row and row[0].lower().startswith("preview models"):
                 preview = True
@@ -43,6 +62,9 @@ def parse(text: str) -> ParseResult:
             else:
                 state = LifecycleState.PREVIEW if preview else LifecycleState.ACTIVE
             has_replacement = replacement_col is not None and len(row) > replacement_col
+            # Routing notes in the cell name the model itself; it is never its own replacement.
+            replacements = backticked(row[replacement_col]) if has_replacement else ()
+            replacements = tuple(r for r in replacements if r != model_ids[0])
             record = LifecycleRecord(
                 platform=PLATFORM,
                 model_id=model_ids[0],
@@ -54,7 +76,7 @@ def parse(text: str) -> ParseResult:
                     else None
                 ),
                 retire_on=retire_on,
-                replacements=backticked(row[replacement_col]) if has_replacement else (),
+                replacements=replacements,
                 source_url=SOURCE_URL,
                 evidence=raw,
             )
