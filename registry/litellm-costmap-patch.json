@@ -4,29 +4,5 @@
   },
   "azure_ai/claude-opus-4-5": {
     "deprecation_date": "2027-02-22"
-  },
-  "gemini/gemini-2.5-flash-preview-tts": {
-    "deprecation_date": "2026-11-17"
-  },
-  "gemini/gemini-2.5-pro-preview-tts": {
-    "deprecation_date": "2026-11-17"
-  },
-  "gemini-2.5-flash-native-audio-preview-12-2025": {
-    "deprecation_date": "2026-11-17"
-  },
-  "gemini-3.1-flash-live-preview": {
-    "deprecation_date": "2026-11-17"
-  },
-  "gemini/gemini-2.5-flash-native-audio-preview-12-2025": {
-    "deprecation_date": "2026-11-17"
-  },
-  "gemini/gemini-3.1-flash-live-preview": {
-    "deprecation_date": "2026-11-17"
-  },
-  "gemini/gemini-3.1-flash-tts-preview": {
-    "deprecation_date": "2026-11-17"
-  },
-  "gemini-2.5-flash-preview-tts": {
-    "deprecation_date": "2026-11-17"
   }
 }
