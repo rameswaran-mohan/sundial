@@ -1,21 +1,6 @@
 {
-  "azure/gpt-realtime-2.1-2026-07-07": {
-    "deprecation_date": "2027-07-31"
-  },
-  "azure/gpt-realtime-2.1-mini-2026-07-07": {
-    "deprecation_date": "2027-07-31"
-  },
-  "azure/gpt-realtime-translate-2026-05-06": {
-    "deprecation_date": "2027-11-09"
-  },
-  "azure/gpt-realtime-whisper-2026-05-06": {
-    "deprecation_date": "2027-11-09"
-  },
   "twelvelabs.marengo-embed-3-0-v1:0": {
     "deprecation_date": "2027-03-22"
-  },
-  "azure/codex-mini": {
-    "deprecation_date": "2026-11-17"
   },
   "azure_ai/claude-fable-5": {
     "deprecation_date": "2027-12-07"
@@ -40,27 +25,6 @@
   },
   "azure_ai/gpt-6.1-terra": {
     "deprecation_date": "2027-10-26"
-  },
-  "azure_ai/codex-mini": {
-    "deprecation_date": "2026-11-17"
-  },
-  "azure/gpt-realtime-2.1": {
-    "deprecation_date": "2027-07-31"
-  },
-  "azure/gpt-realtime-2.1-mini": {
-    "deprecation_date": "2027-07-31"
-  },
-  "azure/gpt-4o-transcribe": {
-    "deprecation_date": "2027-02-26"
-  },
-  "azure/gpt-realtime-whisper": {
-    "deprecation_date": "2027-11-09"
-  },
-  "azure/gpt-6.1-terra": {
-    "deprecation_date": "2027-10-26"
-  },
-  "azure/gpt-image-1": {
-    "deprecation_date": "2026-10-28"
   },
   "azure_ai/MAI-Image-2.5": {
     "deprecation_date": "2026-11-24"
