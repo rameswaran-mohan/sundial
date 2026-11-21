@@ -26,6 +26,24 @@
   "azure_ai/gpt-6.1-terra": {
     "deprecation_date": "2027-10-26"
   },
+  "azure_ai/gpt-5.6-sol": {
+    "deprecation_date": "2028-01-11"
+  },
+  "azure_ai/gpt-5.6-sol-2026-07-09": {
+    "deprecation_date": "2028-01-11"
+  },
+  "azure_ai/gpt-5.6-terra": {
+    "deprecation_date": "2028-01-11"
+  },
+  "azure_ai/gpt-5.6-terra-2026-07-09": {
+    "deprecation_date": "2028-01-11"
+  },
+  "azure_ai/gpt-5.6-luna": {
+    "deprecation_date": "2028-01-11"
+  },
+  "azure_ai/gpt-5.6-luna-2026-07-09": {
+    "deprecation_date": "2028-01-11"
+  },
   "azure_ai/MAI-Image-2.5": {
     "deprecation_date": "2026-11-24"
   },
