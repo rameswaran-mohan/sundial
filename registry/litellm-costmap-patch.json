@@ -1,5 +1,14 @@
 {
   "twelvelabs.marengo-embed-3-0-v1:0": {
     "deprecation_date": "2027-03-22"
+  },
+  "azure_ai/Llama-3.3-70B-Instruct": {
+    "deprecation_date": "2027-02-03"
+  },
+  "azure_ai/Llama-4-Maverick-17B-128E-Instruct-FP8": {
+    "deprecation_date": "2027-02-03"
+  },
+  "azure_ai/Llama-4-Scout-17B-16E-Instruct": {
+    "deprecation_date": "2027-02-03"
   }
 }
