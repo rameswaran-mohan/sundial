@@ -10,5 +10,11 @@
   },
   "azure_ai/Llama-4-Scout-17B-16E-Instruct": {
     "deprecation_date": "2027-02-03"
+  },
+  "azure_ai/grok-4": {
+    "deprecation_date": "2027-02-03"
+  },
+  "azure_ai/grok-code-fast-1": {
+    "deprecation_date": "2027-02-03"
   }
 }
